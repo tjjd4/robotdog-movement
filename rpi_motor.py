@@ -1,10 +1,10 @@
 import time
 import board
 import busio
-import Adafruit_PCA9685
+import adafruit_pca9685
 
 i2c = busio.I2C(board.SCL, board.SDA)
-pca = Adafruit_PCA9685.PCA9685(i2c)
+pca = adafruit_pca9685.PCA9685(i2c)
 pca.frequency = 50
 servo_channels = {
     "servo_channel1": 1,
