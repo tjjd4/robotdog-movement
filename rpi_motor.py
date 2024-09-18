@@ -24,6 +24,7 @@ servo_channels = {
 def set_servo_angle(channel, angle):
     pulse_width = 500 + (angle / 180) * 2000
     pca.channels[channel].duty_cycle = int(pulse_width * 65535 / 20000)
+    print("pulsewidth: ", pca.channels[channel].duty_cycle)
 
 def get_servo_angle(channel):
     # 取得當前的佔空比 (0 ~ 65535)
@@ -64,8 +65,8 @@ if __name__ == '__main__':
         time.sleep(2)
         for servo_name, channel in servo_channels.items():
             angle = get_servo_angle(channel)
-            print(f"測試 {servo_name}，設置 {angle} + 10 = {angle + 15} 度")
-            set_servo_angle(channel, angle + 15)
+            print(f"測試 {servo_name}，設置 {angle} + 20 = {angle + 20} 度")
+            set_servo_angle(channel, angle + 20)
             time.sleep(2)
             print(f"測試 {servo_name} finished")
             time.sleep(2)
