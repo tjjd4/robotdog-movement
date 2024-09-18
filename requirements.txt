@@ -1,2 +1,2 @@
-adafruit_pca9685==1.0.1
+Adafruit_PCA9685==1.0.1
 board==1.0
