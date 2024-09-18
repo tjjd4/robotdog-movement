@@ -24,16 +24,49 @@ def set_servo_angle(channel, angle):
     pulse_width = 500 + (angle / 180) * 2000
     pca.channels[channel].duty_cycle = int(pulse_width * 65535 / 20000)
 
+def get_servo_angle(channel):
+    # 取得當前的佔空比 (0 ~ 65535)
+    duty_cycle = pca.channels[channel].duty_cycle
+    
+    # 計算對應的脈衝寬度，根據 16-bit (65535) 的範圍轉換為 0 ~ 20000 微秒的範圍
+    pulse_width = (duty_cycle / 65535) * 20000
+    
+    # 將脈衝寬度轉換回角度
+    if pulse_width < 500:  # 低於 500 是無效值
+        pulse_width = 500
+    elif pulse_width > 2500:  # 超過 2500 是無效值
+        pulse_width = 2500
+    
+    # 計算角度
+    angle = (pulse_width - 500) * 180 / 2000
+    
+    return angle
+
+def angle_init():
+    set_servo_angle(servo_channels["servo_channel1"], 44)
+    set_servo_angle(servo_channels["servo_channel2"], 49)
+    set_servo_angle(servo_channels["servo_channel3"], 25)
+    set_servo_angle(servo_channels["servo_channel4"], 34)
+    set_servo_angle(servo_channels["servo_channel5"], 49)
+    set_servo_angle(servo_channels["servo_channel6"], 25)
+    set_servo_angle(servo_channels["servo_channel7"], 34)
+    set_servo_angle(servo_channels["servo_channel8"], 49)
+    set_servo_angle(servo_channels["servo_channel9"], 25)
+    set_servo_angle(servo_channels["servo_channel10"], 44)
+    set_servo_angle(servo_channels["servo_channel11"], 49)
+    set_servo_angle(servo_channels["servo_channel12"], 25)
 
 if __name__ == '__main__':
     try:
+        angle_init()
+
         for servo_name, channel in servo_channels.items():
-            print(f"測試 {servo_name}，設置 90 度")
-            set_servo_angle(channel, 90)
-            time.sleep(1)
-            set_servo_angle(channel, 100)
+            angle = get_servo_angle(channel)
+            print(f"測試 {servo_name}，設置 {angle} + 10 = {angle + 10} 度")
+            set_servo_angle(channel, angle + 10)
+            time.sleep(3)
             print(f"測試 {servo_name} finished")
-            time.sleep(1)
+            time.sleep(3)
     except KeyboardInterrupt:
         print("終止")
     finally:
