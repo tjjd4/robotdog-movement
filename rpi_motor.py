@@ -23,8 +23,9 @@ servo_channels = {
 
 def set_servo_angle(channel, angle):
     pulse_width = 500 + (angle / 180) * 2000
+    print("pulse width: ", pulse_width)
     pca.channels[channel].duty_cycle = int(pulse_width * 65535 / 20000)
-    print("pulsewidth: ", pca.channels[channel].duty_cycle)
+    print("duty cycle: ", pca.channels[channel].duty_cycle)
 
 def get_servo_angle(channel):
     # 取得當前的佔空比 (0 ~ 65535)
