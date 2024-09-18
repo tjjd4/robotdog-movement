@@ -61,14 +61,14 @@ if __name__ == '__main__':
     try:
         print("---開始---")
         angle_init()
-        time.sleep(3)
+        time.sleep(2)
         for servo_name, channel in servo_channels.items():
             angle = get_servo_angle(channel)
             print(f"測試 {servo_name}，設置 {angle} + 10 = {angle + 15} 度")
             set_servo_angle(channel, angle + 15)
-            time.sleep(3)
+            time.sleep(2)
             print(f"測試 {servo_name} finished")
-            time.sleep(3)
+            time.sleep(2)
         print("---全部結束---")
     except KeyboardInterrupt:
         print("終止")
