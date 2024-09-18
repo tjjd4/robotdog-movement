@@ -47,7 +47,7 @@ def angle_init():
     set_servo_angle(servo_channels["servo_channel1"], 25)
     set_servo_angle(servo_channels["servo_channel2"], 60)
     set_servo_angle(servo_channels["servo_channel3"], 10)
-    set_servo_angle(servo_channels["servo_channel4"], 34)
+    set_servo_angle(servo_channels["servo_channel4"], 25)
     set_servo_angle(servo_channels["servo_channel5"], 49)
     set_servo_angle(servo_channels["servo_channel6"], 25)
     set_servo_angle(servo_channels["servo_channel7"], 25)
