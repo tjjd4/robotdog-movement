@@ -74,3 +74,4 @@ if __name__ == '__main__':
         print("終止")
     finally:
         angle_init()
+        pca.deinit()
