@@ -63,8 +63,8 @@ if __name__ == '__main__':
         time.sleep(3)
         for servo_name, channel in servo_channels.items():
             angle = get_servo_angle(channel)
-            print(f"測試 {servo_name}，設置 {angle} + 10 = {angle + 10} 度")
-            set_servo_angle(channel, angle + 10)
+            print(f"測試 {servo_name}，設置 {angle} + 10 = {angle + 15} 度")
+            set_servo_angle(channel, angle + 15)
             time.sleep(3)
             print(f"測試 {servo_name} finished")
             time.sleep(3)
