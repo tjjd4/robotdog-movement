@@ -69,9 +69,10 @@ if __name__ == '__main__':
             time.sleep(2)
             print(f"測試 {servo_name} finished")
             time.sleep(2)
-        print("---全部結束---")
+        print("---動作結束---")
     except KeyboardInterrupt:
         print("終止")
     finally:
         angle_init()
         pca.deinit()
+        print("---結束---")
