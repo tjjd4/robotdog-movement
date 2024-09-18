@@ -71,4 +71,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("終止")
     finally:
+        angle_init()
         pca.deinit()
