@@ -36,7 +36,7 @@ if __name__ == '__main__':
                 kit.servo[channel].angle -= 10
                 time.sleep(1)
             time.sleep(1)
-            print(f"測試 {servo_name}結束，移動到{kit.servo[channel].angle} 度")
+            print(f"測試  {channel}號 servo 結束，移動到{kit.servo[channel].angle} 度")
             time.sleep(1)
         print("---動作結束---")
         time.sleep(1)
