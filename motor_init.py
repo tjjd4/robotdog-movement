@@ -25,5 +25,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("終止")
     finally:
-        init_pose()
+        init_pose(kit)
         print("---結束---")
