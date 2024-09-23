@@ -22,6 +22,22 @@ if __name__ == '__main__':
         kit = ServoKit(channels=16)
         init_pose(kit)
         time.sleep(1)
+        for channel in range(1, 13):
+            kit.servo[channel].angle
+            print(f"測試 {channel}號 servo，目前{kit.servo[channel].angle} 度")
+            if channel == 3 or channel == 6:
+                kit.servo[channel].angle -= 10
+                time.sleep(1)
+                kit.servo[channel].angle += 10
+                time.sleep(1)
+            else:
+                kit.servo[channel].angle += 10
+                time.sleep(1)
+                kit.servo[channel].angle -= 10
+                time.sleep(1)
+            time.sleep(1)
+            print(f"測試 {servo_name}結束，移動到{kit.servo[channel].angle} 度")
+            time.sleep(1)
         print("---動作結束---")
         time.sleep(1)
     except KeyboardInterrupt:
