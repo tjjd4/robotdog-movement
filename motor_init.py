@@ -41,8 +41,9 @@ if __name__ == '__main__':
         print("---動作結束---")
         time.sleep(1)
     except KeyboardInterrupt:
-        print("終止")
+        print("-!終止!-")
     finally:
+        print("回位")
         init_pose(kit)
         time.sleep(1)
         print("---結束---")
