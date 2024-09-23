@@ -46,18 +46,18 @@ def get_servo_angle(channel):
     return angle
 
 def angle_init():
-    set_servo_angle(servo_channels["servo_channel1"], 25)
-    set_servo_angle(servo_channels["servo_channel2"], 60)
-    set_servo_angle(servo_channels["servo_channel3"], 0)
-    set_servo_angle(servo_channels["servo_channel4"], 25)
-    set_servo_angle(servo_channels["servo_channel5"], 49)
-    set_servo_angle(servo_channels["servo_channel6"], 25)
-    set_servo_angle(servo_channels["servo_channel7"], 25)
-    set_servo_angle(servo_channels["servo_channel8"], 49)
-    set_servo_angle(servo_channels["servo_channel9"], 25)
-    set_servo_angle(servo_channels["servo_channel10"], 25)
-    set_servo_angle(servo_channels["servo_channel11"], 49)
-    set_servo_angle(servo_channels["servo_channel12"], 25)
+    set_servo_angle(servo_channels["servo_channel1"], 90)
+    set_servo_angle(servo_channels["servo_channel2"], 90)
+    set_servo_angle(servo_channels["servo_channel3"], 166)
+    set_servo_angle(servo_channels["servo_channel4"], 90)
+    set_servo_angle(servo_channels["servo_channel5"], 90)
+    set_servo_angle(servo_channels["servo_channel6"], 166)
+    set_servo_angle(servo_channels["servo_channel7"], 90)
+    set_servo_angle(servo_channels["servo_channel8"], 90)
+    set_servo_angle(servo_channels["servo_channel9"], 14)
+    set_servo_angle(servo_channels["servo_channel10"], 90)
+    set_servo_angle(servo_channels["servo_channel11"], 90)
+    set_servo_angle(servo_channels["servo_channel12"], 14)
 
 if __name__ == '__main__':
     try:
