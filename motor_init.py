@@ -21,9 +21,12 @@ if __name__ == '__main__':
         print("---開始---")
         kit = ServoKit(channels=16)
         init_pose(kit)
+        time.sleep(1)
         print("---動作結束---")
+        time.sleep(1)
     except KeyboardInterrupt:
         print("終止")
     finally:
         init_pose(kit)
+        time.sleep(1)
         print("---結束---")
