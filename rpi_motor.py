@@ -48,16 +48,16 @@ def get_servo_angle(channel):
 def angle_init():
     set_servo_angle(servo_channels["servo_channel1"], 90)
     set_servo_angle(servo_channels["servo_channel2"], 90)
-    set_servo_angle(servo_channels["servo_channel3"], 166)
+    set_servo_angle(servo_channels["servo_channel3"], 180)
     set_servo_angle(servo_channels["servo_channel4"], 90)
     set_servo_angle(servo_channels["servo_channel5"], 90)
-    set_servo_angle(servo_channels["servo_channel6"], 166)
+    set_servo_angle(servo_channels["servo_channel6"], 180)
     set_servo_angle(servo_channels["servo_channel7"], 90)
-    set_servo_angle(servo_channels["servo_channel8"], 90)
+    set_servo_angle(servo_channels["servo_channel8"], 110)
     set_servo_angle(servo_channels["servo_channel9"], 14)
-    set_servo_angle(servo_channels["servo_channel10"], 90)
-    set_servo_angle(servo_channels["servo_channel11"], 90)
-    set_servo_angle(servo_channels["servo_channel12"], 14)
+    set_servo_angle(servo_channels["servo_channel10"], 110)
+    set_servo_angle(servo_channels["servo_channel11"], 110)
+    set_servo_angle(servo_channels["servo_channel12"], 0)
 
 if __name__ == '__main__':
     try:
@@ -66,9 +66,17 @@ if __name__ == '__main__':
         time.sleep(1)
         for servo_name, channel in servo_channels.items():
             angle = get_servo_angle(channel)
-            print(f"測試 {servo_name}，設置 {angle} + 20 = {angle + 20} 度")
-            set_servo_angle(channel, angle + 20)
-            time.sleep(1)
+            print(f"測試 {servo_name}，設置 {angle} + 20 = {angle + 30} 度")
+            if channel == 3 or channel == 6:
+                set_servo_angle(channel, angle - 30)
+                time.sleep(1)
+                set_servo_angle(channel, angle + 30)
+                time.sleep(1)
+            else:
+                set_servo_angle(channel, angle + 30)
+                time.sleep(1)
+                set_servo_angle(channel, angle - 30)
+                time.sleep(1)
             print(f"測試 {servo_name} finished")
             time.sleep(1)
         print("---動作結束---")
