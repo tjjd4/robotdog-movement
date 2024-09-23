@@ -2,8 +2,6 @@ from adafruit_servokit import ServoKit
 import adafruit_motor.servo
 import time
 
-servo = adafruit_motor.servo.Servo(1)
-
 def init_pose(kit):
     kit.servo[1].angle = 90
     kit.servo[2].angle = 90
