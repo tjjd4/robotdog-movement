@@ -16,6 +16,23 @@ def init_pose(kit):
     kit.servo[11].angle = 110
     kit.servo[12].angle = 0
 
+def rear_leg_up(kit):
+    kit.servo[5].angle += 30
+    kit.servo[11].angle -= 30
+
+def rear_leg_down(kit):
+    kit.servo[5].angle -= 30
+    kit.servo[11].angle += 30
+
+def front_leg_up(kit):
+    kit.servo[2].angle += 30
+    kit.servo[8].angle -= 30
+
+def front_leg_down(kit):
+    kit.servo[2].angle -= 30
+    kit.servo[8].angle += 30
+
+
 if __name__ == '__main__':
     try:
         print("---開始---")
@@ -25,18 +42,13 @@ if __name__ == '__main__':
         for channel in range(2):
             kit.servo[channel].angle
             print(f"測試 {channel}號 servo，目前{kit.servo[channel].angle} 度")
-            kit.servo[5].angle += 30
-            kit.servo[11].angle -= 30
-            time.sleep(5)
-            kit.servo[2].angle += 30
-            kit.servo[8].angle -= 30
-            time.sleep(5)
-            kit.servo[5].angle -= 30
-            kit.servo[11].angle += 30
+            front_leg_up(kit)
             time.sleep(1)
-            kit.servo[2].angle -= 30
-            kit.servo[8].angle += 30
-            print(f"測試  {channel}號 servo 結束，移動到{kit.servo[channel].angle} 度")
+            rear_leg_up(kit)
+            time.sleep(5)
+            rear_leg_down(kit)
+            time.sleep(1)
+            front_leg_down(kit)
             time.sleep(1)
         print("---動作結束---")
         time.sleep(1)
