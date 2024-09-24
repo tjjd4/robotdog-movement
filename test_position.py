@@ -9,7 +9,7 @@ def init_pose(kit):
     kit.servo[4].angle = 90
     kit.servo[5].angle = 90
     kit.servo[6].angle = 180
-    kit.servo[7].angle = 75
+    kit.servo[7].angle = 80
     kit.servo[8].angle = 110
     kit.servo[9].angle = 36
     kit.servo[10].angle = 110
@@ -46,7 +46,7 @@ if __name__ == '__main__':
             print(f"站立")
             standup(kit)
             time.sleep(5)
-            print(f"回位")
+            print(f"蹲")
             down(kit)
             time.sleep(1)
         print("---動作結束---")
