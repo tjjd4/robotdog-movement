@@ -18,15 +18,28 @@ def init_pose(kit):
 
 def standup(kit):
     kit.servo[2].angle += 60
+    kit.servo[3].angle -= 45
     kit.servo[5].angle += 60
+    kit.servo[6].angle -= 45
     kit.servo[8].angle -= 60
+    kit.servo[9].angle += 45
     kit.servo[11].angle -= 60
+    kit.servo[12].angle += 45
 
 def down(kit):
     kit.servo[2].angle -= 60
     kit.servo[5].angle -= 60
     kit.servo[8].angle += 60
     kit.servo[11].angle += 60
+
+    kit.servo[2].angle -= 60
+    kit.servo[3].angle += 45
+    kit.servo[5].angle -= 60
+    kit.servo[6].angle += 45
+    kit.servo[8].angle += 60
+    kit.servo[9].angle -= 45
+    kit.servo[11].angle += 60
+    kit.servo[12].angle -= 45
 
 if __name__ == '__main__':
     try:
