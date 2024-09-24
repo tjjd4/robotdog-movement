@@ -28,9 +28,14 @@ if __name__ == '__main__':
             kit.servo[5].angle += 30
             kit.servo[11].angle -= 30
             time.sleep(5)
+            kit.servo[2].angle += 30
+            kit.servo[8].angle -= 30
+            time.sleep(5)
             kit.servo[5].angle -= 30
             kit.servo[11].angle += 30
             time.sleep(1)
+            kit.servo[2].angle -= 30
+            kit.servo[8].angle += 30
             print(f"測試  {channel}號 servo 結束，移動到{kit.servo[channel].angle} 度")
             time.sleep(1)
         print("---動作結束---")
