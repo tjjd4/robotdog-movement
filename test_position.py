@@ -28,11 +28,6 @@ def standup(kit):
 
 def down(kit):
     kit.servo[2].angle -= 60
-    kit.servo[5].angle -= 60
-    kit.servo[8].angle += 60
-    kit.servo[11].angle += 60
-
-    kit.servo[2].angle -= 60
     kit.servo[3].angle += 20
     kit.servo[5].angle -= 60
     kit.servo[6].angle += 20
