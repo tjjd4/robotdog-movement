@@ -25,10 +25,10 @@ if __name__ == '__main__':
         for channel in range(2):
             kit.servo[channel].angle
             print(f"測試 {channel}號 servo，目前{kit.servo[channel].angle} 度")
-            kit.servo[5].angle -= 30
+            kit.servo[5].angle += 30
             kit.servo[11].angle -= 30
             time.sleep(1)
-            kit.servo[5].angle += 30
+            kit.servo[5].angle -= 30
             kit.servo[11].angle += 30
             time.sleep(1)
             print(f"測試  {channel}號 servo 結束，移動到{kit.servo[channel].angle} 度")
