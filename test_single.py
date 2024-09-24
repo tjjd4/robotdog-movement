@@ -25,7 +25,7 @@ if __name__ == '__main__':
         for channel in range(2):
             print(f"測試 {channel}號 servo，目前{kit.servo[channel].angle} 度")
             kit.servo[8].angle -= 45
-            time.sleep(1)
+            time.sleep(10)
             kit.servo[8].angle += 45
             time.sleep(1)
         print("---動作結束---")
