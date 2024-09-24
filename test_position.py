@@ -14,7 +14,7 @@ def init_pose(kit):
     kit.servo[9].angle = 14
     kit.servo[10].angle = 110
     kit.servo[11].angle = 110
-    kit.servo[12].angle = 0
+    kit.servo[12].angle = 14
 
 def standup(kit):
     kit.servo[2].angle += 60
