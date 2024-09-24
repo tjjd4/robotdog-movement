@@ -57,6 +57,7 @@ if __name__ == '__main__':
             print(f"前下")
             rear_leg_down(kit)
             print(f"後下")
+            time.sleep(0.05)
             front_leg_down(kit)
             time.sleep(1)
         print("---動作結束---")
