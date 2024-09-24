@@ -27,7 +27,7 @@ if __name__ == '__main__':
             print(f"測試 {channel}號 servo，目前{kit.servo[channel].angle} 度")
             kit.servo[5].angle += 30
             kit.servo[11].angle -= 30
-            time.sleep(1)
+            time.sleep(5)
             kit.servo[5].angle -= 30
             kit.servo[11].angle += 30
             time.sleep(1)
