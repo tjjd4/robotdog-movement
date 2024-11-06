@@ -5,16 +5,16 @@ import time
 def init_pose(kit):
     kit.servo[1].angle = 90
     kit.servo[2].angle = 90
-    kit.servo[3].angle = 90
+    kit.servo[3].angle = 60
     kit.servo[4].angle = 90
     kit.servo[5].angle = 90
-    kit.servo[6].angle = 90
+    kit.servo[6].angle = 120
     kit.servo[7].angle = 90
     kit.servo[8].angle = 90
-    kit.servo[9].angle = 90
+    kit.servo[9].angle = 60
     kit.servo[10].angle = 90
     kit.servo[11].angle = 90
-    kit.servo[12].angle = 90
+    kit.servo[12].angle = 120
 
 def standup(kit):
     kit.servo[2].angle += 60
