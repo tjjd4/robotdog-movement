@@ -7,18 +7,18 @@ import math
 
 class Motor(IntEnum):
     # identifies the corresponding pin location with the motor location
-    FR_HIP = 1
-    FR_SHOULDER = 2
-    FR_ELBOW = 3
-    FL_HIP = 4
-    FL_SHOULDER = 5
-    FL_ELBOW = 6
-    BR_HIP = 7
-    BR_SHOULDER = 8
-    BR_ELBOW = 9
-    BL_HIP = 10
-    BL_SHOULDER = 11
-    BL_ELBOW = 12
+    FL_HIP = 1
+    FL_SHOULDER = 2
+    FL_ELBOW = 3
+    BL_HIP = 4
+    BL_SHOULDER = 5
+    BL_ELBOW = 6
+    FR_HIP = 7
+    FR_SHOULDER = 8
+    FR_ELBOW = 9
+    BR_HIP = 10
+    BR_SHOULDER = 11
+    BR_ELBOW = 12
 
 class Robotdog:
     def __init__(self) -> None:
@@ -35,18 +35,32 @@ class Robotdog:
         return rad*180/math.pi
     
     def calibrate(self):
-        self.set_angle(Motor.FR_HIP, 90)
-        self.set_angle(Motor.FR_SHOULDER, 90)
-        self.set_angle(Motor.FR_ELBOW, 90)
         self.set_angle(Motor.FL_HIP, 90)
-        self.set_angle(Motor.FL_SHOULDER, 90)
-        self.set_angle(Motor.FL_ELBOW, 90)
-        self.set_angle(Motor.BR_HIP, 90)
-        self.set_angle(Motor.BR_SHOULDER, 90)
-        self.set_angle(Motor.BR_ELBOW, 90)
+        self.set_angle(Motor.FL_SHOULDER, 0)
+        self.set_angle(Motor.FL_ELBOW, 160)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 180)
+        self.set_angle(Motor.FR_ELBOW, 20)
         self.set_angle(Motor.BL_HIP, 90)
-        self.set_angle(Motor.BL_SHOULDER, 90)
-        self.set_angle(Motor.BL_ELBOW, 90)
+        self.set_angle(Motor.BL_SHOULDER, 0)
+        self.set_angle(Motor.BL_ELBOW, 160)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 180)
+        self.set_angle(Motor.BR_ELBOW, 20)
+
+    def standup(self):
+        self.set_angle(Motor.FL_HIP, 90)
+        self.set_angle(Motor.FL_SHOULDER, 70)
+        self.set_angle(Motor.FL_ELBOW, 110)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 110)
+        self.set_angle(Motor.FR_ELBOW, 70)
+        self.set_angle(Motor.BL_HIP, 90)
+        self.set_angle(Motor.BL_SHOULDER, 70)
+        self.set_angle(Motor.BL_ELBOW, 130)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 110)
+        self.set_angle(Motor.BR_ELBOW, 50)
 
     def inverse_positioning(self, shoulder, elbow, x, y, z=0, hip=None, right=True):
         '''
@@ -171,6 +185,8 @@ if __name__ == '__main__':
     print("Calibrating robot dog to default position...")
     robotdog.calibrate()
     time.sleep(2)
+    robotdog.standup()
+    time.sleep(2)
     
     momentum = np.asarray([1, 0, 1, 0], dtype=np.float32)  # 最後一個值為 0 表示不關閉
 
@@ -181,5 +197,6 @@ if __name__ == '__main__':
         print("\nCtrl+C detected! Sending stop signal to robot dog...")
 
         momentum[3] = 1
-        time.sleep(1)  
+        time.sleep(1)
+        robotdog.calibrate()
         print("Movement stopped by user. Exiting program.")
