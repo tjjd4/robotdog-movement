@@ -123,7 +123,7 @@ class Robotdog:
         :param controller: the controller that is called to determine the robot momentum
         :returns: None, enters an infinite loop 
         """
-        momentum = np.asarray([0,0,1,0],dtype=np.float32)  # 前三個值 x(前後), y(上下), z(左右) 為步伐大小的縮放值, 第四個值不為 0 時結束動作
+        momentum = np.asarray([0,0,1,0],dtype=np.float32)  # 前三個值 x(前後), z(左右), y(上下) 為步伐大小的縮放值, 第四個值不為 0 時結束動作
         index = 0
         
         # Generate footstep
