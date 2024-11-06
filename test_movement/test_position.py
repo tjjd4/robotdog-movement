@@ -1,6 +1,22 @@
 from adafruit_servokit import ServoKit
 import adafruit_motor.servo
 import time
+from enum import IntEnum
+
+class Motor(IntEnum):
+    # identifies the corresponding pin location with the motor location
+    FR_HIP = 1
+    FR_SHOULDER = 2
+    FR_ELBOW = 3
+    FL_HIP = 4
+    FL_SHOULDER = 5
+    FL_ELBOW = 6
+    BR_HIP = 7
+    BR_SHOULDER = 8
+    BR_ELBOW = 9
+    BL_HIP = 10
+    BL_SHOULDER = 11
+    BL_ELBOW = 12
 
 def init_pose(kit):
     kit.servo[1].angle = 90
