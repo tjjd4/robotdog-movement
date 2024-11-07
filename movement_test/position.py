@@ -35,7 +35,7 @@ class Robotdog:
         self.set_angle(Motor.FL_ELBOW, 140)
         self.set_angle(Motor.FR_HIP, 90)
         self.set_angle(Motor.FR_SHOULDER, 160)
-        self.set_angle(Motor.FR_ELBOW, 50)
+        self.set_angle(Motor.FR_ELBOW, 20)
         self.set_angle(Motor.BL_HIP, 90)
         self.set_angle(Motor.BL_SHOULDER, 20)
         self.set_angle(Motor.BL_ELBOW, 140)
@@ -43,20 +43,20 @@ class Robotdog:
         self.set_angle(Motor.BR_SHOULDER, 180)
         self.set_angle(Motor.BR_ELBOW, 20)
 
-    def init_pose(self):
-        self.set_angle(Motor.FL_HIP, 90)
-        self.set_angle(Motor.FL_SHOULDER, 0)
-        self.set_angle(Motor.FL_ELBOW, 160)
-        self.set_angle(Motor.FR_HIP, 90)
-        self.set_angle(Motor.FR_SHOULDER, 180)
-        self.set_angle(Motor.FR_ELBOW, 20)
+    # def init_pose(self):
+    #     self.set_angle(Motor.FL_HIP, 90)
+    #     self.set_angle(Motor.FL_SHOULDER, 0)
+    #     self.set_angle(Motor.FL_ELBOW, 160)
+    #     self.set_angle(Motor.FR_HIP, 90)
+    #     self.set_angle(Motor.FR_SHOULDER, 180)
+    #     self.set_angle(Motor.FR_ELBOW, 20)
 
-        self.set_angle(Motor.BL_HIP, 90)
-        self.set_angle(Motor.BL_SHOULDER, 0)
-        self.set_angle(Motor.BL_ELBOW, 160)
-        self.set_angle(Motor.BR_HIP, 90)
-        self.set_angle(Motor.BR_SHOULDER, 180)
-        self.set_angle(Motor.BR_ELBOW, 20)
+    #     self.set_angle(Motor.BL_HIP, 90)
+    #     self.set_angle(Motor.BL_SHOULDER, 0)
+    #     self.set_angle(Motor.BL_ELBOW, 160)
+    #     self.set_angle(Motor.BR_HIP, 90)
+    #     self.set_angle(Motor.BR_SHOULDER, 180)
+    #     self.set_angle(Motor.BR_ELBOW, 20)
 
     def standup(self):
         self.set_angle(Motor.FL_HIP, 90)
@@ -79,10 +79,6 @@ if __name__ == '__main__':
         robotdog = Robotdog()
         robotdog.calibrate()
         
-        action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
-
-        time.sleep(1)
-        
         # 設置初始狀態
         is_standing = False
         
@@ -91,10 +87,10 @@ if __name__ == '__main__':
             
             if is_standing:
                 print("回位")
-                robotdog.init_pose()
+                robotdog.calibrate()
             else:
                 print("站立")
-                robotdog.calibrate()
+                robotdog.standup()
                 
             # 切換狀態
             is_standing = not is_standing
@@ -103,6 +99,6 @@ if __name__ == '__main__':
         print("-!終止!-")
     finally:
         print("回位")
-        robotdog.init_pose()
+        robotdog.calibrate()
         time.sleep(1)
         print("---結束---")
