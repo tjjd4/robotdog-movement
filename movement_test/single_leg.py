@@ -212,7 +212,7 @@ class Robotdog:
             i2 = (index+20)%40 
             # Apply movement based movement
             print(x[i1], y[i1], z[i1])
-            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i1],y[i1],z=z[i1],hip=Motor.FR_HIP,right=True)
+            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i1],y[i1],z=z[i1],hip=Motor.FR_HIP,right=False)
             time.sleep(0.5)
             index += 1
 

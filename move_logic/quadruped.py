@@ -60,13 +60,13 @@ class Robotdog:
         :param right: a boolean that flips the logic for left and right side to properly map "forward direction"
         :return: a list containing the appropriate angle for the shoulder and elbow
         '''
-        L=2
+        L=0
         # 距離
         y_prime = -math.sqrt((z+L)**2 + y**2)
         thetaz = math.atan2(z+L,abs(y))-math.atan2(L,abs(y_prime))
 
-        elbow_offset = 20
-        shoulder_offset = 10
+        elbow_offset = 0
+        shoulder_offset = 0
         a1 = self.upper_leg_length
         a2 = self.lower_leg_length
 
@@ -84,13 +84,13 @@ class Robotdog:
         theta_elbow = theta_shoulder - theta2
         theta_hip = 0
         if right:
-            theta_shoulder = 180 - self.rad_to_degree(theta_shoulder) + shoulder_offset
-            theta_elbow = 130 - self.rad_to_degree(theta_elbow) + elbow_offset
+            theta_shoulder = self.rad_to_degree(theta_shoulder) + shoulder_offset
+            theta_elbow = self.rad_to_degree(theta_elbow) + elbow_offset
             if hip:
                 theta_hip = 90 - self.rad_to_degree(thetaz)
         else:
-            theta_shoulder = self.rad_to_degree(theta_shoulder) - shoulder_offset
-            theta_elbow = 50 + self.rad_to_degree(theta_elbow) - elbow_offset
+            theta_shoulder = 180 - self.rad_to_degree(theta_shoulder) - shoulder_offset
+            theta_elbow = 180 - self.rad_to_degree(theta_elbow) - elbow_offset
             if hip:
                 theta_hip = 90 + self.rad_to_degree(thetaz)
         self.set_angle(shoulder, theta_shoulder)
