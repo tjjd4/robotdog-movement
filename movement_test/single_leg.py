@@ -20,6 +20,41 @@ class Motor(IntEnum):
     BR_SHOULDER = 11
     BR_ELBOW = 12
 
+    FL_HIP_OFSET = 0
+    FL_SHOULDER_OFSET = 0
+    FL_ELBOW_OFSET = 0
+    BL_HIP_OFSET = 0
+    BL_SHOULDER_OFSET = 0
+    BL_ELBOW_OFSET = 0
+    FR_HIP_OFSET = 0
+    FR_SHOULDER_OFSET = 0
+    FR_ELBOW_OFSET = 0
+    BR_HIP = 0
+    BR_SHOULDER = 0
+    BR_ELBOW = 0
+
+    @classmethod
+    def to_offset(cls, motor):
+        # Mapping motor to its corresponding offset
+        offset_mapping = {
+            cls.FL_HIP: cls.FL_HIP_OFFSET,
+            cls.FL_SHOULDER: cls.FL_SHOULDER_OFFSET,
+            cls.FL_ELBOW: cls.FL_ELBOW_OFFSET,
+            cls.BL_HIP: cls.BL_HIP_OFFSET,
+            cls.BL_SHOULDER: cls.BL_SHOULDER_OFFSET,
+            cls.BL_ELBOW: cls.BL_ELBOW_OFFSET,
+            cls.FR_HIP: cls.FR_HIP_OFFSET,
+            cls.FR_SHOULDER: cls.FR_SHOULDER_OFFSET,
+            cls.FR_ELBOW: cls.FR_ELBOW_OFFSET,
+            cls.BR_HIP: cls.BR_HIP_OFFSET,
+            cls.BR_SHOULDER: cls.BR_SHOULDER_OFFSET,
+            cls.BR_ELBOW: cls.BR_ELBOW_OFFSET
+        }
+        
+        # Return the offset for the specified motor
+        return offset_mapping.get(motor, None)
+        
+
 class Robotdog:
     def __init__(self) -> None:
         self.kit = ServoKit(channels=16)

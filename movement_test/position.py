@@ -19,6 +19,20 @@ class Motor(IntEnum):
     BR_ELBOW = 12
 
 
+def calibrate(kit):
+    kit.servo[Motor.FL_HIP].angle = 90
+    kit.servo[Motor.FL_SHOULDER].angle = 90
+    kit.servo[Motor.FL_ELBOW].angle = 90
+    kit.servo[Motor.FR_HIP].angle = 90
+    kit.servo[Motor.FR_SHOULDER].angle = 90
+    kit.servo[Motor.FR_ELBOW].angle = 90
+
+    kit.servo[Motor.BL_HIP].angle = 90
+    kit.servo[Motor.BL_SHOULDER].angle = 90
+    kit.servo[Motor.BL_ELBOW].angle = 90
+    kit.servo[Motor.BR_HIP].angle = 90
+    kit.servo[Motor.BR_SHOULDER].angle = 90
+    kit.servo[Motor.BR_ELBOW].angle = 90
 
 def init_pose(kit):
     kit.servo[Motor.FL_HIP].angle = 90
@@ -34,7 +48,6 @@ def init_pose(kit):
     kit.servo[Motor.BR_HIP].angle = 90
     kit.servo[Motor.BR_SHOULDER].angle = 180
     kit.servo[Motor.BR_ELBOW].angle = 20
-    
 
 def standup(kit):
     kit.servo[Motor.FL_HIP].angle = 90
@@ -65,16 +78,29 @@ if __name__ == '__main__':
     try:
         print("---開始---")
         kit = ServoKit(channels=16)
+        calibrate(kit)
+        
+        action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
+
         init_pose(kit)
         time.sleep(1)
-        for _ in range(1, 13):
-            print(f"站立")
-            standup(kit)
-            time.sleep(3)
-            print(f"回位")
-            init_pose(kit)
-            time.sleep(1)
-        time.sleep(1)
+        
+        # 設置初始狀態
+        is_standing = False
+        
+        while True:
+            action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
+            
+            if is_standing:
+                print("回位")
+                init_pose(kit)
+            else:
+                print("站立")
+                standup(kit)
+                
+            # 切換狀態
+            is_standing = not is_standing
+
     except KeyboardInterrupt:
         print("-!終止!-")
     finally:
