@@ -20,18 +20,18 @@ class Motor(IntEnum):
     BR_SHOULDER = 11
     BR_ELBOW = 12
 
-    FL_HIP_OFSET = 0
-    FL_SHOULDER_OFSET = 0
-    FL_ELBOW_OFSET = 0
-    BL_HIP_OFSET = 0
-    BL_SHOULDER_OFSET = 0
-    BL_ELBOW_OFSET = 0
-    FR_HIP_OFSET = 0
-    FR_SHOULDER_OFSET = 0
-    FR_ELBOW_OFSET = 0
-    BR_HIP = 0
-    BR_SHOULDER = 0
-    BR_ELBOW = 0
+    FL_HIP_OFFSET = 0
+    FL_SHOULDER_OFFSET = 0
+    FL_ELBOW_OFFSET = 0
+    BL_HIP_OFFSET = 0
+    BL_SHOULDER_OFFSET = 0
+    BL_ELBOW_OFFSET = 0
+    FR_HIP_OFFSET = 0
+    FR_SHOULDER_OFFSET = 0
+    FR_ELBOW_OFFSET = 0
+    BR_HIP_OFFSET = 0
+    BR_SHOULDER_OFFSET = 0
+    BR_ELBOW_OFFSET = 0
 
     @classmethod
     def to_offset(cls, motor):
@@ -71,17 +71,21 @@ class Robotdog:
     
     def calibrate(self):
         self.set_angle(Motor.FL_HIP, 90)
-        self.set_angle(Motor.FL_SHOULDER, 0)
-        self.set_angle(Motor.FL_ELBOW, 160)
+        self.set_angle(Motor.FL_SHOULDER, 20)
+        self.set_angle(Motor.FL_ELBOW, 140)
         self.set_angle(Motor.FR_HIP, 90)
-        self.set_angle(Motor.FR_SHOULDER, 180)
-        self.set_angle(Motor.FR_ELBOW, 20)
+        self.set_angle(Motor.FR_SHOULDER, 160)
+        self.set_angle(Motor.FR_ELBOW, 50)
         self.set_angle(Motor.BL_HIP, 90)
-        self.set_angle(Motor.BL_SHOULDER, 0)
-        self.set_angle(Motor.BL_ELBOW, 160)
+        self.set_angle(Motor.BL_SHOULDER, 20)
+        self.set_angle(Motor.BL_ELBOW, 140)
         self.set_angle(Motor.BR_HIP, 90)
         self.set_angle(Motor.BR_SHOULDER, 180)
         self.set_angle(Motor.BR_ELBOW, 20)
+
+    def calibrate_by_inverse_positioning(self):
+        x, y, z = (0, -15, 0)
+        self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x,y,z=z,hip=Motor.FR_HIP,right=True)
 
     def standup(self):
         self.set_angle(Motor.FL_HIP, 90)
@@ -115,8 +119,8 @@ class Robotdog:
         y_prime = -math.sqrt((z+L)**2 + y**2)
         thetaz = math.atan2(z+L,abs(y))-math.atan2(L,abs(y_prime))
 
-        elbow_offset = 20
-        shoulder_offset = 10
+        elbow_offset = 0
+        shoulder_offset = 0
         a1 = self.upper_leg_length
         a2 = self.lower_leg_length
 
@@ -135,19 +139,20 @@ class Robotdog:
         theta_hip = 0
         if right:
             theta_shoulder = 180 - self.rad_to_degree(theta_shoulder) + shoulder_offset
-            theta_elbow = 130 - self.rad_to_degree(theta_elbow) + elbow_offset
+            theta_elbow = 180 - self.rad_to_degree(theta_elbow) + elbow_offset
             if hip:
                 theta_hip = 90 - self.rad_to_degree(thetaz)
         else:
             theta_shoulder = self.rad_to_degree(theta_shoulder) - shoulder_offset
-            theta_elbow = 50 + self.rad_to_degree(theta_elbow) - elbow_offset
+            theta_elbow = self.rad_to_degree(theta_elbow) - elbow_offset
             if hip:
                 theta_hip = 90 + self.rad_to_degree(thetaz)
         self.set_angle(shoulder, theta_shoulder)
         self.set_angle(elbow, theta_elbow)
         if hip:
             self.set_angle(hip, theta_hip)
-        # print("theta shoulder:",theta_shoulder,"\ttheta_elbow:",theta_elbow)
+        print("moving to: ( ", x, y, ")")
+        print("theta shoulder:",theta_shoulder,"\ttheta_elbow:",theta_elbow)
         return [theta_shoulder, theta_elbow]
 
     def leg_position(self, leg_id, x, y, z=0):
@@ -206,11 +211,12 @@ class Robotdog:
             i1 = index%40
             i2 = (index+20)%40 
             # Apply movement based movement
-            self.inverse_positioning(Motor.FR_SHOULDER,Motor.FR_ELBOW,x[i1],y[i1]-1,z=z[i1],hip=Motor.FR_HIP,right=True)
+            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i1],y[i1]-1,z=z[i1],hip=Motor.FR_HIP,right=True)
+            time.sleep(0.5)
             index += 1
 
 def controller(momentum):
-    momentum[:3] = [1, 0, 1]
+    momentum[:3] = [4, 0, 1]
     return momentum
 
 
@@ -219,7 +225,9 @@ if __name__ == '__main__':
     
     print("Calibrating robot dog to default position...")
     robotdog.calibrate()
-    time.sleep(2)
+    action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
+    robotdog.calibrate_by_inverse_positioning()
+    action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
     robotdog.standup()
     time.sleep(2)
     

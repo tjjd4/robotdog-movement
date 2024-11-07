@@ -18,71 +18,69 @@ class Motor(IntEnum):
     BR_SHOULDER = 11
     BR_ELBOW = 12
 
+class Robotdog:
+    def __init__(self) -> None:
+        self.kit = ServoKit(channels=16)
+        self.upper_leg_length = 10
+        self.lower_leg_length = 10
+        for i in range(10):
+            self.kit.servo[i].set_pulse_width_range(500,2500)
 
-def calibrate(kit):
-    kit.servo[Motor.FL_HIP].angle = 90
-    kit.servo[Motor.FL_SHOULDER].angle = 90
-    kit.servo[Motor.FL_ELBOW].angle = 90
-    kit.servo[Motor.FR_HIP].angle = 90
-    kit.servo[Motor.FR_SHOULDER].angle = 90
-    kit.servo[Motor.FR_ELBOW].angle = 90
+    def set_angle(self, motor_id: Motor, degrees: int):
+        self.kit.servo[motor_id].angle = degrees
 
-    kit.servo[Motor.BL_HIP].angle = 90
-    kit.servo[Motor.BL_SHOULDER].angle = 90
-    kit.servo[Motor.BL_ELBOW].angle = 90
-    kit.servo[Motor.BR_HIP].angle = 90
-    kit.servo[Motor.BR_SHOULDER].angle = 90
-    kit.servo[Motor.BR_ELBOW].angle = 90
+    def calibrate(self):
+        self.set_angle(Motor.FL_HIP, 90)
+        self.set_angle(Motor.FL_SHOULDER, 20)
+        self.set_angle(Motor.FL_ELBOW, 140)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 160)
+        self.set_angle(Motor.FR_ELBOW, 50)
+        self.set_angle(Motor.BL_HIP, 90)
+        self.set_angle(Motor.BL_SHOULDER, 20)
+        self.set_angle(Motor.BL_ELBOW, 140)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 180)
+        self.set_angle(Motor.BR_ELBOW, 20)
 
-def init_pose(kit):
-    kit.servo[Motor.FL_HIP].angle = 90
-    kit.servo[Motor.FL_SHOULDER].angle = 0
-    kit.servo[Motor.FL_ELBOW].angle = 160
-    kit.servo[Motor.FR_HIP].angle = 90
-    kit.servo[Motor.FR_SHOULDER].angle = 180
-    kit.servo[Motor.FR_ELBOW].angle = 20
+    def init_pose(self):
+        self.set_angle(Motor.FL_HIP, 90)
+        self.set_angle(Motor.FL_SHOULDER, 0)
+        self.set_angle(Motor.FL_ELBOW, 160)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 180)
+        self.set_angle(Motor.FR_ELBOW, 20)
 
-    kit.servo[Motor.BL_HIP].angle = 90
-    kit.servo[Motor.BL_SHOULDER].angle = 0
-    kit.servo[Motor.BL_ELBOW].angle = 160
-    kit.servo[Motor.BR_HIP].angle = 90
-    kit.servo[Motor.BR_SHOULDER].angle = 180
-    kit.servo[Motor.BR_ELBOW].angle = 20
+        self.set_angle(Motor.BL_HIP, 90)
+        self.set_angle(Motor.BL_SHOULDER, 0)
+        self.set_angle(Motor.BL_ELBOW, 160)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 180)
+        self.set_angle(Motor.BR_ELBOW, 20)
 
-def standup(kit):
-    kit.servo[Motor.FL_HIP].angle = 90
-    kit.servo[Motor.FL_SHOULDER].angle = 70
-    kit.servo[Motor.FL_ELBOW].angle = 110
-    kit.servo[Motor.FR_HIP].angle = 90
-    kit.servo[Motor.FR_SHOULDER].angle = 110
-    kit.servo[Motor.FR_ELBOW].angle = 70
+    def standup(self):
+        self.set_angle(Motor.FL_HIP, 90)
+        self.set_angle(Motor.FL_SHOULDER, 70)
+        self.set_angle(Motor.FL_ELBOW, 110)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 110)
+        self.set_angle(Motor.FR_ELBOW, 70)
+        self.set_angle(Motor.BL_HIP, 90)
+        self.set_angle(Motor.BL_SHOULDER, 70)
+        self.set_angle(Motor.BL_ELBOW, 130)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 110)
+        self.set_angle(Motor.BR_ELBOW, 50)
 
-    kit.servo[Motor.BL_HIP].angle = 90
-    kit.servo[Motor.BL_SHOULDER].angle = 70
-    kit.servo[Motor.BL_ELBOW].angle = 130
-    kit.servo[Motor.BR_HIP].angle = 90
-    kit.servo[Motor.BR_SHOULDER].angle = 110
-    kit.servo[Motor.BR_ELBOW].angle = 50
-
-def down(kit):
-    kit.servo[2].angle -= 60
-    kit.servo[3].angle += 20
-    kit.servo[5].angle -= 60
-    kit.servo[6].angle += 20
-    kit.servo[8].angle += 60
-    kit.servo[9].angle -= 20
-    kit.servo[11].angle += 60
-    kit.servo[12].angle -= 20
 
 if __name__ == '__main__':
     try:
         print("---開始---")
-        kit = ServoKit(channels=16)
-        calibrate(kit)
+        robotdog = Robotdog()
+        robotdog.calibrate()
         
         action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
 
-        init_pose(kit)
         time.sleep(1)
         
         # 設置初始狀態
@@ -93,10 +91,10 @@ if __name__ == '__main__':
             
             if is_standing:
                 print("回位")
-                init_pose(kit)
+                robotdog.init_pose()
             else:
                 print("站立")
-                standup(kit)
+                robotdog.calibrate()
                 
             # 切換狀態
             is_standing = not is_standing
@@ -105,6 +103,6 @@ if __name__ == '__main__':
         print("-!終止!-")
     finally:
         print("回位")
-        init_pose(kit)
+        robotdog.init_pose()
         time.sleep(1)
         print("---結束---")
