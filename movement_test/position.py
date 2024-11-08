@@ -90,6 +90,7 @@ if __name__ == '__main__':
             else:
                 print("站立")
                 robotdog.standup()
+                # robotdog.set_angle(Motor.FL_SHOULDER, 90)
                 
             # 切換狀態
             is_standing = not is_standing
