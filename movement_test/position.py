@@ -75,15 +75,13 @@ if __name__ == '__main__':
             else:
                 print("pos1")
                 robotdog.pos1()
-                # robotdog.set_angle(Motor.FL_SHOULDER, 90)
                 
-            # 切換狀態
             is_standing = not is_standing
 
     except KeyboardInterrupt:
         print("-!終止!-")
     finally:
         print("回位")
-        robotdog.calibrate()
+        robotdog.pos1()
         time.sleep(1)
         print("---結束---")
