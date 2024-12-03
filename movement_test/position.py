@@ -28,68 +28,53 @@ class Robotdog:
     def set_angle(self, motor_id: Motor, degrees: int):
         self.kit.servo[motor_id].angle = degrees
 
-    def calibrate(self):
+    def pos1(self):
         self.set_angle(Motor.FL_HIP, 90)
-        self.set_angle(Motor.FL_SHOULDER, 20)
-        self.set_angle(Motor.FL_ELBOW, 140)
+        self.set_angle(Motor.FL_SHOULDER, 90)
+        self.set_angle(Motor.FL_ELBOW, 180)
         self.set_angle(Motor.FR_HIP, 90)
-        self.set_angle(Motor.FR_SHOULDER, 160)
-        self.set_angle(Motor.FR_ELBOW, 20)
+        self.set_angle(Motor.FR_SHOULDER, 90)
+        self.set_angle(Motor.FR_ELBOW, 0)
         self.set_angle(Motor.BL_HIP, 90)
-        self.set_angle(Motor.BL_SHOULDER, 20)
-        self.set_angle(Motor.BL_ELBOW, 140)
+        self.set_angle(Motor.BL_SHOULDER, 90)
+        self.set_angle(Motor.BL_ELBOW, 180)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 90)
+        self.set_angle(Motor.BR_ELBOW, 0)
+
+    def pos2(self):
+        self.set_angle(Motor.FL_HIP, 90)
+        self.set_angle(Motor.FL_SHOULDER, 0)
+        self.set_angle(Motor.FL_ELBOW, 90)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 180)
+        self.set_angle(Motor.FR_ELBOW, 90)
+        self.set_angle(Motor.BL_HIP, 90)
+        self.set_angle(Motor.BL_SHOULDER, 0)
+        self.set_angle(Motor.BL_ELBOW, 90)
         self.set_angle(Motor.BR_HIP, 90)
         self.set_angle(Motor.BR_SHOULDER, 180)
-        self.set_angle(Motor.BR_ELBOW, 20)
-
-    # def init_pose(self):
-    #     self.set_angle(Motor.FL_HIP, 90)
-    #     self.set_angle(Motor.FL_SHOULDER, 0)
-    #     self.set_angle(Motor.FL_ELBOW, 160)
-    #     self.set_angle(Motor.FR_HIP, 90)
-    #     self.set_angle(Motor.FR_SHOULDER, 180)
-    #     self.set_angle(Motor.FR_ELBOW, 20)
-
-    #     self.set_angle(Motor.BL_HIP, 90)
-    #     self.set_angle(Motor.BL_SHOULDER, 0)
-    #     self.set_angle(Motor.BL_ELBOW, 160)
-    #     self.set_angle(Motor.BR_HIP, 90)
-    #     self.set_angle(Motor.BR_SHOULDER, 180)
-    #     self.set_angle(Motor.BR_ELBOW, 20)
-
-    def standup(self):
-        self.set_angle(Motor.FL_HIP, 90)
-        self.set_angle(Motor.FL_SHOULDER, 70)
-        self.set_angle(Motor.FL_ELBOW, 110)
-        self.set_angle(Motor.FR_HIP, 90)
-        self.set_angle(Motor.FR_SHOULDER, 110)
-        self.set_angle(Motor.FR_ELBOW, 70)
-        self.set_angle(Motor.BL_HIP, 90)
-        self.set_angle(Motor.BL_SHOULDER, 70)
-        self.set_angle(Motor.BL_ELBOW, 130)
-        self.set_angle(Motor.BR_HIP, 90)
-        self.set_angle(Motor.BR_SHOULDER, 110)
-        self.set_angle(Motor.BR_ELBOW, 50)
+        self.set_angle(Motor.BR_ELBOW, 90)
 
 
 if __name__ == '__main__':
     try:
         print("---開始---")
         robotdog = Robotdog()
-        robotdog.calibrate()
+        robotdog.pos1()
         
         # 設置初始狀態
-        is_standing = False
+        is_pos1 = True
         
         while True:
             action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
             
             if is_standing:
-                print("回位")
-                robotdog.calibrate()
+                print("pos2")
+                robotdog.pos2()
             else:
-                print("站立")
-                robotdog.standup()
+                print("pos1")
+                robotdog.pos1()
                 # robotdog.set_angle(Motor.FL_SHOULDER, 90)
                 
             # 切換狀態
