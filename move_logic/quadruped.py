@@ -24,7 +24,7 @@ class Robotdog:
         self.kit = ServoKit(channels=16)
         self.upper_leg_length = 10
         self.lower_leg_length = 10
-        for i in range(10):
+        for i in range(1, 13):
             self.kit.servo[i].set_pulse_width_range(500,2500)
 
     def set_angle(self, motor_id: Motor, degrees: int):
