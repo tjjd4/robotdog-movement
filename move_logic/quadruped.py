@@ -47,6 +47,13 @@ class Robotdog:
         self.set_angle(Motor.BL_SHOULDER, 90)
         self.set_angle(Motor.BL_ELBOW, 90)
 
+    def calibrate_by_inverse_positioning(self):
+        x, y, z = (0, -15, 0)
+        self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x,y,z=z,hip=Motor.FL_HIP,right=False)
+        self.inverse_positioning(Motor.FR_SHOULDER,Motor.FR_ELBOW,x,y,z=z,hip=Motor.FR_HIP,right=True)
+        self.inverse_positioning(Motor.BL_SHOULDER,Motor.BL_ELBOW,x,y,z=z,hip=Motor.BL_HIP,right=False)
+        self.inverse_positioning(Motor.BR_SHOULDER,Motor.BR_ELBOW,x,y,z=z,hip=Motor.BR_HIP,right=True)
+
     def inverse_positioning(self, shoulder, elbow, x, y, z=0, hip=None, right=True):
         '''
         Positions the end effector at a given position based on cartesian coordinates in 
