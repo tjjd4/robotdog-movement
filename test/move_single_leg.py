@@ -2,6 +2,13 @@ import time
 import bezier
 import numpy as np
 
+import sys
+import os
+
+move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(move_logic_path)
+print(sys.path)
+
 from move_logic.quadruped import Robotdog, Motor
 
 def controller(momentum):

@@ -34,18 +34,20 @@ class Robotdog:
         return rad*180/math.pi
     
     def calibrate(self):
-        self.set_angle(Motor.FR_HIP, 90)
-        self.set_angle(Motor.FR_SHOULDER, 90)
-        self.set_angle(Motor.FR_ELBOW, 90)
         self.set_angle(Motor.FL_HIP, 90)
-        self.set_angle(Motor.FL_SHOULDER, 90)
+        self.set_angle(Motor.FL_SHOULDER, 0)
         self.set_angle(Motor.FL_ELBOW, 90)
-        self.set_angle(Motor.BR_HIP, 90)
-        self.set_angle(Motor.BR_SHOULDER, 90)
-        self.set_angle(Motor.BR_ELBOW, 90)
+        self.set_angle(Motor.FR_HIP, 90)
+        self.set_angle(Motor.FR_SHOULDER, 180)
+        self.set_angle(Motor.FR_ELBOW, 90)
+
         self.set_angle(Motor.BL_HIP, 90)
-        self.set_angle(Motor.BL_SHOULDER, 90)
+        self.set_angle(Motor.BL_SHOULDER, 0)
         self.set_angle(Motor.BL_ELBOW, 90)
+        self.set_angle(Motor.BR_HIP, 90)
+        self.set_angle(Motor.BR_SHOULDER, 180)
+        self.set_angle(Motor.BR_ELBOW, 90)
+
 
     def calibrate_by_inverse_positioning(self):
         x, y, z = (0, -15, 0)

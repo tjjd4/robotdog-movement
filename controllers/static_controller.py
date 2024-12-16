@@ -13,7 +13,7 @@ def controller(momentum):
 if __name__ == "__main__":
     import numpy as np
 
-    momentum = np.asarray([0,0,1],dtype=np.float32)
+    momentum = np.asarray([2,0,1],dtype=np.float32)
     while True:
         momentum = controller(momentum)
         print(momentum)

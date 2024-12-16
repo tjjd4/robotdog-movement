@@ -4,3 +4,7 @@ lib/
 lib64
 include/
 pyvenv.cfg
+.python-version
+
+# windows venv
+Scripts/
