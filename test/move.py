@@ -211,13 +211,14 @@ class Robotdog:
             i1 = index%40
             i2 = (index+20)%40 
             # Apply movement based movement
-            print(x[i1], y[i1], z[i1])
-            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i1],y[i1],z=z[i1],hip=Motor.FR_HIP,right=False)
-            time.sleep(0.5)
+            self.inverse_positioning(Motor.FR_SHOULDER,Motor.FR_ELBOW,x[i1],y[i1],z=z[i1],hip=Motor.FR_HIP,right=True)
+            self.inverse_positioning(Motor.BR_SHOULDER,Motor.BR_ELBOW,x[i2],y[i2],right=True)
+            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i2],y[i2],z=-z[i2],hip=Motor.FL_HIP,right=False)
+            self.inverse_positioning(Motor.BL_SHOULDER,Motor.BL_ELBOW,x[i1],y[i1],right=False)
             index += 1
 
 def controller(momentum):
-    momentum[:3] = [4, 0, 1]
+    momentum[:3] = [0, 0, 1]
     return momentum
 
 
@@ -230,7 +231,7 @@ if __name__ == '__main__':
     robotdog.calibrate_by_inverse_positioning()
     action = input("press 'Enter' to start ->")
 
-    momentum = np.asarray([1, 0, 1, 0], dtype=np.float32)  # 最後一個值為 0 表示不關閉
+    momentum = np.asarray([0, 0, 1, 0], dtype=np.float32)  # 最後一個值為 0 表示不關閉
 
     print("Starting robot dog movement. Press Ctrl+C to stop.")
     try:
