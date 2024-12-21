@@ -4,34 +4,54 @@ import math
 import bezier
 import numpy as np
 
-class Motor(IntEnum):
-    # identifies the corresponding pin location with the motor location
-    FL_HIP = 1
-    FL_SHOULDER = 2
-    FL_ELBOW = 3
-    BL_HIP = 4
-    BL_SHOULDER = 5
-    BL_ELBOW = 6
-    FR_HIP = 7
-    FR_SHOULDER = 8
-    FR_ELBOW = 9
-    BR_HIP = 10
-    BR_SHOULDER = 11
-    BR_ELBOW = 12
+from types.leg import LegPosition, LegPart
+from hardware.Motor import Motor
+from LegController import LegController
+from motion_generator import generate_motion
+from kinematics import inverse_kinematics
+from hardware.ServoKitSingleton import ServoKitSingleton
+
 
 class Robotdog:
     def __init__(self) -> None:
-        self.kit = ServoKit(channels=16)
         self.upper_leg_length = 10
         self.lower_leg_length = 10
-        for i in range(1, 13):
-            self.kit.servo[i].set_pulse_width_range(500,2500)
+        self.legs: dict[LegPosition, LegController] = {
+            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, is_opposited=False),
+            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, is_opposited=True),
+            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, is_opposited=False),
+            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, is_opposited=True),
+        }
+        self.kit = ServoKitSingleton.get_instance()
 
     def set_angle(self, motor_id: Motor, degrees: int):
         self.kit.servo[motor_id].angle = degrees
 
+    def set_angle_by_module(self, leg_postion: LegPosition, leg_part: LegPart, degrees: int):
+        self.legs[leg_postion].set_angle_by_module(leg_part, degrees)
+
     def rad_to_degree(self, rad):
         return rad*180/math.pi
+    
+    def standup(self):
+        self.legs[LegPosition.FL].set_shoulder_angle(0)
+        self.legs[LegPosition.FL].set_elbow_angle(90)
+        self.legs[LegPosition.FL].set_hip_angle(90)
+
+        self.legs[LegPosition.FR].set_shoulder_angle(180)
+        self.legs[LegPosition.FR].set_elbow_angle(90)
+        self.legs[LegPosition.FR].set_hip_angle(90)
+
+        self.legs[LegPosition.BL].set_shoulder_angle(0)
+        self.legs[LegPosition.BL].set_elbow_angle(90)
+        self.legs[LegPosition.BL].set_hip_angle(90)
+
+        self.legs[LegPosition.BR].set_shoulder_angle(180)
+        self.legs[LegPosition.BR].set_elbow_angle(90)
+        self.legs[LegPosition.BR].set_hip_angle(90)
+
+    def inverse_position_to_motor_degrees(self, x: float, y: float, z: float):
+        return inverse_kinematics(x, y, z, self.upper_leg_length, self.lower_leg_length)
     
     def calibrate(self):
         self.set_angle(Motor.FL_HIP, 90)
@@ -136,23 +156,7 @@ class Robotdog:
         index = 0
         
         # Generate footstep
-        s_vals = np.linspace(0.0, 1.0, 20)  # from 0 to 1, sperate to 20 point
-        step_nodes = np.asfortranarray([  # define the curve using these four points -> bezier curve
-            [-1.0, -1.0, 1.0, 1.0],
-            [-1.0, -1.0, 1.0, 1.0],
-            [-15.0, -10, -10, -15.0],
-        ])
-        curve = bezier.Curve(step_nodes, degree=3)
-        step = curve.evaluate_multi(s_vals)
-        slide_nodes = np.asfortranarray([
-            [1.0, -1.0],
-            [1.0, -1.0],
-            [-15.0, -15],
-        ])
-        curve = bezier.Curve(slide_nodes, degree=1)
-        slide = curve.evaluate_multi(s_vals)
-
-        motion = np.concatenate((step,slide), axis=1)
+        motion = generate_motion()
 
         close = False
         while not close:
@@ -165,8 +169,51 @@ class Robotdog:
             i1 = index%40
             i2 = (index+20)%40 
             # Apply movement based movement
-            self.inverse_positioning(Motor.FR_SHOULDER,Motor.FR_ELBOW,x[i1],y[i1]-1,z=z[i1],hip=Motor.FR_HIP,right=True)
-            self.inverse_positioning(Motor.BR_SHOULDER,Motor.BR_ELBOW,x[i2],y[i2]+2,right=True)
-            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i2],y[i2]-1,z=-z[i2],hip=Motor.FL_HIP,right=False)
-            self.inverse_positioning(Motor.BL_SHOULDER,Motor.BL_ELBOW,x[i1],y[i1]+2,right=False)
+            self.inverse_positioning(Motor.FR_SHOULDER,Motor.FR_ELBOW,x[i1],y[i1],z=z[i1],hip=Motor.FR_HIP,right=True)
+            self.inverse_positioning(Motor.BR_SHOULDER,Motor.BR_ELBOW,x[i2],y[i2],right=True)
+            self.inverse_positioning(Motor.FL_SHOULDER,Motor.FL_ELBOW,x[i2],y[i2],z=-z[i2],hip=Motor.FL_HIP,right=False)
+            self.inverse_positioning(Motor.BL_SHOULDER,Motor.BL_ELBOW,x[i1],y[i1],right=False)
+            index += 1
+
+    def move_by_module(self, controller=None):
+
+        momentum = np.asarray([0,0,1,0],dtype=np.float32)  # 前三個值 x(前後), z(左右), y(上下) 為步伐大小的縮放值, 第四個值不為 0 時結束動作
+        index = 0
+        
+        # Generate footstep
+        motion = generate_motion()
+
+        close = False
+        while not close:
+            momentum = controller(momentum)
+            tragectory = motion * momentum[:3, None]
+            if momentum[3]:
+                close = True
+            x,z,y = tragectory
+            # 
+            i1 = index%40
+            i2 = (index+20)%40 
+            # Apply movement based movement
+            theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = inverse_kinematics(x=x[i1], y=y[i1], z=z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length)
+            theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = inverse_kinematics(x=x[i2], y=y[i2], z=z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length)
+
+            theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = inverse_kinematics(x=x[i2], y=y[i2], z=z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length)
+            theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = inverse_kinematics(x=x[i1], y=y[i1], z=z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length)
+
+            self.set_angle_by_module(LegPosition.FL, LegPart.SHOULDER, theta_shoulder_FL)
+            self.set_angle_by_module(LegPosition.FL, LegPart.ELBOW, theta_elbow_FL)
+            self.set_angle_by_module(LegPosition.FL, LegPart.HIP, theta_hip_FL)
+
+            self.set_angle_by_module(LegPosition.FR, LegPart.SHOULDER, theta_shoulder_FR)
+            self.set_angle_by_module(LegPosition.FR, LegPart.ELBOW, theta_elbow_FR)
+            self.set_angle_by_module(LegPosition.FR, LegPart.HIP, theta_hip_FR)
+
+            self.set_angle_by_module(LegPosition.BL, LegPart.SHOULDER, theta_shoulder_BL)
+            self.set_angle_by_module(LegPosition.BL, LegPart.ELBOW, theta_elbow_BL)
+            self.set_angle_by_module(LegPosition.BL, LegPart.HIP, theta_hip_BL)
+
+            self.set_angle_by_module(LegPosition.BR, LegPart.SHOULDER, theta_shoulder_BR)
+            self.set_angle_by_module(LegPosition.BR, LegPart.ELBOW, theta_elbow_BR)
+            self.set_angle_by_module(LegPosition.BR, LegPart.HIP, theta_hip_BR)
+
             index += 1
