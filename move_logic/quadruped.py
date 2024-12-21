@@ -24,8 +24,14 @@ class Robotdog:
         }
         self.kit = ServoKitSingleton.get_instance()
 
+    def get_angle(self, motor_id: Motor):
+        return self.kit.servo[motor_id].angle
+
     def set_angle(self, motor_id: Motor, degrees: int):
         self.kit.servo[motor_id].angle = degrees
+
+    def get_angle_by_module(self, leg_postion: LegPosition, leg_part: LegPart, degrees: int):
+        self.legs[leg_postion].get_angle_by_module(leg_part, degrees)
 
     def set_angle_by_module(self, leg_postion: LegPosition, leg_part: LegPart, degrees: int):
         self.legs[leg_postion].set_angle_by_module(leg_part, degrees)

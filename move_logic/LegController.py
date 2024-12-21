@@ -17,6 +17,9 @@ class LegController:
 
         self.kit = ServoKitSingleton.get_instance()
 
+    def get_angle(self, motor_id: Motor):
+        return self.kit.servo[motor_id].angle
+
     def set_angle(self, motor_id: Motor, degrees: int):
         if (degrees > 180):
             degrees = 180
@@ -26,6 +29,10 @@ class LegController:
             print(f"Setting {motor_id.name} to under 0 degree -> adjust to 0")
         self.kit.servo[motor_id].angle =  degrees if self.is_opposited else 180 - degrees
         print(f"Set motor {motor_id.name} to angle {degrees} degrees")
+
+    def get_angle_by_module(self, part: LegPart):
+        motor_id = self.motors[part]
+        return self.kit.servo[motor_id].angle
 
     def set_angle_by_module(self, part: LegPart, degrees: int):
         motor_id = self.motors[part]
