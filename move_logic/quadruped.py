@@ -1,7 +1,4 @@
-from adafruit_servokit import ServoKit
-from enum import IntEnum
 import math
-import bezier
 import numpy as np
 
 from types.leg import LegPosition, LegPart
