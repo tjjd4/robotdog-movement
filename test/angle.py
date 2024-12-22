@@ -7,7 +7,8 @@ move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../')
 sys.path.append(move_logic_path)
 print(sys.path)
 
-from move_logic.quadruped import Robotdog, Motor
+from move_logic.quadruped import Robotdog
+from move_logic.hardware.Motor import Motor
 
 TESTED_LEG_SHOULDER = Motor.FR_SHOULDER
 TESTED_LEG_ELBOW = Motor.FR_ELBOW

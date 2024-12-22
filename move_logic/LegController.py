@@ -27,8 +27,9 @@ class LegController:
         elif (degrees < 0):
             degrees = 0
             print(f"Setting {motor_id.name} to under 0 degree -> adjust to 0")
-        self.kit.servo[motor_id].angle =  degrees if self.is_opposited else 180 - degrees
-        print(f"Set motor {motor_id.name} to angle {degrees} degrees")
+        adjusted_degrees = degrees if self.is_opposited else 180 - degrees
+        self.kit.servo[motor_id].angle = adjusted_degrees
+        print(f"Set motor {motor_id.name} to angle {adjusted_degrees} degrees")
 
     def get_angle_by_module(self, part: LegPart):
         motor_id = self.motors[part]
@@ -51,15 +52,20 @@ class LegController:
 
     def set_shoulder_angle(self, degrees: int):
         """Sets the angle of the shoulder motor."""
-        self.set_angle(self.shoulder, degrees)
+        self.set_angle_by_module(LegPart.SHOULDER, degrees)
         print(f"Set shoulder motor ({self.shoulder.name}) to angle {degrees} degrees")
 
     def set_elbow_angle(self, degrees: int):
         """Sets the angle of the elbow motor."""
-        self.set_angle(self.elbow, degrees)
+        self.set_angle_by_module(LegPart.ELBOW, degrees)
         print(f"Set elbow motor ({self.elbow.name}) to angle {degrees} degrees")
 
     def set_hip_angle(self, degrees: int):
         """Sets the angle of the hip motor."""
-        self.set_angle(self.hip, degrees)
+        self.set_angle_by_module(LegPart.HIP, degrees)
         print(f"Set hip motor ({self.hip.name}) to angle {degrees} degrees")
+
+    def pose1(self):
+        self.set_shoulder_angle(90)
+        self.set_elbow_angle(180)
+        self.set_hip_angle(90)
