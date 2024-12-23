@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     print("Starting robot dog movement. Press Ctrl+C to stop.")
     try:
-        robotdog.move_by_module(controller)  # 使用 lambda 傳遞 momentum 給 controller
+        robotdog.move(controller)  # 使用 lambda 傳遞 momentum 給 controller
     except KeyboardInterrupt:
         print("\nCtrl+C detected! Sending stop signal to robot dog...")
 
