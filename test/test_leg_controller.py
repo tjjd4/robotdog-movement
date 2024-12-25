@@ -30,23 +30,23 @@ if __name__ == '__main__':
             
             if is_pos1:
                 print("pos2")
-                leg.set_angle_by_module(LegPart.SHOULDER, 90)
-                leg.set_angle_by_module(LegPart.ELBOW, 0)
-                leg.set_angle_by_module(LegPart.HIP, 90)
+                leg.set_angle(LegPart.SHOULDER, 90)
+                leg.set_angle(LegPart.ELBOW, 0)
+                leg.set_angle(LegPart.HIP, 90)
                 
             else:
                 print("pos1")
-                leg.set_angle_by_module(LegPart.SHOULDER, 180)
-                leg.set_angle_by_module(LegPart.ELBOW, 90)
-                leg.set_angle_by_module(LegPart.HIP, 90)
+                leg.set_angle(LegPart.SHOULDER, 180)
+                leg.set_angle(LegPart.ELBOW, 90)
+                leg.set_angle(LegPart.HIP, 90)
                 
             is_pos1 = not is_pos1
     except KeyboardInterrupt:
         print("-!終止!-")
     finally:
         print("回位")
-        leg.set_angle_by_module(LegPart.SHOULDER, 90)
-        leg.set_angle_by_module(LegPart.ELBOW, 0)
-        leg.set_angle_by_module(LegPart.HIP, 90)
+        leg.set_angle(LegPart.SHOULDER, 90)
+        leg.set_angle(LegPart.ELBOW, 0)
+        leg.set_angle(LegPart.HIP, 90)
         time.sleep(1)
         print("---結束---")

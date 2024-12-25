@@ -29,23 +29,23 @@ if __name__ == '__main__':
             action = input("按下 Q/W/E 控制 Shoulder，A/S/D 控制 Elbow，Z/X/C 控制 Hip，或按 Ctrl+C 終止程式：").upper()
 
             if action == 'Q':
-                test_leg.set_shoulder_angle(test_leg.get_angle_by_module(LegPart.SHOULDER) + 10)
-                print(test_leg.get_angle_by_module(LegPart.SHOULDER))
+                test_leg.set_shoulder_angle(test_leg.get_angle(LegPart.SHOULDER) + 10)
+                print(test_leg.get_angle(LegPart.SHOULDER))
             elif action == 'W':
-                test_leg.set_shoulder_angle(test_leg.get_angle_by_module(LegPart.SHOULDER) - 10)
-                print(test_leg.get_angle_by_module(LegPart.SHOULDER))
+                test_leg.set_shoulder_angle(test_leg.get_angle(LegPart.SHOULDER) - 10)
+                print(test_leg.get_angle(LegPart.SHOULDER))
             elif action == 'A':
-                test_leg.set_elbow_angle(test_leg.get_angle_by_module(LegPart.ELBOW) + 10)
-                print(test_leg.get_angle_by_module(LegPart.ELBOW))
+                test_leg.set_elbow_angle(test_leg.get_angle(LegPart.ELBOW) + 10)
+                print(test_leg.get_angle(LegPart.ELBOW))
             elif action == 'S':
-                test_leg.set_elbow_angle(test_leg.get_angle_by_module(LegPart.ELBOW) - 10)
-                print(test_leg.get_angle_by_module(LegPart.ELBOW))
+                test_leg.set_elbow_angle(test_leg.get_angle(LegPart.ELBOW) - 10)
+                print(test_leg.get_angle(LegPart.ELBOW))
             elif action == 'Z':
-                test_leg.set_hip_angle(test_leg.get_angle_by_module(LegPart.HIP) + 10)
-                print(test_leg.get_angle_by_module(LegPart.HIP))
+                test_leg.set_hip_angle(test_leg.get_angle(LegPart.HIP) + 10)
+                print(test_leg.get_angle(LegPart.HIP))
             elif action == 'X':
-                test_leg.set_hip_angle(test_leg.get_angle_by_module(LegPart.HIP) - 10)
-                print(test_leg.get_angle_by_module(LegPart.HIP))
+                test_leg.set_hip_angle(test_leg.get_angle(LegPart.HIP) - 10)
+                print(test_leg.get_angle(LegPart.HIP))
             elif action == 'E' or action == 'D' or action == 'C':
                 break
             else:

@@ -22,10 +22,10 @@ class Robotdog:
         self.kit = ServoKitSingleton.get_instance()
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart, degrees: int):
-        self.legs[leg_postion].get_angle_by_module(leg_part, degrees)
+        self.legs[leg_postion].get_angle(leg_part, degrees)
 
     def set_angle(self, leg_postion: LegPosition, leg_part: LegPart, degrees: int):
-        self.legs[leg_postion].set_angle_by_module(leg_part, degrees)
+        self.legs[leg_postion].set_angle(leg_part, degrees)
 
     def rad_to_degree(self, rad):
         return rad*180/math.pi

@@ -17,10 +17,10 @@ class LegController:
 
         self.kit = ServoKitSingleton.get_instance()
 
-    def get_angle(self, motor_id: Motor):
+    def get_angle_by_id(self, motor_id: Motor):
         return self.kit.servo[motor_id].angle
 
-    def set_angle(self, motor_id: Motor, degrees: int):
+    def set_angle_by_id(self, motor_id: Motor, degrees: float):
         if (degrees > 180):
             degrees = 180
             print(f"Setting {motor_id.name} to over 180 degree -> adjust to 180")
@@ -31,11 +31,11 @@ class LegController:
         self.kit.servo[motor_id].angle = adjusted_degrees
         print(f"Set motor {motor_id.name} to angle {adjusted_degrees} degrees")
 
-    def get_angle_by_module(self, part: LegPart):
+    def get_angle(self, part: LegPart):
         motor_id = self.motors[part]
         return self.kit.servo[motor_id].angle
 
-    def set_angle_by_module(self, part: LegPart, degrees: int):
+    def set_angle(self, part: LegPart, degrees: float):
         motor_id = self.motors[part]
 
         if degrees > 180:
@@ -52,17 +52,17 @@ class LegController:
 
     def set_shoulder_angle(self, degrees: int):
         """Sets the angle of the shoulder motor."""
-        self.set_angle_by_module(LegPart.SHOULDER, degrees)
+        self.set_angle(LegPart.SHOULDER, degrees)
         print(f"Set shoulder motor ({self.shoulder.name}) to angle {degrees} degrees")
 
     def set_elbow_angle(self, degrees: int):
         """Sets the angle of the elbow motor."""
-        self.set_angle_by_module(LegPart.ELBOW, degrees)
+        self.set_angle(LegPart.ELBOW, degrees)
         print(f"Set elbow motor ({self.elbow.name}) to angle {degrees} degrees")
 
     def set_hip_angle(self, degrees: int):
         """Sets the angle of the hip motor."""
-        self.set_angle_by_module(LegPart.HIP, degrees)
+        self.set_angle(LegPart.HIP, degrees)
         print(f"Set hip motor ({self.hip.name}) to angle {degrees} degrees")
 
     def pose1(self):
