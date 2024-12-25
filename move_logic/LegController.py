@@ -33,7 +33,8 @@ class LegController:
 
     def get_angle(self, part: LegPart):
         motor_id = self.motors[part]
-        return self.kit.servo[motor_id].angle
+        adjusted_degrees = self.kit.servo[motor_id].angle if self.is_opposited else 180 - self.kit.servo[motor_id].angle
+        return adjusted_degrees
 
     def set_angle(self, part: LegPart, degrees: float):
         motor_id = self.motors[part]
