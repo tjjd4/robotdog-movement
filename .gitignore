@@ -1,6 +1,7 @@
 *.pyc
 bin/
 lib/
+share/
 lib64
 include/
 pyvenv.cfg
