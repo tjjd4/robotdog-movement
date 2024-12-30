@@ -1,4 +1,5 @@
 import curses
+from curses import window
 import time
 import numpy as np
 
@@ -12,7 +13,7 @@ from move_logic.quadruped import Robotdog
 from move_logic.MotionCommand import MotionCommand
 from move_logic.types.BehaviorState import BehaviorState
 
-def control_robot_dog(stdscr, robotdog: Robotdog):
+def control_robot_dog(stdscr: window, robotdog: Robotdog):
     curses.cbreak()
     stdscr.nodelay(True)
     stdscr.clear()
@@ -53,6 +54,8 @@ def control_robot_dog(stdscr, robotdog: Robotdog):
                 break
             
             # 傳遞指令到機器狗
+            stdscr.addstr(11, 0, f"Command: {command.behavior_state.name}, {command.horizontal_velocity}")
+            stdscr.refresh()
             robotdog.run(command)
             time.sleep(0.1)
 

@@ -1,5 +1,5 @@
 import math
-from enum import Enum, auto
+import threading
 import numpy as np
 
 from .types.leg import LegPosition, LegPart
@@ -22,6 +22,7 @@ class Robotdog:
         }
         self.kit = ServoKitSingleton.get_instance()
         self.state = RobotDogState()
+        self.moving_thread = threading.Thread()
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
@@ -185,12 +186,19 @@ class Robotdog:
 
         # 根據行為狀態執行對應行為
         if self.state.behavior_state == BehaviorState.REST:
+            if self.moving_thread.is_alive():
+                self.moving_thread.join()
             self.calibrate_by_inverse_positioning()
 
         elif self.state.behavior_state == BehaviorState.MOVE:
-            self.move_with_state()
+            if not self.moving_thread.is_alive():
+                print("Start moving thread...")
+                self.moving_thread = threading.Thread(target=self.move_with_state)
+                self.moving_thread.start()
 
         elif self.state.behavior_state == BehaviorState.CALIBRATE:
+            if self.moving_thread.is_alive():
+                self.moving_thread.join()
             self.calibrate()
 
     def update_state(self, command: RobotDogState):
