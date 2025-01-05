@@ -46,6 +46,14 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
             elif key == ord('d'):  # Right
                 command.horizontal_velocity = np.array([0.0, -1.0])
                 command.behavior_state = BehaviorState.MOVE
+            elif key == ord('q'):  # Turn Left
+                command.horizontal_velocity = np.array([1.0, 0.0])
+                command.yaw_rate = 20
+                command.behavior_state = BehaviorState.MOVE
+            elif key == ord('e'):  # Turn Right
+                command.horizontal_velocity = np.array([1.0, 0.0])
+                command.yaw_rate = -20
+                command.behavior_state = BehaviorState.MOVE
             elif key == ord('r'):  # Stand/Rest
                 command.behavior_state = BehaviorState.REST
             elif key == ord('c'):  # Calibrate

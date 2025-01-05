@@ -1,6 +1,7 @@
 import math
 import threading
 import numpy as np
+from transforms3d.euler import euler2mat
 
 from .types.leg import LegPosition, LegPart
 from .hardware.Motor import Motor
@@ -67,6 +68,12 @@ class Robotdog:
 
             # 動態計算步態比例
             trajectory = motion * np.array([x_velocity, z_velocity, y_height])[:, None]
+
+            # calculate rotation
+            if not math.isclose(yaw_rate, 0):
+                theta_yaw = math.radians(yaw_rate)
+                # 構造旋轉矩陣
+                R = euler2mat(0, 0, theta_yaw)
 
             x, z, y = trajectory  # 分解軌跡到 x, z, y
             i1 = index % 40
