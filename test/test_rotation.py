@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from transforms3d.euler import euler2mat
 
@@ -17,18 +18,16 @@ def generate_original_trajectory():
     return trajectory
 
 # 旋轉軌跡
-def rotate_trajectory(trajectory, yaw_rate, dt):
-    yaw_angle = yaw_rate * dt
+def rotate_trajectory(trajectory, yaw_rate):
+    yaw_angle = math.radians(yaw_rate)
     rotation_matrix = euler2mat(yaw_angle, 0, 0)
     return rotation_matrix @ trajectory
 
-# 設定參數
-yaw_rate = 0.1  # 每秒的旋轉角速度
-dt = 2  # 持續時間 2 秒
+yaw_rate = 10
 
 # 生成軌跡
 original_trajectory = generate_original_trajectory()
-rotated_trajectory = rotate_trajectory(original_trajectory, yaw_rate, dt)
+rotated_trajectory = rotate_trajectory(original_trajectory, yaw_rate)
 
 # 視覺化
 fig, axes = plt.subplots(1, 2, figsize=(12, 6))
