@@ -1,4 +1,5 @@
 import math
+import time
 import threading
 import numpy as np
 from transforms3d.euler import euler2mat
@@ -15,6 +16,7 @@ class Robotdog:
     def __init__(self) -> None:
         self.upper_leg_length = 10
         self.lower_leg_length = 10
+        self.delay_time = 0.015
         self.legs: dict[LegPosition, LegController] = {
             LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, is_opposited=False),
             LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, is_opposited=True),
@@ -60,8 +62,13 @@ class Robotdog:
 
         # Generate footstep
         motion = generate_motion()
+        last_loop = time.time()
 
         while self.state.behavior_state == BehaviorState.MOVE:
+            now = time.time()
+            if now - last_loop < self.delay_time:
+                continue
+            last_loop = time.time()
             x_velocity, z_velocity = self.state.horizontal_velocity
             yaw_rate = self.state.yaw_rate
             y_height = self.state.height
