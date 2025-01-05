@@ -27,59 +27,34 @@ class Robotdog:
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
 
-    def set_angle(self, leg_postion: LegPosition, leg_part: LegPart, degrees: int):
+    def set_angle(self, leg_postion: LegPosition, leg_part: LegPart, degrees: float):
         self.legs[leg_postion].set_angle(leg_part, degrees)
 
-    def rad_to_degree(self, rad):
-        return rad*180/math.pi
+    def set_leg_angle(self, leg_position: LegPosition, shoulder_angle: float, elbow_angle: float, hip_angle: float):
+        self.legs[leg_position].set_shoulder_angle(shoulder_angle)
+        self.legs[leg_position].set_elbow_angle(elbow_angle)
+        self.legs[leg_position].set_hip_angle(hip_angle)
     
+    def set_four_legs_angle(self, shoulder_angle: float, elbow_angle: float, hip_angle: float):
+        for leg_position, leg_controller in self.legs.items():
+            leg_controller.set_shoulder_angle(shoulder_angle)
+            leg_controller.set_elbow_angle(elbow_angle)
+            leg_controller.set_hip_angle(hip_angle)
+            print(f"Set angles for {leg_position}: "
+                f"Shoulder={shoulder_angle}, Elbow={elbow_angle}, Hip={hip_angle}")
 
-    def inverse_position_to_motor_degrees(self, x: float, y: float, z: float):
-        return inverse_kinematics(x, y, z, self.upper_leg_length, self.lower_leg_length)
+
     
     def calibrate(self):
-        self.set_angle(LegPosition.FL, LegPart.SHOULDER, 180)
-        self.set_angle(LegPosition.FL, LegPart.ELBOW, 90)
-        self.set_angle(LegPosition.FL, LegPart.HIP, 90)
-
-        self.set_angle(LegPosition.FR, LegPart.SHOULDER, 180)
-        self.set_angle(LegPosition.FR, LegPart.ELBOW, 90)
-        self.set_angle(LegPosition.FR, LegPart.HIP, 90)
-
-        self.set_angle(LegPosition.BL, LegPart.SHOULDER, 180)
-        self.set_angle(LegPosition.BL, LegPart.ELBOW, 90)
-        self.set_angle(LegPosition.BL, LegPart.HIP, 90)
-
-        self.set_angle(LegPosition.BR, LegPart.SHOULDER, 180)
-        self.set_angle(LegPosition.BR, LegPart.ELBOW, 90)
-        self.set_angle(LegPosition.BR, LegPart.HIP, 90)
+        self.set_four_legs_angle(180, 30, 90)
 
 
-    def calibrate_by_inverse_positioning(self):
+    def standup(self):
         x, y, z = (0, -15, 0)
-        theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
-        theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
+        theta_shoulder, theta_elbow, theta_hip = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
+        self.set_four_legs_angle(theta_shoulder, theta_elbow, theta_hip)
 
-        theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
-        theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
-
-        self.set_angle(LegPosition.FL, LegPart.SHOULDER, theta_shoulder_FL)
-        self.set_angle(LegPosition.FL, LegPart.ELBOW, theta_elbow_FL)
-        self.set_angle(LegPosition.FL, LegPart.HIP, theta_hip_FL)
-
-        self.set_angle(LegPosition.FR, LegPart.SHOULDER, theta_shoulder_FR)
-        self.set_angle(LegPosition.FR, LegPart.ELBOW, theta_elbow_FR)
-        self.set_angle(LegPosition.FR, LegPart.HIP, theta_hip_FR)
-
-        self.set_angle(LegPosition.BL, LegPart.SHOULDER, theta_shoulder_BL)
-        self.set_angle(LegPosition.BL, LegPart.ELBOW, theta_elbow_BL)
-        self.set_angle(LegPosition.BL, LegPart.HIP, theta_hip_BL)
-
-        self.set_angle(LegPosition.BR, LegPart.SHOULDER, theta_shoulder_BR)
-        self.set_angle(LegPosition.BR, LegPart.ELBOW, theta_elbow_BR)
-        self.set_angle(LegPosition.BR, LegPart.HIP, theta_hip_BR)
-
-    def move_with_state(self):
+    def move(self):
         index = 0
 
         # Generate footstep
@@ -111,21 +86,10 @@ class Robotdog:
             )
 
             # 設定角度到對應的腿部控制器
-            self.set_angle(LegPosition.FL, LegPart.SHOULDER, theta_shoulder_FL)
-            self.set_angle(LegPosition.FL, LegPart.ELBOW, theta_elbow_FL)
-            self.set_angle(LegPosition.FL, LegPart.HIP, theta_hip_FL)
-
-            self.set_angle(LegPosition.FR, LegPart.SHOULDER, theta_shoulder_FR)
-            self.set_angle(LegPosition.FR, LegPart.ELBOW, theta_elbow_FR)
-            self.set_angle(LegPosition.FR, LegPart.HIP, theta_hip_FR)
-
-            self.set_angle(LegPosition.BL, LegPart.SHOULDER, theta_shoulder_BL)
-            self.set_angle(LegPosition.BL, LegPart.ELBOW, theta_elbow_BL)
-            self.set_angle(LegPosition.BL, LegPart.HIP, theta_hip_BL)
-
-            self.set_angle(LegPosition.BR, LegPart.SHOULDER, theta_shoulder_BR)
-            self.set_angle(LegPosition.BR, LegPart.ELBOW, theta_elbow_BR)
-            self.set_angle(LegPosition.BR, LegPart.HIP, theta_hip_BR)
+            self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
+            self.set_leg_angle(LegPosition.FR, theta_shoulder_FR, theta_elbow_FR, theta_hip_FR)
+            self.set_leg_angle(LegPosition.BL, theta_shoulder_BL, theta_elbow_BL, theta_hip_BL)
+            self.set_leg_angle(LegPosition.BR, theta_shoulder_BR, theta_elbow_BR, theta_hip_BR)
 
             index += 1
 
@@ -133,51 +97,6 @@ class Robotdog:
                 print("Stopping robot...")
                 self.state.behavior_state = BehaviorState.REST
 
-
-
-
-    def move(self, controller=None):
-        # 前三個值 x(前後), z(左右), y(上下) 為步伐大小的縮放值, 第四個值不為 0 時結束動作
-        momentum = np.asarray([0,0,1,0],dtype=np.float32)
-        index = 0
-
-        # Generate footstep
-        motion = generate_motion()
-
-        close = False
-        while not close:
-            momentum = controller(momentum)
-            tragectory = motion * momentum[:3, None]
-            if momentum[3]:
-                close = True
-            x,z,y = tragectory
-            # 
-            i1 = index%40
-            i2 = (index+20)%40 
-            # Apply movement based movement
-            theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = inverse_kinematics(x=x[i1], y=y[i1], z=z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length)
-            theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = inverse_kinematics(x=x[i2], y=y[i2], z=z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length)
-
-            theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = inverse_kinematics(x=x[i2], y=y[i2], z=z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length)
-            theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = inverse_kinematics(x=x[i1], y=y[i1], z=z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length)
-
-            self.set_angle(LegPosition.FL, LegPart.SHOULDER, theta_shoulder_FL)
-            self.set_angle(LegPosition.FL, LegPart.ELBOW, theta_elbow_FL)
-            self.set_angle(LegPosition.FL, LegPart.HIP, theta_hip_FL)
-
-            self.set_angle(LegPosition.FR, LegPart.SHOULDER, theta_shoulder_FR)
-            self.set_angle(LegPosition.FR, LegPart.ELBOW, theta_elbow_FR)
-            self.set_angle(LegPosition.FR, LegPart.HIP, theta_hip_FR)
-
-            self.set_angle(LegPosition.BL, LegPart.SHOULDER, theta_shoulder_BL)
-            self.set_angle(LegPosition.BL, LegPart.ELBOW, theta_elbow_BL)
-            self.set_angle(LegPosition.BL, LegPart.HIP, theta_hip_BL)
-
-            self.set_angle(LegPosition.BR, LegPart.SHOULDER, theta_shoulder_BR)
-            self.set_angle(LegPosition.BR, LegPart.ELBOW, theta_elbow_BR)
-            self.set_angle(LegPosition.BR, LegPart.HIP, theta_hip_BR)
-
-            index += 1
 
     def run(self, command: RobotDogState=None):
         """主狀態機控制流程"""
@@ -188,12 +107,12 @@ class Robotdog:
         if self.state.behavior_state == BehaviorState.REST:
             if self.moving_thread.is_alive():
                 self.moving_thread.join()
-            self.calibrate_by_inverse_positioning()
+            self.standup()
 
         elif self.state.behavior_state == BehaviorState.MOVE:
             if not self.moving_thread.is_alive():
                 print("Start moving thread...")
-                self.moving_thread = threading.Thread(target=self.move_with_state)
+                self.moving_thread = threading.Thread(target=self.move)
                 self.moving_thread.start()
 
         elif self.state.behavior_state == BehaviorState.CALIBRATE:

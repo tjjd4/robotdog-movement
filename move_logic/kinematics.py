@@ -3,7 +3,7 @@ import math
 def inverse_kinematics(x: float, y: float, z: float, a1: float, a2: float):
     L = 0
     y_prime = -math.sqrt((z + L)**2 + y**2)
-    thetaz = math.atan2(z + L, abs(y)) - math.atan2(L, abs(y_prime))
+    thetaz = math.atan2(abs(y), z + L) - math.atan2(L, abs(y_prime))
 
     c2 = (x**2 + y_prime**2 - a1**2 - a2**2) / (2 * a1 * a2)
     s2 = math.sqrt(1 - c2**2)
@@ -15,10 +15,11 @@ def inverse_kinematics(x: float, y: float, z: float, a1: float, a2: float):
 
     theta_shoulder = -theta1
     theta_elbow = theta_shoulder - theta2
-    theta_hip: float = 90.0
+    theta_hip: float = thetaz
 
     theta_shoulder = math.degrees(theta_shoulder)
     theta_elbow = math.degrees(theta_elbow)
+    theta_hip: float = math.degrees(theta_hip)
 
     return theta_shoulder, theta_elbow, theta_hip
 
