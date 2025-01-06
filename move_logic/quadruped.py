@@ -57,6 +57,11 @@ class Robotdog:
         theta_shoulder, theta_elbow, theta_hip = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
         self.set_four_legs_angle(theta_shoulder, theta_elbow, theta_hip)
 
+    def adjust_motion_by_yaw_rate(self, trajectory: np.ndarray) -> np.ndarray:
+         adjusted = trajectory.copy()
+         adjusted[:, 2] = trajectory[:, 1] * (self.state.yaw_rate / 15.0)
+         return adjusted
+
     def move(self):
         index = 0
 
@@ -78,10 +83,12 @@ class Robotdog:
 
             # calculate rotation
             if not math.isclose(yaw_rate, 0):
-                theta_yaw = math.radians(yaw_rate)
-                # 構造旋轉矩陣
-                R = euler2mat(0, 0, theta_yaw)
-
+                # theta_yaw = math.radians(yaw_rate)
+                # # 構造旋轉矩陣
+                # R = euler2mat(0, 0, theta_yaw)
+                # trajectory = R @ trajectory
+                trajectory = self.adjust_motion_by_yaw_rate(trajectory)
+ 
             x, z, y = trajectory  # 分解軌跡到 x, z, y
             i1 = index % 40
             i2 = (index + 20) % 40

@@ -54,17 +54,14 @@ class LegController:
     def set_shoulder_angle(self, degrees: int):
         """Sets the angle of the shoulder motor."""
         self.set_angle(LegPart.SHOULDER, degrees)
-        print(f"Set shoulder motor ({self.shoulder.name}) to angle {degrees} degrees")
 
     def set_elbow_angle(self, degrees: int):
         """Sets the angle of the elbow motor."""
         self.set_angle(LegPart.ELBOW, degrees)
-        print(f"Set elbow motor ({self.elbow.name}) to angle {degrees} degrees")
 
     def set_hip_angle(self, degrees: int):
         """Sets the angle of the hip motor."""
         self.set_angle(LegPart.HIP, degrees)
-        print(f"Set hip motor ({self.hip.name}) to angle {degrees} degrees")
 
     def pose1(self):
         self.set_shoulder_angle(90)
