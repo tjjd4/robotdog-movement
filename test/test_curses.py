@@ -8,7 +8,7 @@ import os
 move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(move_logic_path)
 
-from move_logic.MotionCommand import MotionCommand
+from model.MotionCommand import MotionCommand
 
 def control_test(stdscr):
     """測試 curses 交互功能"""

@@ -5,10 +5,9 @@ import os
 
 move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(move_logic_path)
-print(sys.path)
 
-from move_logic.quadruped import Robotdog
-from move_logic.types.leg import LegPosition, LegPart
+from model.quadruped import Robotdog
+from model.types.leg import LegPosition, LegPart
 
 def pos1(self):
     self.set_angle(LegPosition.FL, LegPart.SHOULDER, 180)

@@ -5,11 +5,10 @@ import os
 
 move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(move_logic_path)
-print(sys.path)
 
-from move_logic.LegController import LegController
-from move_logic.hardware.Motor import Motor
-from move_logic.types.leg import LegPart
+from model.LegController import LegController
+from model.hardware.Motor import Motor
+from model.types.leg import LegPart
 
 TESTED_LEG_SHOULDER = Motor.FL_SHOULDER
 TESTED_LEG_ELBOW = Motor.FL_ELBOW

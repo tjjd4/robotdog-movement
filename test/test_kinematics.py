@@ -1,4 +1,10 @@
-from move_logic.kinematics import inverse_kinematics, forward_kinematics
+import sys
+import os
+
+move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(move_logic_path)
+
+from model.kinematics import inverse_kinematics, forward_kinematics
 
 if __name__ == '__main__':
     upper_leg = 10

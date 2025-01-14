@@ -9,7 +9,7 @@ import os
 move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(move_logic_path)
 
-from move_logic.motion_generator import generate_motion
+from model.motion_generator import generate_motion
 
 # 生成原始軌跡
 def generate_original_trajectory():
