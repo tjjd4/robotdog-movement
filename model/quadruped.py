@@ -2,7 +2,6 @@ import math
 import time
 import threading
 import numpy as np
-from transforms3d.euler import euler2mat
 
 from .types.leg import LegPosition, LegPart
 from .hardware.Motor import Motor
@@ -11,6 +10,7 @@ from .LegController import LegController
 from .MotionGenerator import MotionGenerator
 from .kinematics import inverse_kinematics
 from .State import RobotDogState, BehaviorState
+from ..utils.math import get_plane_from_points, turn_points_with_euler_radians
 
 class Robotdog:
     def __init__(self) -> None:
@@ -57,10 +57,25 @@ class Robotdog:
         theta_shoulder, theta_elbow, theta_hip = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
         self.set_four_legs_angle(theta_shoulder, theta_elbow, theta_hip)
 
-    def adjust_motion_by_yaw_rate(self, trajectory: np.ndarray) -> np.ndarray:
-        adjusted = trajectory.copy()
-        adjusted[:, 2] = trajectory[:, 1] * (self.state.yaw_rate / 15.0)
-        return adjusted
+    def adjust_trajectory_by_yaw_rate(self, trajectory: np.ndarray) -> np.ndarray:
+        points = MotionGenerator.get_original_points()
+        radians = math.radians(self.state.yaw_rate)
+        rotated_points = turn_points_with_euler_radians(points=points, radians=radians, axis="x")
+        p1 = rotated_points[:,0]
+        p2 = rotated_points[:,1]
+        p3 = rotated_points[:,2]
+        A, B, C, D = get_plane_from_points(p1,p2,p3)
+        x_trajectory = trajectory[0,:]
+        y_trajectory = trajectory[2,:]
+        z_trajectory = -(A * x_trajectory + C * y_trajectory + D) / B
+        x_trajectory, y_trajectory, z_trajectory
+
+        adjusted_trajectory = np.asfortranarray([
+            x_trajectory,
+            z_trajectory,
+            y_trajectory
+        ])
+        return adjusted_trajectory
 
     def move(self):
         index = 0
@@ -83,7 +98,7 @@ class Robotdog:
 
             # calculate rotation
             if not math.isclose(yaw_rate, 0):
-                trajectory = self.adjust_motion_by_yaw_rate(trajectory)
+                trajectory = self.adjust_trajectory_by_yaw_rate(trajectory)
 
             x, z, y = trajectory  # 分解軌跡到 x, z, y
             i1 = index % 40
