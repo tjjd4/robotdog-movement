@@ -1,11 +1,5 @@
 import time
 
-import sys
-import os
-
-move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(move_logic_path)
-
 from model.quadruped import Robotdog
 from model.types.leg import LegPosition, LegPart
 

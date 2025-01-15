@@ -1,11 +1,4 @@
 import time
-import numpy as np
-
-import sys
-import os
-
-move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(move_logic_path)
 
 from model.LegController import LegController
 from model.hardware.Motor import Motor
