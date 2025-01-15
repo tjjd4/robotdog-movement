@@ -10,18 +10,22 @@ from .LegController import LegController
 from .MotionGenerator import MotionGenerator
 from .kinematics import inverse_kinematics
 from .State import RobotDogState, BehaviorState
-from ..utils.math import get_plane_from_points, turn_points_with_euler_radians
+
+from utils.ConfigHelper import ConfigHelper
+from utils.math import get_plane_from_points, turn_points_with_euler_radians
 
 class Robotdog:
     def __init__(self) -> None:
-        self.upper_leg_length = 10
-        self.lower_leg_length = 10
-        self.delay_time = 0.015
+        self.robotdog_config = ConfigHelper.get_section("robotdog_parameters")
+        self.legs_config = ConfigHelper.get_section("motors_legs")
+        self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length")
+        self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length")
+        self.delay_time = self.robotdog_config.getfloat("delay_time")
         self.legs: dict[LegPosition, LegController] = {
-            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, is_opposited=False),
-            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, is_opposited=True),
-            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, is_opposited=False),
-            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, is_opposited=True),
+            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, is_opposited=self.legs_config.getboolean("FL_is_opposited")),
+            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, is_opposited=self.legs_config.getboolean("FR_is_opposited")),
+            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, is_opposited=self.legs_config.getboolean("BL_is_opposited")),
+            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, is_opposited=self.legs_config.getboolean("BR_is_opposited")),
         }
         self.kit = ServoKitSingleton.get_instance()
         self.state = RobotDogState()
