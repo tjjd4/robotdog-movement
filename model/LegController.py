@@ -4,7 +4,7 @@ from .types.leg import LegPart
 
 class LegController:
     """Handles control for a single leg of the robot."""
-    def __init__(self, shoulder: Motor, elbow: Motor, hip: Motor, is_opposited: bool):
+    def __init__(self, shoulder: Motor, elbow: Motor, hip: Motor, FB_is_opposited: bool, LR_is_opposited: bool):
         self.shoulder = shoulder
         self.elbow = elbow
         self.hip = hip
@@ -13,7 +13,8 @@ class LegController:
             LegPart.ELBOW: elbow,
             LegPart.HIP: hip,
         }
-        self.is_opposited = is_opposited
+        self.FB_is_opposited = FB_is_opposited
+        self.LR_is_opposited = LR_is_opposited
 
         self.kit = ServoKitSingleton.get_instance()
 
@@ -47,7 +48,10 @@ class LegController:
             print(f"Setting {motor_id.name} to under 0 degrees -> adjusted to 0")
 
         # Adjust the angle based on whether the leg is opposited
-        adjusted_degrees = degrees if self.is_opposited else 180 - degrees
+        if part == LegPart.HIP:
+            adjusted_degrees = degrees if self.LR_is_opposited else 180 - degrees
+        else:
+            adjusted_degrees = degrees if self.FB_is_opposited else 180 - degrees
         self.kit.servo[motor_id].angle = adjusted_degrees
 
 

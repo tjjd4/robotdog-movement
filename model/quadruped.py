@@ -22,10 +22,10 @@ class Robotdog:
         self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length")
         self.delay_time = self.robotdog_config.getfloat("delay_time")
         self.legs: dict[LegPosition, LegController] = {
-            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, is_opposited=self.legs_config.getboolean("FL_is_opposited")),
-            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, is_opposited=self.legs_config.getboolean("FR_is_opposited")),
-            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, is_opposited=self.legs_config.getboolean("BL_is_opposited")),
-            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, is_opposited=self.legs_config.getboolean("BR_is_opposited")),
+            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_FL_is_opposited")),
+            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_FR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_FR_is_opposited")),
+            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited")),
+            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited")),
         }
         self.kit = ServoKitSingleton.get_instance()
         self.state = RobotDogState()
@@ -101,24 +101,30 @@ class Robotdog:
             trajectory = motion * np.array([x_velocity, z_velocity, y_height])[:, None]
 
             # calculate rotation
-            if not math.isclose(yaw_rate, 0):
-                trajectory = self.adjust_trajectory_by_yaw_rate(trajectory)
-
+            if yaw_rate != 0.0:
+                front_trajectory = self.adjust_trajectory_by_yaw_rate(trajectory)
+                back_trajectory = front_trajectory.copy()
+                back_trajectory[1,:] = front_trajectory[1,:] * -1
+            else:
+                front_trajectory = trajectory.copy()
+                back_trajectory = trajectory.copy()
+            front_x, front_z, front_y = front_trajectory
+            back_x, back_z, back_y = back_trajectory
             x, z, y = trajectory  # 分解軌跡到 x, z, y
             i1 = index % 40
             i2 = (index + 20) % 40
 
             theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = inverse_kinematics(
-                x=x[i1], y=y[i1], z=z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=front_x[i1], y=front_y[i1], z=front_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
             theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = inverse_kinematics(
-                x=x[i2], y=y[i2], z=z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=front_x[i2], y=front_y[i2], z=front_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
             theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = inverse_kinematics(
-                x=x[i2], y=y[i2], z=z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=back_x[i2], y=back_y[i2], z=back_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
             theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = inverse_kinematics(
-                x=x[i1], y=y[i1], z=z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=back_x[i1], y=back_y[i1], z=back_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
 
             # 設定角度到對應的腿部控制器
