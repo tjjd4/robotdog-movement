@@ -1,25 +1,26 @@
-import io
-import picamera
 from flask import Flask, Response
+from picamera2 import Picamera2
+import cv2
+
+### You can donate at https://www.buymeacoffee.com/mmshilleh 
 
 app = Flask(__name__)
 
-def get_frames():
-    with picamera.PiCamera() as camera:
-        camera.resolution = (640,480)
-        camera.famerate = 24
-        stream = io.BytesIO()
+camera = Picamera2()
+camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+camera.start()
 
-        for _ in camera.capture_continuous(stream, 'jpeg', use_video_port=True):
-            stream.seek(0)
-            yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + stream.read() + b'\r\n'
-            stream.seek(0)
-            stream.truncate()
+def generate_frames():
+    while True:
+        frame = camera.capture_array()
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 @app.route('/video')
-def video():
-    return Response(get_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, threaded=True)
-        

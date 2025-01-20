@@ -6,7 +6,7 @@ def inverse_kinematics(x: float, y: float, z: float, a1: float, a2: float):
     thetaz = math.atan2(abs(y), z + L) - math.atan2(L, abs(y_prime))
 
     c2 = (x**2 + y_prime**2 - a1**2 - a2**2) / (2 * a1 * a2)
-    s2 = math.sqrt(1 - c2**2)
+    s2 = math.sqrt(abs(1 - c2**2))
     theta2 = math.atan2(s2, c2)
 
     c1 = (x * (a1 + (a2 * c2)) + y_prime * (a2 * s2)) / (x**2 + y_prime**2)

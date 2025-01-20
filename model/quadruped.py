@@ -61,25 +61,32 @@ class Robotdog:
         theta_shoulder, theta_elbow, theta_hip = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
         self.set_four_legs_angle(theta_shoulder, theta_elbow, theta_hip)
 
-    def adjust_trajectory_by_yaw_rate(self, trajectory: np.ndarray) -> np.ndarray:
-        points = MotionGenerator.get_original_points()
-        radians = math.radians(self.state.yaw_rate)
-        rotated_points = turn_points_with_euler_radians(points=points, radians=radians, axis="x")
-        p1 = rotated_points[:,0]
-        p2 = rotated_points[:,1]
-        p3 = rotated_points[:,2]
-        A, B, C, D = get_plane_from_points(p1,p2,p3)
-        x_trajectory = trajectory[0,:]
-        y_trajectory = trajectory[2,:]
-        z_trajectory = -(A * x_trajectory + C * y_trajectory + D) / B
-        x_trajectory, y_trajectory, z_trajectory
 
-        adjusted_trajectory = np.asfortranarray([
-            x_trajectory,
-            z_trajectory,
-            y_trajectory
-        ])
-        return adjusted_trajectory
+    def adjust_for_turning(self, trajectory: np.ndarray, turning_factor: float) -> np.ndarray:
+        """
+        Adjust the step size for turning using the small-step, big-step method.
+
+        Args:
+            motion (np.ndarray): Original motion trajectory (shape: [3, n_steps]).
+            turning_factor (float): Positive for turning right, negative for turning left.
+
+        Returns:
+            np.ndarray: Adjusted motion trajectory.
+        """
+        left_trajectory = trajectory.copy()
+        right_trajectory = trajectory.copy()
+
+        if turning_factor > 0:  # Turn Right
+            # Left legs take bigger steps, right legs take smaller steps
+            left_trajectory[0, :] *= (1 + turning_factor)  # Left legs bigger steps
+            right_trajectory[0, :] *= (1 - turning_factor)  # Right legs smaller steps
+        elif turning_factor < 0:  # Turn Left
+            turning_factor = abs(turning_factor)
+            # Right legs take bigger steps, left legs take smaller steps
+            left_trajectory[0, :] *= (1 - turning_factor)  # Left legs smaller steps
+            right_trajectory[0, :] *= (1 + turning_factor)  # Right legs bigger steps
+
+        return left_trajectory, right_trajectory
 
     def move(self):
         index = 0
@@ -100,31 +107,28 @@ class Robotdog:
             # 動態計算步態比例
             trajectory = motion * np.array([x_velocity, z_velocity, y_height])[:, None]
 
-            # calculate rotation
             if yaw_rate != 0.0:
-                front_trajectory = self.adjust_trajectory_by_yaw_rate(trajectory)
-                back_trajectory = front_trajectory.copy()
-                back_trajectory[1,:] = front_trajectory[1,:] * -1
+                left_trajectory, right_trajectory = self.adjust_for_turning(trajectory, self.state.yaw_rate)
             else:
-                front_trajectory = trajectory.copy()
-                back_trajectory = trajectory.copy()
-            front_x, front_z, front_y = front_trajectory
-            back_x, back_z, back_y = back_trajectory
+                left_trajectory = trajectory.copy()
+                right_trajectory = trajectory.copy()
+            left_x, left_z, left_y = left_trajectory
+            right_x, right_z, right_y = right_trajectory
             x, z, y = trajectory  # 分解軌跡到 x, z, y
             i1 = index % 40
             i2 = (index + 20) % 40
 
             theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = inverse_kinematics(
-                x=front_x[i1], y=front_y[i1], z=front_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=left_x[i1]+3, y=left_y[i1], z=left_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
             theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = inverse_kinematics(
-                x=front_x[i2], y=front_y[i2], z=front_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=right_x[i2]+3, y=right_y[i2], z=right_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
             theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = inverse_kinematics(
-                x=back_x[i2], y=back_y[i2], z=back_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=left_x[i2], y=left_y[i2], z=left_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
             theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = inverse_kinematics(
-                x=back_x[i1], y=back_y[i1], z=back_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
+                x=right_x[i1], y=right_y[i1], z=right_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
             )
 
             # 設定角度到對應的腿部控制器

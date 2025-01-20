@@ -21,37 +21,32 @@ git clone https://github.com/tjjd4/robotdog-movement.git
 cd robotdog-movement
 ```
 
+### Update System Software
+```bash
+sudo apt update && sudo apt upgrade
+sudo apt install libcamera-dev
+sudo apt install python3-picamera2
+```
+
 ### 2. Create and Activate a Virtual Environment
 
 #### On macOS/Linux:
+Need system site packages for camera modules ( picamera2 )
 ```bash
-python3 -m venv venv
+python3 -m venv --system-site-packages venv
 source venv/bin/activate
-```
-
-#### On Windows:
-```cmd
-python -m venv venv
-venv\Scripts\activate
 ```
 
 Once activated, your terminal prompt should display the virtual environment name, e.g., `(venv)`.
 
 #### Set Up `PYTHONPATH`
 
-##### On macOS/Linux:
 Modify the `venv/bin/activate` file to include the project root in `PYTHONPATH`. Add the following lines after `export PATH`:
 ```bash
 PYTHONPATH="$VIRTUAL_ENV:$PYTHONPATH"
 export PYTHONPATH
 ```
-
-##### On Windows:
-Modify the `venv\Scripts\activate.bat` file. Add the following lines after `set PATH`:
-```cmd
-set PYTHONPATH=%VIRTUAL_ENV%;%PYTHONPATH%
-```
-
+re-activate virtual environment!
 ---
 
 ### 3. Install Dependencies
@@ -68,8 +63,7 @@ To verify everything is working:
 
 1. Activate the virtual environment:
    ```bash
-   source venv/bin/activate   # macOS/Linux
-   venv\Scripts\activate    # Windows
+   source venv/bin/activate
    ```
 
 2. Run a script (e.g., `test_kinematics.py`) to ensure no errors occur:
