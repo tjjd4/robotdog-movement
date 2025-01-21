@@ -1,8 +1,11 @@
 import bezier
 import numpy as np
+from utils.ConfigHelper import ConfigHelper
 
 class MotionGenerator:
-
+    robotdog_config = ConfigHelper.get_section("robotdog_parameters")
+    TRAJECTORY_CYCLE = robotdog_config.getint("trajectory_cycle")
+    HALF_CYCLE = TRAJECTORY_CYCLE // 2
     # bezier curve reference points
     STEP_POINT_1 = [-1.0, -1.0, -15.0]
     STEP_POINT_2 = [-1.0, -1.0, -10.0]
@@ -14,7 +17,7 @@ class MotionGenerator:
 
     @classmethod
     def generate_motion(cls):
-        s_vals = np.linspace(0.0, 1.0, 20)
+        s_vals = np.linspace(0.0, 1.0, cls.HALF_CYCLE)
 
         # Combine step points into array
         step_nodes = np.asfortranarray([
