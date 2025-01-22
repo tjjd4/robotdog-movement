@@ -3,17 +3,19 @@ import numpy as np
 from utils.ConfigHelper import ConfigHelper
 
 class MotionGenerator:
-    robotdog_config = ConfigHelper.get_section("robotdog_parameters")
-    TRAJECTORY_CYCLE = robotdog_config.getint("trajectory_cycle")
+    movement_config = ConfigHelper.get_section("movement_parameters")
+    TRAJECTORY_CYCLE = movement_config.getint("trajectory_cycle")
+    MAX_HEIGHT = movement_config.getfloat("max_height")
+    MIN_HEIGHT = movement_config.getfloat("min_height")
     HALF_CYCLE = TRAJECTORY_CYCLE // 2
     # bezier curve reference points
-    STEP_POINT_1 = [-1.0, -1.0, -15.0]
-    STEP_POINT_2 = [-1.0, -1.0, -10.0]
-    STEP_POINT_3 = [1.0, 1.0, -10.0]
-    STEP_POINT_4 = [1.0, 1.0, -15.0]
+    STEP_POINT_1 = [-1.0, -1.0, -MAX_HEIGHT]
+    STEP_POINT_2 = [-1.0, -1.0, -MIN_HEIGHT]
+    STEP_POINT_3 = [1.0, 1.0, -MAX_HEIGHT]
+    STEP_POINT_4 = [1.0, 1.0, -MAX_HEIGHT]
 
-    SLIDE_POINT_1 = [1.0, 1.0, -15.0]
-    SLIDE_POINT_2 = [-1.0, -1.0, -15.0]
+    SLIDE_POINT_1 = [1.0, 1.0, -MAX_HEIGHT]
+    SLIDE_POINT_2 = [-1.0, -1.0, -MAX_HEIGHT]
 
     @classmethod
     def generate_motion(cls):

@@ -17,10 +17,11 @@ from utils.math import get_plane_from_points, turn_points_with_euler_radians
 class Robotdog:
     def __init__(self) -> None:
         self.robotdog_config = ConfigHelper.get_section("robotdog_parameters")
+        self.movement_config = ConfigHelper.get_section("movement_parameters")
         self.legs_config = ConfigHelper.get_section("motors_legs")
         self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length")
         self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length")
-        self.delay_time = self.robotdog_config.getfloat("delay_time")
+        self.delay_time = self.movement_config.getfloat("delay_time")
         self.legs: dict[LegPosition, LegController] = {
             LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_FL_is_opposited")),
             LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_FR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_FR_is_opposited")),
