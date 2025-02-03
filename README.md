@@ -7,7 +7,7 @@ This guide provides instructions to set up the development environment for the R
 ## Prerequisites
 
 Before proceeding, ensure you have the following installed on your system:
-- **Python 3.12** ( Some packages don't work on **python 3.13** or later version )
+- **Python (suggest version: 3.12.7)** ( Some packages don't work on **python 3.13** or later version )
 - **Git**
 ---
 
