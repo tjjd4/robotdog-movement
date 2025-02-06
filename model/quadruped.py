@@ -6,13 +6,13 @@ import numpy as np
 from .types.leg import LegPosition, LegPart
 from .hardware.Motor import Motor
 from .hardware.ServoKitSingleton import ServoKitSingleton
+from .hardware.GyroscopeKitSigleton import GyroscopeKitSigleton
 from .LegController import LegController
 from .MotionGenerator import MotionGenerator
 from .kinematics import inverse_kinematics
 from .State import RobotDogState, BehaviorState
 
 from utils.ConfigHelper import ConfigHelper
-from utils.math import get_plane_from_points, turn_points_with_euler_radians
 
 class Robotdog:
     def __init__(self) -> None:
@@ -31,6 +31,7 @@ class Robotdog:
         self.kit = ServoKitSingleton.get_instance()
         self.state = RobotDogState()
         self.moving_thread = threading.Thread()
+        self.gyro_thread = threading.Thread()
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
@@ -173,3 +174,30 @@ class Robotdog:
         self.state.yaw_rate = command.yaw_rate
         self.state.height = command.height
         self.state.behavior_state = command.behavior_state
+
+    def activate_gyroscope(self):
+        if not self.gyro_thread.is_alive():
+                print("Start gyroscope detecting thread...")
+                self.gyro_thread = threading.Thread(target=self.move)
+                self.gyro_thread.start()
+        else:
+            print("Gyroscope already activated!")
+
+    def detect_angle(self):
+        self.gyroscope = GyroscopeKitSigleton.get_instance()
+        packet_size = self.gyroscope.DMP_get_FIFO_packet_size()
+        FIFO_buffer = [0] * 64
+
+        while True:  # infinite loop
+            if self.gyroscope.isreadyFIFO(packet_size):  # Check if FIFO data are ready to use...
+                FIFO_buffer = self.gyroscope.get_FIFO_bytes(packet_size)  # get all the DMP data here
+                
+                q = self.gyroscope.DMP_get_quaternion_int16(FIFO_buffer)
+                grav = self.gyroscope.DMP_get_gravity(q)
+                roll_pitch_yaw = self.gyroscope.DMP_get_euler_roll_pitch_yaw(q)
+                
+                print('roll: ' + str(roll_pitch_yaw.x))
+                print('pitch: ' + str(roll_pitch_yaw.y))
+                print('yaw: ' + str(roll_pitch_yaw.z))
+                print('\n')
+            time.sleep(0.05)
