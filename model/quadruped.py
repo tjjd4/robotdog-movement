@@ -1,16 +1,14 @@
-import math
 import time
-import threading
+from threading import Thread
+from queue import LifoQueue
 import numpy as np
 
-from .types.leg import LegPosition, LegPart
+from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, GyroData
 from .hardware.Motor import Motor
-from .hardware.ServoKitSingleton import ServoKitSingleton
-from .hardware.GyroscopeKitSigleton import GyroscopeKitSigleton
 from .LegController import LegController
+from .GyroscopeController import GyroscopeController
 from .MotionGenerator import MotionGenerator
-from .kinematics import inverse_kinematics
-from .State import RobotDogState, BehaviorState
+from .kinematics import get_angle_for_position
 
 from utils.ConfigHelper import ConfigHelper
 
@@ -28,10 +26,13 @@ class Robotdog:
             LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited")),
             LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited")),
         }
-        self.kit = ServoKitSingleton.get_instance()
+        self.gyroscope = GyroscopeController()
         self.state = RobotDogState()
-        self.moving_thread = threading.Thread()
-        self.gyro_thread = threading.Thread()
+        self.moving_thread = Thread()
+        self.standing_thread = Thread()
+        self.gyro_thread = Thread()
+        self.gyro_queue = LifoQueue()
+        self.is_gyroscope_running = False
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
@@ -56,12 +57,6 @@ class Robotdog:
     
     def calibrate(self):
         self.set_four_legs_angle(180, 30, 90)
-
-
-    def standup(self):
-        x, y, z = (0, -15, 0)
-        theta_shoulder, theta_elbow, theta_hip = inverse_kinematics(x=x, y=y, z=z, a1=self.upper_leg_length, a2=self.lower_leg_length)
-        self.set_four_legs_angle(theta_shoulder, theta_elbow, theta_hip)
 
 
     def adjust_for_turning(self, trajectory: np.ndarray, turning_factor: float) -> np.ndarray:
@@ -89,6 +84,23 @@ class Robotdog:
             right_trajectory[0, :] *= (1 + turning_factor)  # Right legs bigger steps
 
         return left_trajectory, right_trajectory
+    
+    def standup(self):
+        last_loop = time.time()
+        while self.state.behavior_state == BehaviorState.STAND:
+            now = time.time()
+            if now - last_loop < self.delay_time:
+                continue
+            last_loop = time.time()
+            x, y, z = (0, -15, 0)
+
+            gyro_data = None
+            if self.is_gyroscope_running:
+                gyro_data = self.state.gyro_data
+
+            theta_shoulder, theta_elbow, theta_hip = get_angle_for_position(x=x, y=y, z=z, gyro_data=gyro_data)
+            self.set_four_legs_angle(theta_shoulder, theta_elbow, theta_hip)
+
 
     def move(self):
         index = 0
@@ -116,21 +128,25 @@ class Robotdog:
                 right_trajectory = trajectory.copy()
             left_x, left_z, left_y = left_trajectory
             right_x, right_z, right_y = right_trajectory
-            x, z, y = trajectory  # 分解軌跡到 x, z, y
+            # x, z, y = trajectory  # 分解軌跡到 x, z, y
             i1 = index % 40
             i2 = (index + 20) % 40
 
-            theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = inverse_kinematics(
-                x=left_x[i1]+3, y=left_y[i1], z=left_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
+            gyro_data = None
+            if self.is_gyroscope_running:
+                gyro_data = self.state.gyro_data
+
+            theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_for_position(
+                x=left_x[i1]+3, y=left_y[i1], z=left_z[i1], gyro_data=gyro_data
             )
-            theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = inverse_kinematics(
-                x=right_x[i2]+3, y=right_y[i2], z=right_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
+            theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_for_position(
+                x=right_x[i2]+3, y=right_y[i2], z=right_z[i2], gyro_data=gyro_data
             )
-            theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = inverse_kinematics(
-                x=left_x[i2], y=left_y[i2], z=left_z[i2], a1=self.upper_leg_length, a2=self.lower_leg_length
+            theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_for_position(
+                x=left_x[i2], y=left_y[i2], z=left_z[i2], gyro_data=gyro_data
             )
-            theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = inverse_kinematics(
-                x=right_x[i1], y=right_y[i1], z=right_z[i1], a1=self.upper_leg_length, a2=self.lower_leg_length
+            theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_for_position(
+                x=right_x[i1], y=right_y[i1], z=right_z[i1], gyro_data=gyro_data
             )
 
             # 設定角度到對應的腿部控制器
@@ -152,20 +168,29 @@ class Robotdog:
             self.update_state(command)
 
         # 根據行為狀態執行對應行為
-        if self.state.behavior_state == BehaviorState.REST:
+        if self.state.behavior_state == BehaviorState.STAND:
             if self.moving_thread.is_alive():
                 self.moving_thread.join()
-            self.standup()
+
+            if not self.standing_thread.is_alive():
+                print("Start standing thread...")
+                self.standing_thread = Thread(target=self.standup)
+                self.standing_thread.start()
 
         elif self.state.behavior_state == BehaviorState.MOVE:
+            if self.standing_thread.is_alive():
+                self.standing_thread.join()
+
             if not self.moving_thread.is_alive():
                 print("Start moving thread...")
-                self.moving_thread = threading.Thread(target=self.move)
+                self.moving_thread = Thread(target=self.move)
                 self.moving_thread.start()
 
-        elif self.state.behavior_state == BehaviorState.CALIBRATE:
+        elif self.state.behavior_state == BehaviorState.REST:
             if self.moving_thread.is_alive():
                 self.moving_thread.join()
+            if self.standing_thread.is_alive():
+                self.standing_thread.join()
             self.calibrate()
 
     def update_state(self, command: RobotDogState):
@@ -175,29 +200,33 @@ class Robotdog:
         self.state.height = command.height
         self.state.behavior_state = command.behavior_state
 
+    def update_gyro_data(self):
+        while self.is_gyroscope_running:
+            if not self.gyro_queue.empty():
+                gyro_data: GyroData = self.gyro_queue.get()
+                self.state.gyro_data = gyro_data
+
+            time.sleep(0.25)
+    
     def activate_gyroscope(self):
-        if not self.gyro_thread.is_alive():
-                print("Start gyroscope detecting thread...")
-                self.gyro_thread = threading.Thread(target=self.move)
-                self.gyro_thread.start()
+        if not self.is_gyroscope_running:
+            self.is_gyroscope_running = True
+            if not self.gyroscope.is_running():
+                self.gyroscope.start(self.gyro_queue)
+            if not self.gyro_thread.is_alive():
+                self.gyro_thread = Thread(target=self.update_gyro_data)
+            print("LOG: Gyroscope activated.")
         else:
-            print("Gyroscope already activated!")
-
-    def detect_angle(self):
-        self.gyroscope = GyroscopeKitSigleton.get_instance()
-        packet_size = self.gyroscope.DMP_get_FIFO_packet_size()
-        FIFO_buffer = [0] * 64
-
-        while True:  # infinite loop
-            if self.gyroscope.isreadyFIFO(packet_size):  # Check if FIFO data are ready to use...
-                FIFO_buffer = self.gyroscope.get_FIFO_bytes(packet_size)  # get all the DMP data here
-                
-                q = self.gyroscope.DMP_get_quaternion_int16(FIFO_buffer)
-                grav = self.gyroscope.DMP_get_gravity(q)
-                roll_pitch_yaw = self.gyroscope.DMP_get_euler_roll_pitch_yaw(q)
-                
-                print('roll: ' + str(roll_pitch_yaw.x))
-                print('pitch: ' + str(roll_pitch_yaw.y))
-                print('yaw: ' + str(roll_pitch_yaw.z))
-                print('\n')
-            time.sleep(0.05)
+            print("LOG: Gyroscope already activated!")
+            
+    
+    def deactivate_gyroscope(self):
+        if self.is_gyroscope_running:
+            self.is_gyroscope_running = False
+            if self.gyroscope.is_running:
+                self.gyroscope.stop()
+            if self.gyro_thread.is_alive():
+                self.gyro_thread.join()
+            print("LOG: Gyroscope deactivated.")
+        else:
+            print("LOG: Gyroscope not activated!")

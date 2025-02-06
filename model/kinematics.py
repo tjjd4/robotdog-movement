@@ -1,6 +1,27 @@
 import math
+import numpy as np
+from types.types import GyroData, LegPosition
+from utils.math import get_plane_from_points, turn_points_with_euler_radians
+from utils.ConfigHelper import ConfigHelper
 
-def inverse_kinematics(x: float, y: float, z: float, a1: float, a2: float):
+robotdog_config = ConfigHelper.get_section("robotdog_parameters")
+upper_leg_length = robotdog_config.getfloat("upper_leg_length")
+lower_leg_length = robotdog_config.getfloat("lower_leg_length")
+body_length = robotdog_config.getfloat("body_length")
+body_width = robotdog_config.getfloat("body_width")
+
+shoulder_positions = np.array([
+    [body_length / 2, body_length / 2, -body_length / 2, -body_length / 2],
+    [-body_width / 2, body_width / 2, -body_width / 2, body_width / 2],
+    [0, 0, 0, 0],
+])
+
+def get_angle_for_position(x: float, y: float, z: float, legPosition: LegPosition, gyro_data: GyroData=None):
+    if GyroData != None:
+        x, y, z = compenstated_with_gyro_data(x, y, z, legPosition, gyro_data)
+    return inverse_kinematics(x,y,z,upper_leg_length,lower_leg_length)
+
+def inverse_kinematics(x: float, y: float, z: float, a1: float=upper_leg_length, a2: float=lower_leg_length):
     y_prime = -math.sqrt((z)**2 + y**2)
     thetaz = math.atan2(abs(y), z)
 
@@ -37,4 +58,12 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
     
     y = -math.sqrt(y_prime**2 - (z)**2)  # y_prime = -sqrt(z^2 + y^2), assume z = 0
 
+    return x, y, z
+
+def compenstated_with_gyro_data(x: float, y: float, z: float, legPosition: LegPosition, gyro_data: GyroData):
+    
+    gyro_shoulder_positions = turn_points_with_euler_radians(shoulder_positions, gyro_data.roll, gyro_data.pitch, gyro_data.yaw)
+    A, B, C, D = get_plane_from_points(gyro_shoulder_positions[:,0], gyro_shoulder_positions[:,1], gyro_shoulder_positions[:,2])
+    compensation_height = -(A*gyro_shoulder_positions[0,legPosition] + B*gyro_shoulder_positions[1,legPosition]+D)/C
+    y += compensation_height
     return x, y, z

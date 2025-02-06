@@ -15,17 +15,12 @@ def get_plane_from_points(p1: np.ndarray, p2: np.ndarray, p3: np.ndarray):
 
     return A,B,C,D
 
-def turn_points_with_euler_radians(points: np.ndarray, radians: float, axis: Literal["x","y","z"]="x"):
+def turn_points_with_euler_radians(points: np.ndarray, roll, pitch, yaw):
     if points.shape[0] != 3:
         raise ValueError("input points must have 3 dimension (x, z, y)")
 
-    if axis == "x":
-        rotation_matrix = euler2mat(radians, 0, 0)
-    elif axis == "y":
-        rotation_matrix = euler2mat(0, radians, 0)
-    elif axis == "z":
-        rotation_matrix = euler2mat(0, 0, radians)
-    
-    # 應用旋轉
+    rotation_matrix = euler2mat(roll, pitch, yaw)
+
+    # rotate
     rotated_points = rotation_matrix @ points
     return rotated_points

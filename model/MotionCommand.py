@@ -1,5 +1,5 @@
 import numpy as np
-from .types.BehaviorState import BehaviorState
+from .types.types import BehaviorState
 
 class MotionCommand:
     def __init__(

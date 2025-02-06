@@ -5,7 +5,7 @@ import numpy as np
 
 from model.quadruped import Robotdog
 from model.MotionCommand import MotionCommand
-from model.types.BehaviorState import BehaviorState
+from model.types.types import BehaviorState
 
 def control_robot_dog(stdscr: window, robotdog: Robotdog):
     curses.cbreak()
@@ -68,7 +68,7 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
                 elif key == ord('r'):  # Stand/Rest
                     command.behavior_state = BehaviorState.REST
                 elif key == ord('c'):  # Calibrate
-                    command.behavior_state = BehaviorState.CALIBRATE
+                    command.behavior_state = BehaviorState.STAND
                 elif key == 27:  # ESC
                     break
                 
