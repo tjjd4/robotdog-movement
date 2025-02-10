@@ -3,7 +3,7 @@ from mpu6050.MPU6050 import MPU6050
 
 i2c_bus = 0
 device_address = 0x68
-freq_divider = 0x10
+freq_divider = 10
 
 # Make an MPU6050
 mpu = MPU6050(i2c_bus, device_address)

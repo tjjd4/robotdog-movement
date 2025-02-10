@@ -1,5 +1,6 @@
 import time
 from queue import LifoQueue
+from model.GyroscopeController import GyroscopeController
 
 if __name__ == "__main__":
     q = LifoQueue()

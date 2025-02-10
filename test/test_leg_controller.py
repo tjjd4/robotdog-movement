@@ -2,7 +2,7 @@ import time
 
 from model.LegController import LegController
 from model.hardware.Motor import Motor
-from model.types.leg import LegPart
+from model.types.types import LegPart
 
 TEST_SHOULDER = Motor.FL_SHOULDER
 TEST_ELBOW = Motor.FL_ELBOW
@@ -14,7 +14,7 @@ def controller(momentum):
 
 if __name__ == '__main__':
     try:
-        leg = LegController(TEST_SHOULDER, TEST_ELBOW, TEST_HIP, is_opposited=False)
+        leg = LegController(TEST_SHOULDER, TEST_ELBOW, TEST_HIP, FB_is_opposited=False, LR_is_opposited=False)
         is_pos1 = True
             
         while True:
