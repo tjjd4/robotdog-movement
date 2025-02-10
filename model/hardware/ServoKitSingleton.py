@@ -1,4 +1,6 @@
 from adafruit_servokit import ServoKit
+import board
+import busio
 
 class ServoKitSingleton:
     """Singleton manager for ServoKit."""
@@ -7,7 +9,7 @@ class ServoKitSingleton:
     @staticmethod
     def get_instance():
         if ServoKitSingleton._instance is None:
-            ServoKitSingleton._instance = ServoKit(channels=16)
+            ServoKitSingleton._instance = ServoKit(channels=16, i2c=busio.I2C(scl=board.GP1, sda=board.GP0))
             for i in range(1, 13):
                 ServoKitSingleton._instance.servo[i].set_pulse_width_range(500,2500)
             print("ServoKit instance created.")
