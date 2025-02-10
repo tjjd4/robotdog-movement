@@ -2,7 +2,7 @@ import time
 import numpy as np
 
 from model.quadruped import Robotdog
-from model.MotionCommand import MotionCommand
+from model.types.types import MotionCommand
 from model.types.types import BehaviorState
 
 if __name__ == '__main__':

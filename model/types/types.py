@@ -1,6 +1,6 @@
 import numpy as np
 from enum import IntEnum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 class LegPosition(IntEnum):
     FL = 0  # Front Left
@@ -32,3 +32,10 @@ class RobotDogState():
     yaw_rate: float = 0.0
     height: float = 1
     behavior_state: BehaviorState = BehaviorState.REST
+
+@dataclass
+class MotionCommand:
+    horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
+    yaw_rate: float = 0.0
+    height: float = 1
+    behavior_state: BehaviorState=BehaviorState.REST

@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 from model.quadruped import Robotdog
-from model.MotionCommand import MotionCommand
+from model.types.types import MotionCommand
 from model.types.types import BehaviorState
 
 def control_robot_dog(stdscr: window, robotdog: Robotdog):
@@ -82,6 +82,7 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
         # 停止並校準機器狗
         robotdog.run(MotionCommand(behavior_state=BehaviorState.REST))
         time.sleep(1)
+        print("Calibrating robot dog to default position...")
         robotdog.run(MotionCommand(behavior_state=BehaviorState.CALIBRATE))
         time.sleep(1)
 
