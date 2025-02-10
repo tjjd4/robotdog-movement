@@ -42,9 +42,15 @@ Find i2c-interface and choose 'Enable', then restart to apply setting
 sudo reboot
 ```
 #### Set Up I2C Port
+Open and edit config file for i2c connection
 ```bash
 sudo /boot/firmware/config.txt
 ```
+Find `dtparam=i2c_arm=on` ( if `off`, modify it to `on`), then add the config info bellow:
+```text
+dtparam=i2c_vc=on
+```
+Note: To enable another line of i2c to speparate two different types of device using i2c.
 
 ### 2. Create and Activate a Virtual Environment
 

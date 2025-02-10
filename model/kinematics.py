@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from types.types import GyroData, LegPosition
+from model.types.types import GyroData, LegPosition
 from utils.math import get_plane_from_points, turn_points_with_euler_radians
 from utils.ConfigHelper import ConfigHelper
 
@@ -16,7 +16,7 @@ shoulder_positions = np.array([
     [0, 0, 0, 0],
 ])
 
-def get_angle_for_position(x: float, y: float, z: float, legPosition: LegPosition, gyro_data: GyroData=None):
+def get_angle_for_position(x: float, y: float, z: float, legPosition: LegPosition=None, gyro_data: GyroData=None):
     if GyroData != None:
         x, y, z = compenstated_with_gyro_data(x, y, z, legPosition, gyro_data)
     return inverse_kinematics(x,y,z,upper_leg_length,lower_leg_length)
@@ -61,7 +61,8 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
     return x, y, z
 
 def compenstated_with_gyro_data(x: float, y: float, z: float, legPosition: LegPosition, gyro_data: GyroData):
-    
+    if gyro_data == None:
+        return x, y, z
     gyro_shoulder_positions = turn_points_with_euler_radians(shoulder_positions, gyro_data.roll, gyro_data.pitch, gyro_data.yaw)
     A, B, C, D = get_plane_from_points(gyro_shoulder_positions[:,0], gyro_shoulder_positions[:,1], gyro_shoulder_positions[:,2])
     compensation_height = -(A*gyro_shoulder_positions[0,legPosition] + B*gyro_shoulder_positions[1,legPosition]+D)/C

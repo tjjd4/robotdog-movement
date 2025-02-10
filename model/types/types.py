@@ -27,8 +27,8 @@ class GyroData():
 
 @dataclass
 class RobotDogState():
+    gyro_data: GyroData = None
     horizontal_velocity = np.array([0.0, 0.0])
     yaw_rate: float = 0.0
     height: float = 1
     behavior_state: BehaviorState = BehaviorState.REST
-    gyro_data: GyroData

@@ -1,7 +1,7 @@
 import time
 
 from model.quadruped import Robotdog
-from model.types.leg import LegPosition, LegPart
+from model.types.types import LegPosition, LegPart
 
 def pos1(self):
     self.set_angle(LegPosition.FL, LegPart.SHOULDER, 180)

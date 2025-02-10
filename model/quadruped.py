@@ -26,12 +26,12 @@ class Robotdog:
             LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited")),
             LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited")),
         }
-        self.gyroscope = GyroscopeController()
+        self.gyro_queue = LifoQueue()
+        # self.gyroscope = GyroscopeController(gyro_queue=self.gyro_queue)
         self.state = RobotDogState()
         self.moving_thread = Thread()
         self.standing_thread = Thread()
         self.gyro_thread = Thread()
-        self.gyro_queue = LifoQueue()
         self.is_gyroscope_running = False
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
@@ -137,16 +137,16 @@ class Robotdog:
                 gyro_data = self.state.gyro_data
 
             theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_for_position(
-                x=left_x[i1]+3, y=left_y[i1], z=left_z[i1], gyro_data=gyro_data
+                x=left_x[i1]+3, y=left_y[i1], z=left_z[i1], legPosition=LegPosition.FL, gyro_data=gyro_data
             )
             theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_for_position(
-                x=right_x[i2]+3, y=right_y[i2], z=right_z[i2], gyro_data=gyro_data
+                x=right_x[i2]+3, y=right_y[i2], z=right_z[i2], legPosition=LegPosition.FR, gyro_data=gyro_data
             )
             theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_for_position(
-                x=left_x[i2], y=left_y[i2], z=left_z[i2], gyro_data=gyro_data
+                x=left_x[i2], y=left_y[i2], z=left_z[i2], legPosition=LegPosition.BL, gyro_data=gyro_data
             )
             theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_for_position(
-                x=right_x[i1], y=right_y[i1], z=right_z[i1], gyro_data=gyro_data
+                x=right_x[i1], y=right_y[i1], z=right_z[i1], legPosition=LegPosition.BR, gyro_data=gyro_data
             )
 
             # 設定角度到對應的腿部控制器
