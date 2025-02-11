@@ -66,9 +66,9 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
                     command.yaw_rate = -0.5
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('r'):  # Stand/Rest
-                    command.behavior_state = BehaviorState.REST
-                elif key == ord('c'):  # Calibrate
                     command.behavior_state = BehaviorState.STAND
+                elif key == ord('c'):  # Calibrate
+                    command.behavior_state = BehaviorState.CALIBRATE
                 elif key == 27:  # ESC
                     break
                 

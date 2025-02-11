@@ -14,7 +14,7 @@ class GyroscopeController:
         if not self.gyro_thread.is_alive():
                 print("Start gyroscope detecting thread...")
                 self.running = True
-                self.gyro_thread = Thread(target=self.__detect)
+                self.gyro_thread = Thread(target=self.__detect, daemon=True)
                 self.gyro_thread.start()
         else:
             print("Already detecting!")
@@ -28,13 +28,12 @@ class GyroscopeController:
                 FIFO_buffer = self.gyro_kit.get_FIFO_bytes(packet_size)  # get all the DMP data here
                 
                 q = self.gyro_kit.DMP_get_quaternion_int16(FIFO_buffer)
-                roll, pitch, yaw = self.gyro_kit.DMP_get_euler_roll_pitch_yaw(q)
+                roll_pitch_yaw = self.gyro_kit.DMP_get_euler_roll_pitch_yaw(q)
+                roll = roll_pitch_yaw.x
+                pitch = roll_pitch_yaw.y
+                yaw = roll_pitch_yaw.z
                 self.queue.put(GyroData(roll=roll, pitch=pitch, yaw=yaw))
-                
-                print('roll: ' + str(roll))
-                print('pitch: ' + str(pitch))
-                print('yaw: ' + str(yaw))
-                print('\n')
+
             time.sleep(0.05)
         
     def stop(self):
