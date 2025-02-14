@@ -10,15 +10,15 @@ lower_leg_length = robotdog_config.getfloat("lower_leg_length")
 body_length = robotdog_config.getfloat("body_length")
 body_width = robotdog_config.getfloat("body_width")
 
-shoulder_positions = np.array([
+shoulder_positions = np.asfortranarray([
     [body_length / 2, body_length / 2, -body_length / 2, -body_length / 2],
     [-body_width / 2, body_width / 2, -body_width / 2, body_width / 2],
     [0, 0, 0, 0],
 ])
 
-def get_angle_from_position(x: float, y: float, z: float, legPosition: LegPosition=None, gyro_data: GyroData=None):
-    if GyroData != None:
-        x, y, z = compenstated_with_gyro_data(x, y, z, legPosition, gyro_data)
+def get_angle_from_position(x: float, y: float, z: float, leg_position: LegPosition=None, gyro_data: GyroData=None):
+    if gyro_data != None:
+        x, y, z = compenstated_with_gyro_data(x, y, z, leg_position, gyro_data)
     return inverse_kinematics(x,y,z,upper_leg_length,lower_leg_length)
 
 def inverse_kinematics(x: float, y: float, z: float, a1: float=upper_leg_length, a2: float=lower_leg_length):
@@ -60,11 +60,12 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
 
     return x, y, z
 
-def compenstated_with_gyro_data(x: float, y: float, z: float, legPosition: LegPosition, gyro_data: GyroData):
+def compenstated_with_gyro_data(x: float, y: float, z: float, leg_position: LegPosition, gyro_data: GyroData | None):
     if gyro_data == None:
+        print("No Gyro Data!")
         return x, y, z
-    gyro_shoulder_positions = turn_points_with_euler_radians(shoulder_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), math.radians(gyro_data.yaw))
+    gyro_shoulder_positions = turn_points_with_euler_radians(shoulder_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), 0)
     A, B, C, D = get_plane_from_points(gyro_shoulder_positions[:,0], gyro_shoulder_positions[:,1], gyro_shoulder_positions[:,2])
-    compensation_height = -(A*gyro_shoulder_positions[0,legPosition] + B*gyro_shoulder_positions[1,legPosition]+D)/C
+    compensation_height = -(A*gyro_shoulder_positions[0,leg_position] + B*gyro_shoulder_positions[1,leg_position,]+D)/C
     y += compensation_height
     return x, y, z
