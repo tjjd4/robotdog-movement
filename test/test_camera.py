@@ -1,6 +1,5 @@
 from flask import Flask, Response
 from picamera2 import Picamera2
-import cv2
 
 ### You can donate at https://www.buymeacoffee.com/mmshilleh 
 
