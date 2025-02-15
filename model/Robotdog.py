@@ -1,7 +1,7 @@
 import time
 from threading import Thread
-from queue import LifoQueue
 import numpy as np
+import queue
 
 from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, GyroData
 from .hardware.Motor import Motor
@@ -11,6 +11,7 @@ from .MotionGenerator import MotionGenerator
 from .kinematics import get_angle_from_position
 
 from utils.ConfigHelper import ConfigHelper
+from utils.GyroQueue import GyroQueue
 
 class Robotdog:
     def __init__(self) -> None:
@@ -26,7 +27,7 @@ class Robotdog:
             LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited")),
             LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited")),
         }
-        self.gyro_queue = LifoQueue()
+        self.gyro_queue = GyroQueue(maxsize=1)
         self.gyroscope = GyroscopeController(gyro_queue=self.gyro_queue)
         self.state = RobotDogState()
         self.moving_thread = Thread()
@@ -217,16 +218,15 @@ class Robotdog:
 
     def update_gyro_data(self):
         while self.is_gyroscope_running:
-            if not self.gyro_queue.empty():
-                try:
+            try:
             # 直接拿最新的一筆資料 (LIFO)
-                    latest_gyro_data = self.gyro_queue.get_nowait()  # 不會阻塞
-                    with self.gyro_queue.mutex and self.gyro_queue.qsize() > 2:
-                        self.gyro_queue.queue.clear()
-                    # 更新狀態
-                    self.state.gyro_data = latest_gyro_data
-                except:
-                    pass
+                latest_gyro_data = self.gyro_queue.get_nowait()  # 不會阻塞
+                with self.gyro_queue.mutex and self.gyro_queue.qsize() > 2:
+                    self.gyro_queue.queue.clear()
+                # 更新狀態
+                self.state.gyro_data = latest_gyro_data
+            except queue.Empty:
+                pass
 
             time.sleep(0.25)
     

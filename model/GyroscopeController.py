@@ -1,10 +1,12 @@
 import time
 from threading import Thread
-from queue import LifoQueue
+
 from .hardware.GyroKitSingleton import GyroKitSingleton
 from .types.types import GyroData
+from utils.GyroQueue import GyroQueue
+
 class GyroscopeController:
-    def __init__(self, gyro_queue: LifoQueue):
+    def __init__(self, gyro_queue: GyroQueue):
         self.gyro_kit = GyroKitSingleton.get_instance()
         self.queue = gyro_queue
         self.running = False
@@ -45,11 +47,11 @@ class GyroscopeController:
             print("detection not activated!")
 
     def is_running(self):
-         return self.running
+        return self.running
 
 
 if __name__ == "__main__":
-    q = LifoQueue()
+    q = GyroQueue()
     gyro_controller = GyroscopeController(q)
     gyro_controller.start()
 
