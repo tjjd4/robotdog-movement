@@ -3,7 +3,7 @@ from threading import Thread
 import numpy as np
 import queue
 
-from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, GyroData
+from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, LegsPositions, Position, GyroData
 from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
@@ -49,14 +49,6 @@ class Robotdog:
     def set_four_legs_angle(self, shoulder_angle: float, elbow_angle: float, hip_angle: float):
         for leg_position, leg_controller in self.legs.items():
             self.set_leg_angle(leg_position, shoulder_angle, elbow_angle, hip_angle)
-            
-            # print(f"Set angles for {leg_position}: "
-            #     f"Shoulder={shoulder_angle}, Elbow={elbow_angle}, Hip={hip_angle}")
-
-
-    
-    def calibrate(self):
-        self.set_four_legs_angle(180, 30, 90)
 
 
     def adjust_for_turning(self, trajectory: np.ndarray, turning_factor: float) -> np.ndarray:
@@ -84,7 +76,33 @@ class Robotdog:
             right_trajectory[0, :] *= (1 + turning_factor)  # Right legs bigger steps
 
         return left_trajectory, right_trajectory
-    
+
+    def set_motors_by_legs_positions(self, legs_positions: LegsPositions, gyro_data: GyroData=None):
+        theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
+            x=legs_positions.FL.x, y=legs_positions.FL.y, z=legs_positions.FL.z, legPosition=LegPosition.FL, gyro_data=gyro_data
+        )
+        theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
+            x=legs_positions.FR.x, y=legs_positions.FR.y, z=legs_positions.FR.z, legPosition=LegPosition.FR, gyro_data=gyro_data
+        )
+        theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_from_position(
+            x=legs_positions.BL.x, y=legs_positions.BL.y, z=legs_positions.BL.z, legPosition=LegPosition.BL, gyro_data=gyro_data
+        )
+        theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_from_position(
+            x=legs_positions.BR.x, y=legs_positions.BR.y, z=legs_positions.BR.z, legPosition=LegPosition.BR, gyro_data=gyro_data
+        )
+
+        self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
+        self.set_leg_angle(LegPosition.FR, theta_shoulder_FR, theta_elbow_FR, theta_hip_FR)
+        self.set_leg_angle(LegPosition.BL, theta_shoulder_BL, theta_elbow_BL, theta_hip_BL)
+        self.set_leg_angle(LegPosition.BR, theta_shoulder_BR, theta_elbow_BR, theta_hip_BR)
+
+    """
+    Movement Functions
+    """
+
+    def calibrate(self):
+        self.set_four_legs_angle(180, 30, 90)
+
     def standup(self):
         last_loop = time.time()
         while self.state.behavior_state == BehaviorState.STAND:
@@ -98,24 +116,15 @@ class Robotdog:
             if self.state.is_gyro_running:
                 gyro_data = self.state.gyro_data
 
-            theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
-                x=x, y=y, z=z, legPosition=LegPosition.FL, gyro_data=gyro_data
-            )
-            theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
-                x=x, y=y, z=z, legPosition=LegPosition.FR, gyro_data=gyro_data
-            )
-            theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_from_position(
-                x=x, y=y, z=z, legPosition=LegPosition.BL, gyro_data=gyro_data
-            )
-            theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_from_position(
-                x=x, y=y, z=z, legPosition=LegPosition.BR, gyro_data=gyro_data
+            legs_current_positions = LegsPositions(
+                FL = Position(x=x, y=y, z=z),
+                FR = Position(x=x, y=y, z=z),
+                BL = Position(x=x, y=y, z=z),
+                BR = Position(x=x, y=y, z=z)
             )
 
-            # 設定角度到對應的腿部控制器
-            self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
-            self.set_leg_angle(LegPosition.FR, theta_shoulder_FR, theta_elbow_FR, theta_hip_FR)
-            self.set_leg_angle(LegPosition.BL, theta_shoulder_BL, theta_elbow_BL, theta_hip_BL)
-            self.set_leg_angle(LegPosition.BR, theta_shoulder_BR, theta_elbow_BR, theta_hip_BR)
+            self.update_legs_positions(legs_current_positions)
+            self.set_motors_by_legs_positions(legs_positions=legs_current_positions, gyro_data=gyro_data)
 
 
     def move(self):
@@ -152,24 +161,14 @@ class Robotdog:
             if self.state.is_gyro_running:
                 gyro_data = self.state.gyro_data
 
-            theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
-                x=left_x[i1]+3, y=left_y[i1], z=left_z[i1], legPosition=LegPosition.FL, gyro_data=gyro_data
+            legs_current_positions = LegsPositions(
+                FL = Position(x=left_x[i1]+3, y=left_y[i1], z=left_z[i1]),
+                FR = Position(x=right_x[i2]+3, y=right_y[i2], z=right_z[i2]),
+                BL = Position(x=left_x[i2], y=left_y[i2], z=left_z[i2]),
+                BR = Position(x=right_x[i1], y=right_y[i1], z=right_z[i1])
             )
-            theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
-                x=right_x[i2]+3, y=right_y[i2], z=right_z[i2], legPosition=LegPosition.FR, gyro_data=gyro_data
-            )
-            theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_from_position(
-                x=left_x[i2], y=left_y[i2], z=left_z[i2], legPosition=LegPosition.BL, gyro_data=gyro_data
-            )
-            theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_from_position(
-                x=right_x[i1], y=right_y[i1], z=right_z[i1], legPosition=LegPosition.BR, gyro_data=gyro_data
-            )
-
-            # 設定角度到對應的腿部控制器
-            self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
-            self.set_leg_angle(LegPosition.FR, theta_shoulder_FR, theta_elbow_FR, theta_hip_FR)
-            self.set_leg_angle(LegPosition.BL, theta_shoulder_BL, theta_elbow_BL, theta_hip_BL)
-            self.set_leg_angle(LegPosition.BR, theta_shoulder_BR, theta_elbow_BR, theta_hip_BR)
+            self.update_legs_positions(legs_current_positions)
+            self.set_motors_by_legs_positions(legs_positions=legs_current_positions, gyro_data=gyro_data)
 
             index += 1
 
@@ -178,7 +177,7 @@ class Robotdog:
                 self.state.behavior_state = BehaviorState.REST
 
 
-    def run(self, command: RobotDogState=None):
+    def run(self, command: MotionCommand=None):
         """主狀態機控制流程"""
         if command:
             self.update_state(command)
@@ -209,12 +208,15 @@ class Robotdog:
                 self.standing_thread.join()
             self.calibrate()
 
-    def update_state(self, command: RobotDogState):
+    def update_state_by_motion_command(self, command: MotionCommand):
         """根據指令更新狀態"""
         self.state.horizontal_velocity = command.horizontal_velocity
         self.state.yaw_rate = command.yaw_rate
         self.state.height = command.height
         self.state.behavior_state = command.behavior_state
+
+    def update_legs_positions(self, legs_current_positions: LegsPositions):
+        self.state.legs_current_positions = legs_current_positions
 
     def update_gyro_data(self):
         while self.is_gyroscope_running:
@@ -229,7 +231,7 @@ class Robotdog:
                 pass
 
             time.sleep(0.25)
-    
+
     def activate_gyroscope(self):
         if not self.state.is_gyro_running:
             self.state.is_gyro_running = True
@@ -240,8 +242,7 @@ class Robotdog:
             print("LOG: Gyroscope activated.")
         else:
             print("LOG: Gyroscope already activated!")
-            
-    
+
     def deactivate_gyroscope(self):
         if self.state.is_gyro_running:
             self.state.is_gyro_running = False
