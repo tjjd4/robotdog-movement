@@ -41,7 +41,7 @@ Find i2c-interface and choose 'Enable', then restart to apply setting
 ```bash
 sudo reboot
 ```
-#### Set Up I2C Port
+#### Set Up I2C Port (Deprecated)
 Open and edit config file for i2c connection
 ```bash
 sudo /boot/firmware/config.txt
