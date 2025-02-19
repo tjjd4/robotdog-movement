@@ -1,14 +1,17 @@
 import math
 import numpy as np
-from model.types.types import GyroData, LegPosition
-from utils.math import get_plane_from_points, turn_points_with_euler_radians
+from model.types.types import GyroData, LegPosition, LegsPositions
+from utils.math_utils import get_plane_from_points, turn_points_with_euler_radians
 from utils.ConfigHelper import ConfigHelper
+from utils.utils import get_np_array_from_legs_positions, get_legs_positions_from_np_array
 
 robotdog_config = ConfigHelper.get_section("robotdog_parameters")
+movement_config = ConfigHelper.get_section("movement_parameters")
 upper_leg_length = robotdog_config.getfloat("upper_leg_length")
 lower_leg_length = robotdog_config.getfloat("lower_leg_length")
 body_length = robotdog_config.getfloat("body_length")
 body_width = robotdog_config.getfloat("body_width")
+max_height = movement_config.getfloat("max_height")
 
 shoulder_positions = np.asfortranarray([
     [body_length / 2, body_length / 2, -body_length / 2, -body_length / 2],
@@ -16,9 +19,7 @@ shoulder_positions = np.asfortranarray([
     [0, 0, 0, 0],
 ])
 
-def get_angle_from_position(x: float, y: float, z: float, leg_position: LegPosition=None, gyro_data: GyroData=None):
-    if gyro_data != None:
-        x, y, z = compenstated_with_gyro_data(x, y, z, leg_position, gyro_data)
+def get_angle_from_position(x: float, y: float, z: float):
     return inverse_kinematics(x,y,z,upper_leg_length,lower_leg_length)
 
 def inverse_kinematics(x: float, y: float, z: float, a1: float=upper_leg_length, a2: float=lower_leg_length):
@@ -60,12 +61,18 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
 
     return x, y, z
 
-def compenstated_with_gyro_data(x: float, y: float, z: float, leg_position: LegPosition, gyro_data: GyroData | None):
-    if gyro_data == None:
-        print("No Gyro Data!")
-        return x, y, z
-    gyro_shoulder_positions = turn_points_with_euler_radians(shoulder_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), 0)
-    A, B, C, D = get_plane_from_points(gyro_shoulder_positions[:,0], gyro_shoulder_positions[:,1], gyro_shoulder_positions[:,2])
-    compensation_height = -(A*gyro_shoulder_positions[0,leg_position] + B*gyro_shoulder_positions[1,leg_position,]+D)/C
-    y += compensation_height
-    return x, y, z
+def compensate_legs_positions_by_gyro(legs_positions: LegsPositions, gyro_data: GyroData) -> LegsPositions:
+    local_foot_positions = get_np_array_from_legs_positions(legs_positions, order='xzy')
+    foot_positions = local_foot_positions.copy()
+    foot_positions[0,:] += shoulder_positions[0,:]
+    foot_positions[1,:] += shoulder_positions[1,:]
+    gyro_foot_positions = turn_points_with_euler_radians(foot_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), 0)
+    # A * x + B * z + C * y + D = 0
+    A, B, C, D = get_plane_from_points(gyro_foot_positions[:,0], gyro_foot_positions[:,1], gyro_foot_positions[:,2])
+
+    compensated_foot_positions = local_foot_positions.copy()
+    for leg_position in LegPosition:
+        compensated_foot_positions[2,leg_position] += -(A*shoulder_positions[0,leg_position] + B*shoulder_positions[1,leg_position,]+D)/C - (-max_height)
+
+    compensated_legs_positions = get_legs_positions_from_np_array(compensated_foot_positions)
+    return compensated_legs_positions

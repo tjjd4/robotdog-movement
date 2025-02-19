@@ -8,7 +8,7 @@ from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
 from .MotionGenerator import MotionGenerator
-from .kinematics import get_angle_from_position
+from .kinematics import get_angle_from_position, compensate_legs_positions_by_gyro
 
 from utils.ConfigHelper import ConfigHelper
 from utils.GyroQueue import GyroQueue
@@ -33,7 +33,6 @@ class Robotdog:
         self.moving_thread = Thread()
         self.standing_thread = Thread()
         self.gyro_thread = Thread()
-        self.is_gyroscope_running = False
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
@@ -78,8 +77,13 @@ class Robotdog:
         return left_trajectory, right_trajectory
 
     def set_motors_by_legs_positions(self, legs_positions: LegsPositions, gyro_data: GyroData=None):
+        if self.state.is_gyro_running and gyro_data != None:
+            legs_positions = compensate_legs_positions_by_gyro(legs_positions, gyro_data)
+
+        self.update_legs_positions(legs_positions)
+
         theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
-            x=legs_positions.FL.x, y=legs_positions.FL.y, z=legs_positions.FL.z, legPosition=LegPosition.FL, gyro_data=gyro_data
+            x=legs_positions.FL.x, y=legs_positions.FL.y, z=legs_positions.FL.z
         )
         theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
             x=legs_positions.FR.x, y=legs_positions.FR.y, z=legs_positions.FR.z, legPosition=LegPosition.FR, gyro_data=gyro_data
@@ -116,15 +120,14 @@ class Robotdog:
             if self.state.is_gyro_running:
                 gyro_data = self.state.gyro_data
 
-            legs_current_positions = LegsPositions(
+            legs_new_positions = LegsPositions(
                 FL = Position(x=x, y=y, z=z),
                 FR = Position(x=x, y=y, z=z),
                 BL = Position(x=x, y=y, z=z),
                 BR = Position(x=x, y=y, z=z)
             )
 
-            self.update_legs_positions(legs_current_positions)
-            self.set_motors_by_legs_positions(legs_positions=legs_current_positions, gyro_data=gyro_data)
+            self.set_motors_by_legs_positions(legs_positions=legs_new_positions, gyro_data=gyro_data)
 
 
     def move(self):
@@ -161,14 +164,13 @@ class Robotdog:
             if self.state.is_gyro_running:
                 gyro_data = self.state.gyro_data
 
-            legs_current_positions = LegsPositions(
+            legs_new_positions = LegsPositions(
                 FL = Position(x=left_x[i1]+3, y=left_y[i1], z=left_z[i1]),
                 FR = Position(x=right_x[i2]+3, y=right_y[i2], z=right_z[i2]),
                 BL = Position(x=left_x[i2], y=left_y[i2], z=left_z[i2]),
                 BR = Position(x=right_x[i1], y=right_y[i1], z=right_z[i1])
             )
-            self.update_legs_positions(legs_current_positions)
-            self.set_motors_by_legs_positions(legs_positions=legs_current_positions, gyro_data=gyro_data)
+            self.set_motors_by_legs_positions(legs_positions=legs_new_positions, gyro_data=gyro_data)
 
             index += 1
 
@@ -180,7 +182,7 @@ class Robotdog:
     def run(self, command: MotionCommand=None):
         """主狀態機控制流程"""
         if command:
-            self.update_state(command)
+            self.update_state_by_motion_command(command)
 
         # 根據行為狀態執行對應行為
         if self.state.behavior_state == BehaviorState.STAND:
@@ -219,7 +221,7 @@ class Robotdog:
         self.state.legs_current_positions = legs_current_positions
 
     def update_gyro_data(self):
-        while self.is_gyroscope_running:
+        while self.state.is_gyro_running:
             try:
             # 直接拿最新的一筆資料 (LIFO)
                 latest_gyro_data = self.gyro_queue.get_nowait()  # 不會阻塞
@@ -234,22 +236,24 @@ class Robotdog:
 
     def activate_gyroscope(self):
         if not self.state.is_gyro_running:
-            self.state.is_gyro_running = True
             if not self.gyroscope.is_running():
                 self.gyroscope.start()
             if not self.gyro_thread.is_alive():
                 self.gyro_thread = Thread(target=self.update_gyro_data, daemon=True)
+
+            self.state.is_gyro_running = True
             print("LOG: Gyroscope activated.")
         else:
             print("LOG: Gyroscope already activated!")
 
     def deactivate_gyroscope(self):
         if self.state.is_gyro_running:
-            self.state.is_gyro_running = False
             if self.gyroscope.is_running:
                 self.gyroscope.stop()
             if self.gyro_thread.is_alive():
                 self.gyro_thread.join()
+
+            self.state.is_gyro_running = False
             print("LOG: Gyroscope deactivated.")
         else:
             print("LOG: Gyroscope not activated!")

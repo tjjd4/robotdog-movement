@@ -42,7 +42,7 @@ class LegsPositions:
 class RobotDogState():
     legs_current_positions: LegsPositions = None
     gyro_data: GyroData = None
-    horizontal_velocity = field(default_factory=lambda: np.array([0.0, 0.0]))
+    horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
     yaw_rate: float = 0.0
     height: float = 1
     behavior_state: BehaviorState = BehaviorState.REST
