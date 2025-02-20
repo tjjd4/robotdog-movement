@@ -6,7 +6,7 @@ class GyroKitSingleton:
     _instance = None
 
     @staticmethod
-    def get_instance(i2c_bus=0, device_address=0x68, freq_divider=0x10):
+    def get_instance(i2c_bus=1, device_address=0x68, freq_divider=0x10):
         if GyroKitSingleton._instance is None:
             GyroKitSingleton._instance = MPU6050(i2c_bus, device_address, freq_divider)
             GyroKitSingleton._instance.dmp_initialize()

@@ -240,6 +240,7 @@ class Robotdog:
                 self.gyroscope.start()
             if not self.gyro_thread.is_alive():
                 self.gyro_thread = Thread(target=self.update_gyro_data, daemon=True)
+                self.gyro_thread.start()
 
             self.state.is_gyro_running = True
             print("LOG: Gyroscope activated.")
