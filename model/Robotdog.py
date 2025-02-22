@@ -86,13 +86,13 @@ class Robotdog:
             x=legs_positions.FL.x, y=legs_positions.FL.y, z=legs_positions.FL.z
         )
         theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
-            x=legs_positions.FR.x, y=legs_positions.FR.y, z=legs_positions.FR.z, legPosition=LegPosition.FR, gyro_data=gyro_data
+            x=legs_positions.FR.x, y=legs_positions.FR.y, z=legs_positions.FR.z
         )
         theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_from_position(
-            x=legs_positions.BL.x, y=legs_positions.BL.y, z=legs_positions.BL.z, legPosition=LegPosition.BL, gyro_data=gyro_data
+            x=legs_positions.BL.x, y=legs_positions.BL.y, z=legs_positions.BL.z
         )
         theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_from_position(
-            x=legs_positions.BR.x, y=legs_positions.BR.y, z=legs_positions.BR.z, legPosition=LegPosition.BR, gyro_data=gyro_data
+            x=legs_positions.BR.x, y=legs_positions.BR.y, z=legs_positions.BR.z
         )
 
         self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
