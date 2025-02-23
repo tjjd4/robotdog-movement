@@ -214,6 +214,9 @@ class Robotdog:
         """根據指令更新狀態"""
         self.state.horizontal_velocity = command.horizontal_velocity
         self.state.yaw_rate = command.yaw_rate
+        self.state.roll = command.roll
+        self.state.pitch = command.pitch
+        self.state.yaw = command.yaw
         self.state.height = command.height
         self.state.behavior_state = command.behavior_state
 

@@ -44,6 +44,9 @@ class RobotDogState():
     gyro_data: GyroData = None
     horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
     yaw_rate: float = 0.0
+    roll: float = 0.0
+    pitch: float = 0.0
+    yaw: float = 0.0
     height: float = 1
     behavior_state: BehaviorState = BehaviorState.REST
     is_gyro_running: bool = False
@@ -52,5 +55,8 @@ class RobotDogState():
 class MotionCommand:
     horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
     yaw_rate: float = 0.0
+    roll: float = 0.0
+    pitch: float = 0.0
+    yaw: float = 0.0
     height: float = 1
     behavior_state: BehaviorState=BehaviorState.REST
