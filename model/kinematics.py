@@ -1,9 +1,9 @@
 import math
 import numpy as np
-from model.types.types import GyroData, LegPosition, LegsPositions
+from model.types.types import GyroData, LegPosition, FootPositions
 from utils.math_utils import get_plane_from_points, turn_points_with_euler_radians
 from utils.ConfigHelper import ConfigHelper
-from utils.utils import get_np_array_from_legs_positions, get_legs_positions_from_np_array
+from utils.utils import get_np_array_from_foot_positions, get_foot_positions_from_np_array
 
 robotdog_config = ConfigHelper.get_section("robotdog_parameters")
 movement_config = ConfigHelper.get_section("movement_parameters")
@@ -61,8 +61,8 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
 
     return x, y, z
 
-def compensate_legs_positions_by_gyro(legs_positions: LegsPositions, gyro_data: GyroData) -> LegsPositions:
-    local_foot_positions = get_np_array_from_legs_positions(legs_positions, order='xzy')
+def compensate_foot_positions_by_gyro(foot_positions_FP: FootPositions, gyro_data: GyroData) -> FootPositions:
+    local_foot_positions = get_np_array_from_foot_positions(foot_positions_FP, order='xzy')
     foot_positions = local_foot_positions.copy()
     foot_positions[0,:] += shoulder_positions[0,:]
     foot_positions[1,:] += shoulder_positions[1,:]
@@ -74,5 +74,5 @@ def compensate_legs_positions_by_gyro(legs_positions: LegsPositions, gyro_data: 
     for leg_position in LegPosition:
         compensated_foot_positions[2,leg_position] += -(A*shoulder_positions[0,leg_position] + B*shoulder_positions[1,leg_position,]+D)/C - (-max_height)
 
-    compensated_legs_positions = get_legs_positions_from_np_array(compensated_foot_positions)
-    return compensated_legs_positions
+    compensated_foot_positions_FP = get_foot_positions_from_np_array(compensated_foot_positions)
+    return compensated_foot_positions_FP

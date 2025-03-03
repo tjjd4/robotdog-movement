@@ -3,12 +3,12 @@ from threading import Thread
 import numpy as np
 import queue
 
-from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, LegsPositions, Position, GyroData
+from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position, GyroData
 from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
 from .MotionGenerator import MotionGenerator
-from .kinematics import get_angle_from_position, compensate_legs_positions_by_gyro
+from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
 
 from utils.ConfigHelper import ConfigHelper
 from utils.GyroQueue import GyroQueue
@@ -76,23 +76,23 @@ class Robotdog:
 
         return left_trajectory, right_trajectory
 
-    def set_motors_by_legs_positions(self, legs_positions: LegsPositions, gyro_data: GyroData=None):
+    def set_motors_by_foot_positions(self, foot_positions: FootPositions, gyro_data: GyroData=None):
         if self.state.is_gyro_running and gyro_data != None:
-            legs_positions = compensate_legs_positions_by_gyro(legs_positions, gyro_data)
+            foot_positions = compensate_foot_positions_by_gyro(foot_positions, gyro_data)
 
-        self.update_legs_positions(legs_positions)
+        self.update_foot_positions(foot_positions)
 
         theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
-            x=legs_positions.FL.x, y=legs_positions.FL.y, z=legs_positions.FL.z
+            x=foot_positions.FL.x, y=foot_positions.FL.y, z=foot_positions.FL.z
         )
         theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
-            x=legs_positions.FR.x, y=legs_positions.FR.y, z=legs_positions.FR.z
+            x=foot_positions.FR.x, y=foot_positions.FR.y, z=foot_positions.FR.z
         )
         theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_from_position(
-            x=legs_positions.BL.x, y=legs_positions.BL.y, z=legs_positions.BL.z
+            x=foot_positions.BL.x, y=foot_positions.BL.y, z=foot_positions.BL.z
         )
         theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_from_position(
-            x=legs_positions.BR.x, y=legs_positions.BR.y, z=legs_positions.BR.z
+            x=foot_positions.BR.x, y=foot_positions.BR.y, z=foot_positions.BR.z
         )
 
         self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
@@ -120,14 +120,14 @@ class Robotdog:
             if self.state.is_gyro_running:
                 gyro_data = self.state.gyro_data
 
-            legs_new_positions = LegsPositions(
+            foot_new_positions = FootPositions(
                 FL = Position(x=x, y=y, z=z),
                 FR = Position(x=x, y=y, z=z),
                 BL = Position(x=x, y=y, z=z),
                 BR = Position(x=x, y=y, z=z)
             )
 
-            self.set_motors_by_legs_positions(legs_positions=legs_new_positions, gyro_data=gyro_data)
+            self.set_motors_by_foot_positions(foot_positions=foot_new_positions, gyro_data=gyro_data)
 
 
     def move(self):
@@ -164,13 +164,13 @@ class Robotdog:
             if self.state.is_gyro_running:
                 gyro_data = self.state.gyro_data
 
-            legs_new_positions = LegsPositions(
+            foot_new_positions = FootPositions(
                 FL = Position(x=left_x[i1]+3, y=left_y[i1], z=left_z[i1]),
                 FR = Position(x=right_x[i2]+3, y=right_y[i2], z=right_z[i2]),
                 BL = Position(x=left_x[i2], y=left_y[i2], z=left_z[i2]),
                 BR = Position(x=right_x[i1], y=right_y[i1], z=right_z[i1])
             )
-            self.set_motors_by_legs_positions(legs_positions=legs_new_positions, gyro_data=gyro_data)
+            self.set_motors_by_foot_positions(foot_positions=foot_new_positions, gyro_data=gyro_data)
 
             index += 1
 
@@ -220,8 +220,8 @@ class Robotdog:
         self.state.height = command.height
         self.state.behavior_state = command.behavior_state
 
-    def update_legs_positions(self, legs_current_positions: LegsPositions):
-        self.state.legs_current_positions = legs_current_positions
+    def update_foot_positions(self, foot_current_positions: FootPositions):
+        self.state.foot_current_positions = foot_current_positions
 
     def update_gyro_data(self):
         while self.state.is_gyro_running:

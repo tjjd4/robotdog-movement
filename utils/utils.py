@@ -1,24 +1,24 @@
 import numpy as np
 from typing import Literal
 
-from model.types.types import LegsPositions, Position
+from model.types.types import FootPositions, Position
 
 
-def get_np_array_from_legs_positions(legs_positions: LegsPositions, order: Literal['xyz', 'xzy']='xzy') -> np.ndarray:
+def get_np_array_from_foot_positions(foot_positions: FootPositions, order: Literal['xyz', 'xzy']='xzy') -> np.ndarray:
     """
-    Convert LegsPositions into a NumPy array with specified axis order.
+    Convert FootPositions into a NumPy array with specified axis order.
     
     Args:
-        legs_positions (LegsPositions): The structure containing leg positions.
+        foot_positions (FootPositions): The structure containing leg positions.
         order (Literal['xyz', 'xzy']): Determines the order of the axes.
     
     Returns:
         np.ndarray: A (3, 4) array where rows represent x, y, z coordinates and columns represent FL, FR, BL, BR.
     """
     # Extract the x, y, z coordinates into separate lists
-    x = np.array([legs_positions.FL.x, legs_positions.FR.x, legs_positions.BL.x, legs_positions.BR.x], dtype=np.float64)
-    y = np.array([legs_positions.FL.y, legs_positions.FR.y, legs_positions.BL.y, legs_positions.BR.y], dtype=np.float64)
-    z = np.array([legs_positions.FL.z, legs_positions.FR.z, legs_positions.BL.z, legs_positions.BR.z], dtype=np.float64)
+    x = np.array([foot_positions.FL.x, foot_positions.FR.x, foot_positions.BL.x, foot_positions.BR.x], dtype=np.float64)
+    y = np.array([foot_positions.FL.y, foot_positions.FR.y, foot_positions.BL.y, foot_positions.BR.y], dtype=np.float64)
+    z = np.array([foot_positions.FL.z, foot_positions.FR.z, foot_positions.BL.z, foot_positions.BR.z], dtype=np.float64)
 
     if order == 'xyz':
         return np.vstack([x, y, z])
@@ -27,7 +27,7 @@ def get_np_array_from_legs_positions(legs_positions: LegsPositions, order: Liter
     else:
         raise ValueError("Invalid order. Use 'xyz' or 'xzy'.")
 
-def get_legs_positions_from_np_array(positions: np.ndarray, order: Literal['xyz', 'xzy']='xzy') -> LegsPositions:
+def get_foot_positions_from_np_array(positions: np.ndarray, order: Literal['xyz', 'xzy']='xzy') -> FootPositions:
     if positions.shape != (3, 4):
         raise ValueError("Invalid shape for positions array. Expected (3, 4).")
     
@@ -38,7 +38,7 @@ def get_legs_positions_from_np_array(positions: np.ndarray, order: Literal['xyz'
     else:
         raise ValueError("Invalid order. Use 'xyz' or 'xzy'.")
     
-    return LegsPositions(
+    return FootPositions(
         FL=Position(x[0], y[0], z[0]),
         FR=Position(x[1], y[1], z[1]),
         BL=Position(x[2], y[2], z[2]),
@@ -47,16 +47,16 @@ def get_legs_positions_from_np_array(positions: np.ndarray, order: Literal['xyz'
 
 if __name__ == '__main__':
 
-    legs_positions = LegsPositions(
+    foot_positions = FootPositions(
         FL=Position(-10, -14.54609376, -7.5),
         FR=Position(-10, -11.98094269, 7.5),
         BL=Position(10, -18.01905731, -7.5),
         BR=Position(10, -15.45390624, 7.5)
     )
 
-    ans1 = get_np_array_from_legs_positions(legs_positions)
+    ans1 = get_np_array_from_foot_positions(foot_positions)
     print(ans1)
-    temp = get_legs_positions_from_np_array(ans1)
+    temp = get_foot_positions_from_np_array(ans1)
 
-    ans2 = get_np_array_from_legs_positions(temp)
+    ans2 = get_np_array_from_foot_positions(temp)
     print(ans2)

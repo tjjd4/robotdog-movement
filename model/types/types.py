@@ -32,7 +32,7 @@ class GyroData():
     yaw: float = 0.0
 
 @dataclass
-class LegsPositions:
+class FootPositions:
     FL: Position
     FR: Position
     BL: Position
@@ -40,7 +40,7 @@ class LegsPositions:
 
 @dataclass
 class RobotDogState():
-    legs_current_positions: LegsPositions = None
+    foot_current_positions: FootPositions = None
     gyro_data: GyroData = None
     horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
     yaw_rate: float = 0.0
