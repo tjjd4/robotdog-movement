@@ -2,7 +2,7 @@ import time
 
 from model.LegController import LegController
 from model.hardware.Motor import Motor
-from model.types.types import LegPart
+from model.custom_types.index import LegPart
 
 TEST_SHOULDER = Motor.FL_SHOULDER
 TEST_ELBOW = Motor.FL_ELBOW

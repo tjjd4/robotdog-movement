@@ -2,8 +2,7 @@ import time
 import numpy as np
 
 from model.Robotdog import Robotdog
-from model.types.types import MotionCommand
-from model.types.types import BehaviorState
+from model.custom_types.index import MotionCommand, BehaviorState
 
 
 if __name__ == '__main__':

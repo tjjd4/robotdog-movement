@@ -3,9 +3,9 @@ from curses import window
 import time
 import numpy as np
 
-from model.quadruped import Robotdog
-from model.types.types import MotionCommand
-from model.types.types import BehaviorState
+from model.Robotdog import Robotdog
+from model.custom_types.index import MotionCommand
+from model.custom_types.index import BehaviorState
 
 def control_robot_dog(stdscr: window, robotdog: Robotdog):
     curses.cbreak()

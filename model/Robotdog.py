@@ -3,7 +3,7 @@ from threading import Thread
 import numpy as np
 import queue
 
-from .types.types import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position, GyroData
+from .custom_types.index import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position, GyroData
 from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
@@ -32,7 +32,6 @@ class Robotdog:
         self.state = RobotDogState()
         self.moving_thread = Thread()
         self.standing_thread = Thread()
-        self.gyro_thread = Thread()
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
@@ -50,7 +49,7 @@ class Robotdog:
             self.set_leg_angle(leg_position, shoulder_angle, elbow_angle, hip_angle)
 
 
-    def adjust_for_turning(self, trajectory: np.ndarray, turning_factor: float) -> np.ndarray:
+    def adjust_for_turning(self, motion: np.ndarray, turning_factor: float, leg_position: LegPosition) -> np.ndarray:
         """
         Adjust the step size for turning using the small-step, big-step method.
 
@@ -61,26 +60,24 @@ class Robotdog:
         Returns:
             np.ndarray: Adjusted motion trajectory.
         """
-        left_trajectory = trajectory.copy()
-        right_trajectory = trajectory.copy()
 
         if turning_factor > 0:  # Turn Right
             # Left legs take bigger steps, right legs take smaller steps
-            left_trajectory[0, :] *= (1 + turning_factor)  # Left legs bigger steps
-            right_trajectory[0, :] *= (1 - turning_factor)  # Right legs smaller steps
+            if leg_position == LegPosition.FL or leg_position == LegPosition.BL:
+                motion[0, :] *= (1 + turning_factor)  # Left legs bigger steps
+            elif leg_position == LegPosition.FR or leg_position == LegPosition.BR:
+                motion[0, :] *= (1 - turning_factor)  # Right legs smaller steps
         elif turning_factor < 0:  # Turn Left
             turning_factor = abs(turning_factor)
             # Right legs take bigger steps, left legs take smaller steps
-            left_trajectory[0, :] *= (1 - turning_factor)  # Left legs smaller steps
-            right_trajectory[0, :] *= (1 + turning_factor)  # Right legs bigger steps
+            if leg_position == LegPosition.FL or leg_position == LegPosition.BL:
+                motion[0, :] *= (1 - turning_factor)  # Left legs smaller steps
+            elif leg_position == LegPosition.FR or leg_position == LegPosition.BR:
+                motion[0, :] *= (1 + turning_factor)  # Right legs bigger steps
 
-        return left_trajectory, right_trajectory
+        return motion
 
-    def set_motors_by_foot_positions(self, foot_positions: FootPositions, gyro_data: GyroData=None):
-        if self.state.is_gyro_running and gyro_data != None:
-            foot_positions = compensate_foot_positions_by_gyro(foot_positions, gyro_data)
-
-        self.update_foot_positions(foot_positions)
+    def set_motors_by_foot_positions(self, foot_positions: FootPositions):
 
         theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
             x=foot_positions.FL.x, y=foot_positions.FL.y, z=foot_positions.FL.z
@@ -114,27 +111,19 @@ class Robotdog:
             if now - last_loop < self.delay_time:
                 continue
             last_loop = time.time()
-            x, y, z = (0, -15, 0)
-
-            gyro_data = None
+            foot_current_positions = self.state.foot_current_positions
             if self.state.is_gyro_running:
-                gyro_data = self.state.gyro_data
+                gyro_data = self.update_gyro_data()
+                if gyro_data:
+                    foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 
-            foot_new_positions = FootPositions(
-                FL = Position(x=x, y=y, z=z),
-                FR = Position(x=x, y=y, z=z),
-                BL = Position(x=x, y=y, z=z),
-                BR = Position(x=x, y=y, z=z)
-            )
-
-            self.set_motors_by_foot_positions(foot_positions=foot_new_positions, gyro_data=gyro_data)
+            self.set_motors_by_foot_positions(foot_positions=foot_current_positions)
 
 
     def move(self):
-        index = 0
+        tick = 0
 
         # Generate footstep
-        motion = MotionGenerator.generate_motion()
         last_loop = time.time()
 
         while self.state.behavior_state == BehaviorState.MOVE:
@@ -147,32 +136,35 @@ class Robotdog:
             y_height = self.state.height
 
             # 動態計算步態比例
-            trajectory = motion * np.array([x_velocity, z_velocity, y_height])[:, None]
-
-            if yaw_rate != 0.0:
-                left_trajectory, right_trajectory = self.adjust_for_turning(trajectory, self.state.yaw_rate)
-            else:
-                left_trajectory = trajectory.copy()
-                right_trajectory = trajectory.copy()
-            left_x, left_z, left_y = left_trajectory
-            right_x, right_z, right_y = right_trajectory
-            # x, z, y = trajectory  # 分解軌跡到 x, z, y
-            i1 = index % 40
-            i2 = (index + 20) % 40
-
-            gyro_data = None
+            foot_current_positions = self.state.foot_current_positions
             if self.state.is_gyro_running:
-                gyro_data = self.state.gyro_data
+                gyro_data = self.update_gyro_data()
+                if gyro_data:
+                    foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 
-            foot_new_positions = FootPositions(
-                FL = Position(x=left_x[i1]+3, y=left_y[i1], z=left_z[i1]),
-                FR = Position(x=right_x[i2]+3, y=right_y[i2], z=right_z[i2]),
-                BL = Position(x=left_x[i2], y=left_y[i2], z=left_z[i2]),
-                BR = Position(x=right_x[i1], y=right_y[i1], z=right_z[i1])
+            four_leg_motions = {
+                LegPosition.FL: MotionGenerator.generate_motion_from_position(foot_current_positions.FL) * np.array([x_velocity, z_velocity, y_height])[:, None],
+                LegPosition.FR: MotionGenerator.generate_motion_from_position(foot_current_positions.FR) * np.array([x_velocity, z_velocity, y_height])[:, None],
+                LegPosition.BL: MotionGenerator.generate_motion_from_position(foot_current_positions.BL) * np.array([x_velocity, z_velocity, y_height])[:, None],
+                LegPosition.BR: MotionGenerator.generate_motion_from_position(foot_current_positions.BR) * np.array([x_velocity, z_velocity, y_height])[:, None]
+            }
+            if yaw_rate != 0.0:
+                for leg_position in LegPosition:
+                    four_leg_motions[leg_position] = self.adjust_for_turning(four_leg_motions[leg_position], self.state.yaw_rate)
+                
+            # x, z, y = trajectory  # 分解軌跡到 x, z, y
+            i1 = tick % 40
+            i2 = (tick + 20) % 40
+
+            foot_next_positions = FootPositions(
+                FL = Position(x=four_leg_motions[LegPosition.FL][i1]+3, y=four_leg_motions[LegPosition.FL][i1], z=four_leg_motions[LegPosition.FL][i1]),
+                FR = Position(x=four_leg_motions[LegPosition.FR][i2]+3, y=four_leg_motions[LegPosition.FR][i2], z=four_leg_motions[LegPosition.FR][i2]),
+                BL = Position(x=four_leg_motions[LegPosition.BL][i2], y=four_leg_motions[LegPosition.BL][i2], z=four_leg_motions[LegPosition.BL][i2]),
+                BR = Position(x=four_leg_motions[LegPosition.BR][i1], y=four_leg_motions[LegPosition.BR][i1], z=four_leg_motions[LegPosition.BR][i1])
             )
-            self.set_motors_by_foot_positions(foot_positions=foot_new_positions, gyro_data=gyro_data)
+            self.set_motors_by_foot_positions(foot_positions=foot_next_positions, gyro_data=gyro_data)
 
-            index += 1
+            tick += 1
 
             if np.allclose(self.state.horizontal_velocity, [0, 0]):
                 print("Stopping robot...")
@@ -224,26 +216,21 @@ class Robotdog:
         self.state.foot_current_positions = foot_current_positions
 
     def update_gyro_data(self):
-        while self.state.is_gyro_running:
-            try:
-            # 直接拿最新的一筆資料 (LIFO)
-                latest_gyro_data = self.gyro_queue.get_nowait()  # 不會阻塞
-                with self.gyro_queue.mutex and self.gyro_queue.qsize() > 2:
-                    self.gyro_queue.queue.clear()
-                # 更新狀態
-                self.state.gyro_data = latest_gyro_data
-            except queue.Empty:
-                pass
-
-            time.sleep(0.25)
+        try:
+        # 直接拿最新的一筆資料 (LIFO)
+            latest_gyro_data = self.gyro_queue.get_nowait()  # 不會阻塞
+            with self.gyro_queue.mutex and self.gyro_queue.qsize() > 2:
+                self.gyro_queue.queue.clear()
+            # 更新狀態
+            self.state.gyro_data = latest_gyro_data
+            return latest_gyro_data
+        except queue.Empty:
+            return None
 
     def activate_gyroscope(self):
         if not self.state.is_gyro_running:
             if not self.gyroscope.is_running():
                 self.gyroscope.start()
-            if not self.gyro_thread.is_alive():
-                self.gyro_thread = Thread(target=self.update_gyro_data, daemon=True)
-                self.gyro_thread.start()
 
             self.state.is_gyro_running = True
             print("LOG: Gyroscope activated.")
@@ -254,8 +241,6 @@ class Robotdog:
         if self.state.is_gyro_running:
             if self.gyroscope.is_running:
                 self.gyroscope.stop()
-            if self.gyro_thread.is_alive():
-                self.gyro_thread.join()
 
             self.state.is_gyro_running = False
             print("LOG: Gyroscope deactivated.")

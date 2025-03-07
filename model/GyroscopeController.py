@@ -2,7 +2,7 @@ import time
 from threading import Thread
 
 from .hardware.GyroKitSingleton import GyroKitSingleton
-from .types.types import GyroData
+from .custom_types.index import GyroData
 from utils.GyroQueue import GyroQueue
 
 class GyroscopeController:

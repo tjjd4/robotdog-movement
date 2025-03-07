@@ -1,6 +1,6 @@
 from .hardware.ServoKitSingleton import ServoKitSingleton
 from .hardware.Motor import Motor
-from .types.types import LegPart
+from .custom_types.index import LegPart
 
 class LegController:
     """Handles control for a single leg of the robot."""

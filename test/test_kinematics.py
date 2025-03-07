@@ -1,5 +1,5 @@
 from model.kinematics import inverse_kinematics, forward_kinematics, compensate_foot_positions_by_gyro
-from model.types.types import FootPositions, Position, GyroData
+from model.custom_types.index import FootPositions, Position, GyroData
 from utils.utils import get_np_array_from_foot_positions
 
 if __name__ == '__main__':

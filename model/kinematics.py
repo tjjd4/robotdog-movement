@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from model.types.types import GyroData, LegPosition, FootPositions
+from model.custom_types.index import GyroData, LegPosition, FootPositions
 from utils.math_utils import get_plane_from_points, turn_points_with_euler_radians
 from utils.ConfigHelper import ConfigHelper
 from utils.utils import get_np_array_from_foot_positions, get_foot_positions_from_np_array
@@ -61,18 +61,29 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
 
     return x, y, z
 
-def compensate_foot_positions_by_gyro(foot_positions_FP: FootPositions, gyro_data: GyroData) -> FootPositions:
-    local_foot_positions = get_np_array_from_foot_positions(foot_positions_FP, order='xzy')
-    foot_positions = local_foot_positions.copy()
-    foot_positions[0,:] += shoulder_positions[0,:]
-    foot_positions[1,:] += shoulder_positions[1,:]
-    gyro_foot_positions = turn_points_with_euler_radians(foot_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), 0)
-    # A * x + B * z + C * y + D = 0
-    A, B, C, D = get_plane_from_points(gyro_foot_positions[:,0], gyro_foot_positions[:,1], gyro_foot_positions[:,2])
+# def compensate_foot_positions_by_gyro(foot_positions_FP: FootPositions, gyro_data: GyroData) -> FootPositions:
+#     local_foot_positions = get_np_array_from_foot_positions(foot_positions_FP, order='xzy')
+#     foot_positions = local_foot_positions.copy()
+#     foot_positions[0,:] += shoulder_positions[0,:]
+#     foot_positions[1,:] += shoulder_positions[1,:]
 
-    compensated_foot_positions = local_foot_positions.copy()
-    for leg_position in LegPosition:
-        compensated_foot_positions[2,leg_position] += -(A*shoulder_positions[0,leg_position] + B*shoulder_positions[1,leg_position,]+D)/C - (-max_height)
+#     gyro_foot_positions = turn_points_with_euler_radians(foot_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), 0)
+#     # A * x + B * z + C * y + D = 0
+#     A, B, C, D = get_plane_from_points(gyro_foot_positions[:,0], gyro_foot_positions[:,1], gyro_foot_positions[:,2])
 
-    compensated_foot_positions_FP = get_foot_positions_from_np_array(compensated_foot_positions)
-    return compensated_foot_positions_FP
+#     compensated_foot_positions = local_foot_positions.copy()
+#     for leg_position in LegPosition:
+#         compensated_foot_positions[2,leg_position] += -(A*shoulder_positions[0,leg_position] + B*shoulder_positions[1,leg_position,]+D)/C - (-max_height)
+
+#     compensated_foot_positions_FP = get_foot_positions_from_np_array(compensated_foot_positions)
+#     return compensated_foot_positions_FP
+
+def compensate_foot_positions_by_gyro(foot_positions: FootPositions, gyro_data: GyroData) -> FootPositions:
+    np_foot_positions = get_np_array_from_foot_positions(foot_positions, order='xzy')
+    correction_factor = 0.8
+    max_tilt = 0.4
+    roll_compensation = correction_factor * np.clip(-gyro_data.roll, -max_tilt, max_tilt)
+    pitch_compensation = correction_factor * np.clip(-gyro_data.pitch, -max_tilt, max_tilt)
+    np_rotated_foot_positions = turn_points_with_euler_radians(np_foot_positions, roll_compensation, pitch_compensation, 0)
+    rotated_foot_positions = get_foot_positions_from_np_array(np_rotated_foot_positions)
+    return rotated_foot_positions
