@@ -45,11 +45,10 @@ cd robotdog-movement
 #### On macOS/Linux:
 Need system site packages for camera modules ( picamera2 )
 ```bash
-python3 -m venv --system-site-packages venv # To include 'libcamera-dev' and 'python3-picamera2' with correct matched versions
-source venv/bin/activate
+python -m venv --system-site-packages .venv
 ```
 
-Once activated, your terminal prompt should display the virtual environment name, e.g., `(venv)`.
+Once activated, your terminal prompt should display the virtual environment name, e.g., `(.venv)`.
 
 #### Set Up `PYTHONPATH`
 
