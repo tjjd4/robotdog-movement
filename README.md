@@ -64,6 +64,7 @@ re-activate virtual environment!
 
 Install the required Python packages using the `requirements.txt` file:
 ```bash
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 ---
@@ -74,7 +75,7 @@ To verify everything is working:
 
 1. Activate the virtual environment:
    ```bash
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 2. Run a script (e.g., `test_kinematics.py`) to ensure no errors occur:
