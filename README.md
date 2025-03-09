@@ -17,23 +17,16 @@ Before proceeding, ensure you have the following installed on your Raspberrypi 5
 ---
 
 ## Steps to Set Up
+### 1. System Setup
 
-### 1. Clone the Repository
-
-Clone the project from the Git repository to your local machine:
-```bash
-git clone https://github.com/tjjd4/robotdog-movement.git
-cd robotdog-movement
-```
-
-### Update System Software
+#### Update System Software
 ```bash
 sudo apt update && sudo apt upgrade
 sudo apt install libcamera-dev
 sudo apt install python3-picamera2
 ```
 
-### Enable I2C Connection
+#### Enable I2C Connection
 ```bash
 sudo raspi-config
 ```
@@ -41,18 +34,13 @@ Find i2c-interface and choose 'Enable', then restart to apply setting
 ```bash
 sudo reboot
 ```
-#### Set Up I2C Port (Deprecated)
-Open and edit config file for i2c connection
-```bash
-sudo /boot/firmware/config.txt
-```
-Find `dtparam=i2c_arm=on` ( if `off`, modify it to `on`), then add the config info bellow:
-```text
-dtparam=i2c_vc=on
-```
-Note: To enable another line of i2c to speparate two different types of device using i2c.
 
-### 2. Create and Activate a Virtual Environment
+### 2. Clone the Repository and Create a Virtual Environment
+Clone the project from the Git repository to your local machine:
+```bash
+git clone https://github.com/tjjd4/robotdog-movement.git
+cd robotdog-movement
+```
 
 #### On macOS/Linux:
 Need system site packages for camera modules ( picamera2 )
