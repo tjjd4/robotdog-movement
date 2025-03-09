@@ -8,10 +8,6 @@ TEST_SHOULDER = Motor.FL_SHOULDER
 TEST_ELBOW = Motor.FL_ELBOW
 TEST_HIP = Motor.FL_HIP
 
-def controller(momentum):
-    momentum[:3] = [0, 0, 1]
-    return momentum
-
 if __name__ == '__main__':
     try:
         leg = LegController(TEST_SHOULDER, TEST_ELBOW, TEST_HIP, FB_is_opposited=False, LR_is_opposited=False)

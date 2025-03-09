@@ -14,10 +14,18 @@ from utils.ConfigHelper import ConfigHelper
 from utils.GyroQueue import GyroQueue
 
 class Robotdog:
+    robotdog_config = ConfigHelper.get_section("robotdog_parameters")
+    movement_config = ConfigHelper.get_section("movement_parameters")
+    legs_config = ConfigHelper.get_section("motors_legs")
+
+    DEFAULT_STAND_FOOT_POSITIONS = FootPositions(
+        FL = Position(x=0, y=-movement_config.getfloat("max_height"), z=0),
+        FR = Position(x=0, y=-movement_config.getfloat("max_height"), z=0),
+        BL = Position(x=0, y=-movement_config.getfloat("max_height"), z=0),
+        BR = Position(x=0, y=-movement_config.getfloat("max_height"), z=0)
+    )
+
     def __init__(self) -> None:
-        self.robotdog_config = ConfigHelper.get_section("robotdog_parameters")
-        self.movement_config = ConfigHelper.get_section("movement_parameters")
-        self.legs_config = ConfigHelper.get_section("motors_legs")
         self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length")
         self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length")
         self.delay_time = self.movement_config.getfloat("delay_time")
@@ -105,6 +113,8 @@ class Robotdog:
         self.set_four_legs_angle(180, 30, 90)
 
     def standup(self):
+        if self.state.foot_current_positions == None:
+            self.state.foot_current_positions = self.DEFAULT_STAND_FOOT_POSITIONS
         last_loop = time.time()
         while self.state.behavior_state == BehaviorState.STAND:
             now = time.time()
@@ -121,6 +131,8 @@ class Robotdog:
 
 
     def move(self):
+        if self.state.foot_current_positions == None:
+            self.state.foot_current_positions = self.DEFAULT_STAND_FOOT_POSITIONS
         tick = 0
 
         # Generate footstep
@@ -142,27 +154,30 @@ class Robotdog:
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 
-            four_leg_motions = {
-                LegPosition.FL: MotionGenerator.generate_motion_from_position(foot_current_positions.FL) * np.array([x_velocity, z_velocity, y_height])[:, None],
-                LegPosition.FR: MotionGenerator.generate_motion_from_position(foot_current_positions.FR) * np.array([x_velocity, z_velocity, y_height])[:, None],
-                LegPosition.BL: MotionGenerator.generate_motion_from_position(foot_current_positions.BL) * np.array([x_velocity, z_velocity, y_height])[:, None],
-                LegPosition.BR: MotionGenerator.generate_motion_from_position(foot_current_positions.BR) * np.array([x_velocity, z_velocity, y_height])[:, None]
-            }
+            four_leg_motions = np.asfortranarray([
+                MotionGenerator.generate_motion_from_position(foot_current_positions.FL) * np.array([x_velocity, z_velocity, y_height])[:, None],
+                MotionGenerator.generate_motion_from_position(foot_current_positions.FR) * np.array([x_velocity, z_velocity, y_height])[:, None],
+                MotionGenerator.generate_motion_from_position(foot_current_positions.BL) * np.array([x_velocity, z_velocity, y_height])[:, None],
+                MotionGenerator.generate_motion_from_position(foot_current_positions.BR) * np.array([x_velocity, z_velocity, y_height])[:, None]
+            ])
+
             if yaw_rate != 0.0:
                 for leg_position in LegPosition:
                     four_leg_motions[leg_position] = self.adjust_for_turning(four_leg_motions[leg_position], self.state.yaw_rate)
                 
-            # x, z, y = trajectory  # 分解軌跡到 x, z, y
+            # 在 four_leg_motions 中 x, z, y 座標的 index
+            X, Z, Y = 0, 1, 2
+
             i1 = tick % 40
             i2 = (tick + 20) % 40
 
             foot_next_positions = FootPositions(
-                FL = Position(x=four_leg_motions[LegPosition.FL][i1]+3, y=four_leg_motions[LegPosition.FL][i1], z=four_leg_motions[LegPosition.FL][i1]),
-                FR = Position(x=four_leg_motions[LegPosition.FR][i2]+3, y=four_leg_motions[LegPosition.FR][i2], z=four_leg_motions[LegPosition.FR][i2]),
-                BL = Position(x=four_leg_motions[LegPosition.BL][i2], y=four_leg_motions[LegPosition.BL][i2], z=four_leg_motions[LegPosition.BL][i2]),
-                BR = Position(x=four_leg_motions[LegPosition.BR][i1], y=four_leg_motions[LegPosition.BR][i1], z=four_leg_motions[LegPosition.BR][i1])
+                FL = Position(x=four_leg_motions[LegPosition.FL][X][i1]+3, y=four_leg_motions[LegPosition.FL][Y][i1], z=four_leg_motions[LegPosition.FL][Z][i1]),
+                FR = Position(x=four_leg_motions[LegPosition.FR][X][i2]+3, y=four_leg_motions[LegPosition.FR][Y][i2], z=four_leg_motions[LegPosition.FR][Z][i2]),
+                BL = Position(x=four_leg_motions[LegPosition.BL][X][i2], y=four_leg_motions[LegPosition.BL][Y][i2], z=four_leg_motions[LegPosition.BL][Z][i2]),
+                BR = Position(x=four_leg_motions[LegPosition.BR][X][i1], y=four_leg_motions[LegPosition.BR][Y][i1], z=four_leg_motions[LegPosition.BR][Z][i1])
             )
-            self.set_motors_by_foot_positions(foot_positions=foot_next_positions, gyro_data=gyro_data)
+            self.set_motors_by_foot_positions(foot_positions=foot_next_positions)
 
             tick += 1
 

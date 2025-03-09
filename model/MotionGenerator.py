@@ -66,8 +66,11 @@ class MotionGenerator:
 
 
 if __name__ == "__main__":
+    print("STEP NODES:\n")
+    print("Shape:\n", MotionGenerator.STEP_NODES.shape)
     motion = MotionGenerator.generate_motion()
     print("Generated Motion:\n")
+    print("Shape:\n", motion.shape)
     print(motion)
 
     original_points = MotionGenerator.get_original_points()
@@ -77,5 +80,7 @@ if __name__ == "__main__":
     x, y, z = (1, -15, 0)
     position = Position(x=x, y=y, z=z)
 
+    motion_from_position = MotionGenerator.generate_motion_from_position(position)
     print("\nMotion from Positions:\n")
-    print(MotionGenerator.generate_motion_from_position(position))
+    print("Shape:\n", motion_from_position.shape)
+    print(motion_from_position)
