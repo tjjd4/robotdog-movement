@@ -21,9 +21,12 @@ Before proceeding, ensure you have the following installed on your Raspberrypi 5
 
 #### Update System Software
 ```bash
-sudo apt update && sudo apt upgrade
-sudo apt install libcamera-dev
-sudo apt install python3-picamera2
+sudo apt update && sudo apt upgrade -y
+```
+
+#### Install System packages
+```bash
+sudo apt install libcamera-dev python3-picamera2
 ```
 
 #### Enable I2C Connection
@@ -54,8 +57,14 @@ Once activated, your terminal prompt should display the virtual environment name
 
 Modify the `venv/bin/activate` file to include the project root in `PYTHONPATH`. Add the following lines after `export PATH`:
 ```bash
+...
+export PATH
+
+# Add the commands bellow
 PYTHONPATH="$VIRTUAL_ENV:$PYTHONPATH"
 export PYTHONPATH
+
+...
 ```
 re-activate virtual environment!
 ---
