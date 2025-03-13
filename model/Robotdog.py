@@ -11,7 +11,6 @@ from .MotionGenerator import MotionGenerator
 from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
 
 from utils.ConfigHelper import ConfigHelper
-from utils.GyroQueue import GyroQueue
 
 class Robotdog:
     robotdog_config = ConfigHelper.get_section("robotdog_parameters")
@@ -35,8 +34,8 @@ class Robotdog:
             LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited")),
             LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited")),
         }
-        self.gyro_queue = GyroQueue(maxsize=1)
-        self.gyroscope = GyroscopeController(gyro_queue=self.gyro_queue)
+
+        self.gyroscope = GyroscopeController()
         self.state = RobotDogState()
         self.moving_thread = Thread()
         self.standing_thread = Thread()
@@ -122,8 +121,10 @@ class Robotdog:
                 continue
             last_loop = time.time()
             foot_current_positions = self.state.foot_current_positions
+
             if self.state.is_gyro_running:
-                gyro_data = self.update_gyro_data()
+                gyro_data = self.gyroscope.read_gyro_data()
+                print(gyro_data)
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 
@@ -150,7 +151,7 @@ class Robotdog:
             # 動態計算步態比例
             foot_current_positions = self.state.foot_current_positions
             if self.state.is_gyro_running:
-                gyro_data = self.update_gyro_data()
+                gyro_data = self.gyroscope.read_gyro_data()
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 
@@ -163,7 +164,7 @@ class Robotdog:
 
             if yaw_rate != 0.0:
                 for leg_position in LegPosition:
-                    four_leg_motions[leg_position] = self.adjust_for_turning(four_leg_motions[leg_position], self.state.yaw_rate)
+                    four_leg_motions[leg_position] = self.adjust_for_turning(four_leg_motions[leg_position], self.state.yaw_rate, leg_position)
                 
             # 在 four_leg_motions 中 x, z, y 座標的 index
             X, Z, Y = 0, 1, 2
@@ -230,23 +231,8 @@ class Robotdog:
     def update_foot_positions(self, foot_current_positions: FootPositions):
         self.state.foot_current_positions = foot_current_positions
 
-    def update_gyro_data(self):
-        try:
-        # 直接拿最新的一筆資料 (LIFO)
-            latest_gyro_data = self.gyro_queue.get_nowait()  # 不會阻塞
-            with self.gyro_queue.mutex and self.gyro_queue.qsize() > 2:
-                self.gyro_queue.queue.clear()
-            # 更新狀態
-            self.state.gyro_data = latest_gyro_data
-            return latest_gyro_data
-        except queue.Empty:
-            return None
-
     def activate_gyroscope(self):
         if not self.state.is_gyro_running:
-            if not self.gyroscope.is_running():
-                self.gyroscope.start()
-
             self.state.is_gyro_running = True
             print("LOG: Gyroscope activated.")
         else:
@@ -254,9 +240,6 @@ class Robotdog:
 
     def deactivate_gyroscope(self):
         if self.state.is_gyro_running:
-            if self.gyroscope.is_running:
-                self.gyroscope.stop()
-
             self.state.is_gyro_running = False
             print("LOG: Gyroscope deactivated.")
         else:

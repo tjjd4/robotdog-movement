@@ -4,15 +4,12 @@ from model.GyroscopeController import GyroscopeController
 from model.custom_types.index import GyroData
 
 if __name__ == "__main__":
-    q = LifoQueue()
-    gyro_controller = GyroscopeController(q)
-    gyro_controller.start()
+    gyro_controller = GyroscopeController()
 
     try:
         while True:
-            if not q.empty():
-                data: GyroData = q.get()
-                print(f"Roll: {data.roll:.2f}, Pitch: {data.pitch:.2f}, Yaw: {data.yaw:.2f}")
+            data: GyroData = gyro_controller.read_gyro_data()
+            print(f"Roll: {data.roll:.2f}, Pitch: {data.pitch:.2f}, Yaw: {data.yaw:.2f}")
             time.sleep(0.1)
     except KeyboardInterrupt:
-        gyro_controller.stop()
+        print("LOG: Stop reading gyro data")

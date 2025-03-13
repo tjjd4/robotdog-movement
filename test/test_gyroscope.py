@@ -1,7 +1,7 @@
 import time
 from mpu6050.MPU6050 import MPU6050
 
-i2c_bus = 0
+i2c_bus = 1
 device_address = 0x68
 freq_divider = 10
 
