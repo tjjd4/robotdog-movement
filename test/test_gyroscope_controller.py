@@ -8,8 +8,13 @@ if __name__ == "__main__":
 
     try:
         while True:
+            timestamp = time.perf_counter()
             data: GyroData = gyro_controller.read_gyro_data()
-            print(f"Roll: {data.roll:.2f}, Pitch: {data.pitch:.2f}, Yaw: {data.yaw:.2f}")
-            time.sleep(0.1)
+            print("cost: ", time.perf_counter() - timestamp)
+            if data != None:
+                print(f"Roll: {data.roll:.2f}, Pitch: {data.pitch:.2f}, Yaw: {data.yaw:.2f}")
+            else:
+                print("No data")
+
     except KeyboardInterrupt:
         print("LOG: Stop reading gyro data")

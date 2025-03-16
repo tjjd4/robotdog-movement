@@ -11,28 +11,19 @@ class GyroscopeController:
         self.packet_size = self.gyro_kit.DMP_get_FIFO_packet_size()
 
     def read_gyro_data(self):
-        FIFO_buffer = [0] * 64
-        while(not self.gyro_kit.isreadyFIFO(self.packet_size)):
-            pass
+        FIFO_buffer = [0] * 42
 
-        if self.gyro_kit.isreadyFIFO(self.packet_size):  # Check if FIFO data are ready to use...
-            FIFO_buffer = self.gyro_kit.get_FIFO_bytes(self.packet_size)  # get all the DMP data here
-            
-            q = self.gyro_kit.DMP_get_quaternion_int16(FIFO_buffer)
-            roll_pitch_yaw = self.gyro_kit.DMP_get_euler_roll_pitch_yaw(q)
-            roll = roll_pitch_yaw.x
-            pitch = roll_pitch_yaw.y
-            yaw = roll_pitch_yaw.z
-            return GyroData(roll=roll, pitch=pitch, yaw=yaw)
-        
-    def stop(self):
-        if self.gyro_thread.is_alive():
-            print("Kill gyroscope detecting thread...")
-            self.gyro_thread.join()
-            self.running = False
-            print("Gyroscope detecting thread killed.")
-        else:
-            print("detection not activated!")
+        while True:
+            if self.gyro_kit.isreadyFIFO(self.packet_size):  # Check if FIFO data are ready to use...
+                FIFO_buffer = self.gyro_kit.get_FIFO_bytes(self.packet_size)  # get all the DMP data here
+                
+                q = self.gyro_kit.DMP_get_quaternion_int16(FIFO_buffer)
+                roll_pitch_yaw = self.gyro_kit.DMP_get_euler_roll_pitch_yaw(q)
+                roll = roll_pitch_yaw.x
+                pitch = roll_pitch_yaw.y
+                yaw = roll_pitch_yaw.z
+                return GyroData(roll=roll, pitch=pitch, yaw=yaw)
+
 
 if __name__ == "__main__":
     gyro_controller = GyroscopeController()

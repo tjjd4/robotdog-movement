@@ -42,19 +42,19 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
                 command = MotionCommand(horizontal_velocity=np.array([0.0, 0.0]), yaw_rate=0.0, behavior_state=BehaviorState.REST)
 
                 if key == ord('w'):  # Forward
-                    command.horizontal_velocity = np.array([1.0, 0.0])
+                    command.horizontal_velocity = np.array([3.0, 0.0])
                     command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('s'):  # Backward
-                    command.horizontal_velocity = np.array([-1.0, 0.0])
+                    command.horizontal_velocity = np.array([-3.0, 0.0])
                     command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('a'):  # Left
-                    command.horizontal_velocity = np.array([0.0, 1.0])
+                    command.horizontal_velocity = np.array([0.0, 3.0])
                     command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('d'):  # Right
-                    command.horizontal_velocity = np.array([0.0, -1.0])
+                    command.horizontal_velocity = np.array([0.0, -3.0])
                     command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('q'):  # Turn Left
