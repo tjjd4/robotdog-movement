@@ -1,7 +1,6 @@
 from flask import Flask, Response
 from picamera2 import Picamera2
 import cv2
-import numpy as np
 from ultralytics import YOLO
 
 app = Flask(__name__)
@@ -13,8 +12,8 @@ camera.preview_configuration.align()
 camera.configure("preview")
 camera.start()
 
-# Load YOLOv11 model (Ensure yolov11n.pt exists at this path)
-model = YOLO("yolo11n.pt")
+# Load YOLO model (Ensure yolo___.pt exists at this path if using self fine-tune model)
+model = YOLO("yolo11n_ncnn_model")
 
 def generate_frames():
     while True:

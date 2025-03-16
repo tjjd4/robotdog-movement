@@ -8,6 +8,7 @@ from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
 from .MotionGenerator import MotionGenerator
+from .CameraController import CameraController
 from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
 
 from utils.ConfigHelper import ConfigHelper
@@ -39,6 +40,8 @@ class Robotdog:
         self.state = RobotDogState()
         self.moving_thread = Thread()
         self.standing_thread = Thread()
+
+        self.camera_controller = CameraController()
 
     def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
         self.legs[leg_postion].get_angle(leg_part)
@@ -244,3 +247,28 @@ class Robotdog:
             print("LOG: Gyroscope deactivated.")
         else:
             print("LOG: Gyroscope not activated!")
+
+    def start_camera(self):
+        """Start the camera."""
+        self.camera_controller.start_camera()
+        print("Camera started.")
+
+    def stop_camera(self):
+        """Stop the camera."""
+        self.camera_controller.stop_camera()
+        print("Camera stopped.")
+
+    def start_detection(self):
+        """Start the object detection feature."""
+        self.camera_controller.start_detection()
+        print("Object detection started.")
+
+    def stop_detection(self):
+        """Stop the object detection feature."""
+        self.camera_controller.stop_detection()
+        print("Object detection stopped.")
+
+    def start_camera_server(self):
+        """Start the camera server to view the live feed."""
+        self.camera_controller.start_server()
+        print("Camera server started. View at http://localhost:5000/video")

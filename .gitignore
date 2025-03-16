@@ -1,10 +1,12 @@
-*.pyc
-bin/
-lib/
-share/
-lib64
-include/
-pyvenv.cfg
+# pycache
+**/*.pyc
 
-# windows venv
-Scripts/
+# venv
+venv/
+.venv/
+
+# yolo model
+*.pt
+*.torchscript
+
+**/*_ncnn_model/
