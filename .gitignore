@@ -5,6 +5,9 @@
 venv/
 .venv/
 
+# pyenv
+.python-version
+
 # yolo model
 *.pt
 *.torchscript
