@@ -55,15 +55,15 @@ class LegController:
         self.kit.servo[motor_id].angle = adjusted_degrees
 
 
-    def set_shoulder_angle(self, degrees: int):
+    def set_shoulder_angle(self, degrees: float):
         """Sets the angle of the shoulder motor."""
         self.set_angle(LegPart.SHOULDER, degrees)
 
-    def set_elbow_angle(self, degrees: int):
+    def set_elbow_angle(self, degrees: float):
         """Sets the angle of the elbow motor."""
         self.set_angle(LegPart.ELBOW, degrees)
 
-    def set_hip_angle(self, degrees: int):
+    def set_hip_angle(self, degrees: float):
         """Sets the angle of the hip motor."""
         self.set_angle(LegPart.HIP, degrees)
 

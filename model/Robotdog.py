@@ -1,9 +1,9 @@
 import time
 from threading import Thread
+from typing import Optional
 import numpy as np
-import queue
 
-from .custom_types.index import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position, GyroData
+from .custom_types.index import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position
 from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
@@ -17,23 +17,45 @@ class Robotdog:
     robotdog_config = ConfigHelper.get_section("robotdog_parameters")
     movement_config = ConfigHelper.get_section("movement_parameters")
     legs_config = ConfigHelper.get_section("motors_legs")
-
+    MAX_HEIGHT = movement_config.getfloat("max_height", fallback=15.0)
     DEFAULT_STAND_FOOT_POSITIONS = FootPositions(
-        FL = Position(x=0, y=-movement_config.getfloat("max_height"), z=0),
-        FR = Position(x=0, y=-movement_config.getfloat("max_height"), z=0),
-        BL = Position(x=0, y=-movement_config.getfloat("max_height"), z=0),
-        BR = Position(x=0, y=-movement_config.getfloat("max_height"), z=0)
+        FL = Position(x=0, y=-MAX_HEIGHT, z=0),
+        FR = Position(x=0, y=-MAX_HEIGHT, z=0),
+        BL = Position(x=0, y=-MAX_HEIGHT, z=0),
+        BR = Position(x=0, y=-MAX_HEIGHT, z=0)
     )
 
     def __init__(self) -> None:
-        self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length")
-        self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length")
-        self.delay_time = self.movement_config.getfloat("delay_time")
+        self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length", fallback=10.0)
+        self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length", fallback=10.0)
+        self.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
         self.legs: dict[LegPosition, LegController] = {
-            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_FL_is_opposited")),
-            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_FR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_FR_is_opposited")),
-            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited")),
-            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP, FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited"), LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited")),
+            LegPosition.FL: LegController(
+                Motor.FL_SHOULDER,
+                Motor.FL_ELBOW, Motor.FL_HIP,
+                FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited", fallback=False),
+                LR_is_opposited=self.legs_config.getboolean("LR_FL_is_opposited", fallback=False),
+            ),
+            LegPosition.FR: LegController(
+                Motor.FR_SHOULDER,
+                Motor.FR_ELBOW,
+                Motor.FR_HIP,
+                FB_is_opposited=self.legs_config.getboolean("FB_FR_is_opposited", fallback=True),
+                LR_is_opposited=self.legs_config.getboolean("LR_FR_is_opposited", fallback=False),
+            ),
+            LegPosition.BL: LegController(
+                Motor.BL_SHOULDER,
+                Motor.BL_ELBOW, Motor.BL_HIP,
+                FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited", fallback=False),
+                LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited", fallback=True),
+            ),
+            LegPosition.BR: LegController(
+                Motor.BR_SHOULDER,
+                Motor.BR_ELBOW,
+                Motor.BR_HIP,
+                FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited", fallback=True),
+                LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited", fallback=True),
+            ),
         }
 
         self.gyroscope = GyroscopeController()
@@ -53,7 +75,7 @@ class Robotdog:
         self.legs[leg_position].set_shoulder_angle(shoulder_angle)
         self.legs[leg_position].set_elbow_angle(elbow_angle)
         self.legs[leg_position].set_hip_angle(hip_angle)
-    
+
     def set_four_legs_angle(self, shoulder_angle: float, elbow_angle: float, hip_angle: float):
         for leg_position, leg_controller in self.legs.items():
             self.set_leg_angle(leg_position, shoulder_angle, elbow_angle, hip_angle)
@@ -168,7 +190,7 @@ class Robotdog:
             if yaw_rate != 0.0:
                 for leg_position in LegPosition:
                     four_leg_motions[leg_position] = self.adjust_for_turning(four_leg_motions[leg_position], self.state.yaw_rate, leg_position)
-                
+
             # 在 four_leg_motions 中 x, z, y 座標的 index
             X, Z, Y = 0, 1, 2
 
@@ -190,10 +212,11 @@ class Robotdog:
                 self.state.behavior_state = BehaviorState.REST
 
 
-    def run(self, command: MotionCommand=None):
+    def run(self, command: Optional[MotionCommand]=None):
         """主狀態機控制流程"""
-        if command:
-            self.update_state_by_motion_command(command)
+        if command == None:
+            return
+        self.update_state_by_motion_command(command)
 
         # 根據行為狀態執行對應行為
         if self.state.behavior_state == BehaviorState.STAND:
