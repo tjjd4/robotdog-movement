@@ -1,8 +1,10 @@
-from flask import Flask, Response
+from fastapi import FastAPI, Response
+from fastapi.responses import StreamingResponse
 from picamera2 import Picamera2
 import cv2
 from ultralytics import YOLO
 import threading
+import uvicorn
 
 class CameraController:
     def __init__(self, model_path='yolo11n_ncnn_model', resolution=(640, 480)):
@@ -13,15 +15,15 @@ class CameraController:
         self.model = YOLO(model_path)
         self.is_camera_active = False
         self.is_detection_active = False
-        self.app = Flask(__name__)
+        self.app = FastAPI()
         self._setup_routes()
 
     def _setup_routes(self):
-        self.app.add_url_rule('/start_camera', view_func=self.start_camera_route)
-        self.app.add_url_rule('/stop_camera', view_func=self.stop_camera_route)
-        self.app.add_url_rule('/start_detection', view_func=self.start_detection_route)
-        self.app.add_url_rule('/stop_detection', view_func=self.stop_detection_route)
-        self.app.add_url_rule('/video', view_func=self.video_feed)
+        self.app.get("/start_camera")(self.start_camera_route)
+        self.app.get("/stop_camera")(self.stop_camera_route)
+        self.app.get("/start_detection")(self.start_detection_route)
+        self.app.get("/stop_detection")(self.stop_detection_route)
+        self.app.get("/video")(self.video_feed)
 
     def start_camera(self):
         if not self.is_camera_active:
@@ -63,27 +65,29 @@ class CameraController:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
 
-    def start_server(self, host='0.0.0.0', port=5000):
-        threading.Thread(target=self.app.run, kwargs={'host': host, 'port': port, 'threaded': True, 'debug': False}, daemon=True).start()
+    def start_server(self, host='0.0.0.0', port=8000):
+        threading.Thread(target=uvicorn.run, args=(self.app,), kwargs={
+            "host": host, "port": port, "log_level": "info"
+        }, daemon=True).start()
 
-    def start_camera_route(self):
+    async def start_camera_route(self):
         self.start_camera()
-        return "Camera started"
+        return {"message": "Camera started"}
 
-    def stop_camera_route(self):
+    async def stop_camera_route(self):
         self.stop_camera()
-        return "Camera stopped"
+        return {"message": "Camera stopped"}
 
-    def start_detection_route(self):
+    async def start_detection_route(self):
         self.start_detection()
-        return "Detection started"
+        return {"message": "Detection started"}
 
-    def stop_detection_route(self):
+    async def stop_detection_route(self):
         self.stop_detection()
-        return "Detection stopped"
+        return {"message": "Detection stopped"}
 
-    def video_feed(self):
-        return Response(self.generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    async def video_feed(self):
+        return StreamingResponse(self.generate_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 if __name__ == '__main__':
     controller = CameraController()

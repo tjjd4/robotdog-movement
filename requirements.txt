@@ -5,10 +5,11 @@ keyboard
 ipykernel
 matplotlib
 transforms3d
-flask
 numpy
 simplejpeg==1.7.6
 mpu6050
 scipy
 opencv-python
 ultralytics
+fastapi
+uvicorn
