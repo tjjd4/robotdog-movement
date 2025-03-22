@@ -50,7 +50,6 @@ class RobotDogState():
     yaw: float = 0.0
     height: float = 1
     behavior_state: BehaviorState = BehaviorState.REST
-    is_gyro_running: bool = False
 
 @dataclass
 class MotionCommand:

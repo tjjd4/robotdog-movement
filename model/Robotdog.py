@@ -1,5 +1,5 @@
 import time
-from threading import Thread
+from threading import Thread, Event
 from typing import Optional
 import numpy as np
 
@@ -57,11 +57,11 @@ class Robotdog:
                 LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited", fallback=True),
             ),
         }
-
-        self.gyroscope = GyroscopeController()
         self.state = RobotDogState()
         self.moving_thread = Thread()
         self.standing_thread = Thread()
+        self.gyroscope = GyroscopeController()
+        self.gyro_event = Event()
 
         self.camera_controller = CameraController()
 
@@ -147,7 +147,7 @@ class Robotdog:
             last_loop = time.time()
             foot_current_positions = self.state.foot_current_positions
 
-            if self.state.is_gyro_running:
+            if self.gyro_event.is_set():
                 gyro_data = self.gyroscope.read_gyro_data()
                 print(gyro_data)
                 if gyro_data:
@@ -175,7 +175,7 @@ class Robotdog:
 
             # 動態計算步態比例
             foot_current_positions = self.state.foot_current_positions
-            if self.state.is_gyro_running:
+            if self.gyro_event.is_set():
                 gyro_data = self.gyroscope.read_gyro_data()
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
@@ -258,15 +258,15 @@ class Robotdog:
         self.state.foot_current_positions = foot_current_positions
 
     def activate_gyroscope(self):
-        if not self.state.is_gyro_running:
-            self.state.is_gyro_running = True
+        if not self.gyro_event.is_set():
+            self.gyro_event.set()
             print("LOG: Gyroscope activated.")
         else:
             print("LOG: Gyroscope already activated!")
 
     def deactivate_gyroscope(self):
-        if self.state.is_gyro_running:
-            self.state.is_gyro_running = False
+        if self.gyro_event.is_set():
+            self.gyro_event.clear()
             print("LOG: Gyroscope deactivated.")
         else:
             print("LOG: Gyroscope not activated!")
