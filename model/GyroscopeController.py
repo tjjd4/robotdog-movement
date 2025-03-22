@@ -1,5 +1,4 @@
 import time
-from threading import Thread
 
 from .hardware.GyroKitSingleton import GyroKitSingleton
 from .custom_types.index import GyroData
@@ -16,7 +15,7 @@ class GyroscopeController:
         while True:
             if self.gyro_kit.isreadyFIFO(self.packet_size):  # Check if FIFO data are ready to use...
                 FIFO_buffer = self.gyro_kit.get_FIFO_bytes(self.packet_size)  # get all the DMP data here
-                
+
                 q = self.gyro_kit.DMP_get_quaternion_int16(FIFO_buffer)
                 roll_pitch_yaw = self.gyro_kit.DMP_get_euler_roll_pitch_yaw(q)
                 roll = roll_pitch_yaw.x

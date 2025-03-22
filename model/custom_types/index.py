@@ -1,3 +1,4 @@
+from typing_extensions import Optional
 import numpy as np
 from enum import IntEnum
 from typing import NamedTuple
@@ -40,8 +41,8 @@ class FootPositions:
 
 @dataclass
 class RobotDogState():
-    foot_current_positions: FootPositions = None
-    gyro_data: GyroData = None
+    foot_current_positions: Optional[FootPositions] = None
+    gyro_data: Optional[GyroData] = None
     horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
     yaw_rate: float = 0.0
     roll: float = 0.0

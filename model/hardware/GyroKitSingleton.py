@@ -1,4 +1,3 @@
-import time
 from mpu6050.MPU6050 import MPU6050
 
 class GyroKitSingleton:

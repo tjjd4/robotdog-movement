@@ -1,17 +1,17 @@
 import math
 import numpy as np
-from model.custom_types.index import GyroData, LegPosition, FootPositions
-from utils.math_utils import get_plane_from_points, turn_points_with_euler_radians
+from model.custom_types.index import GyroData, FootPositions
+from utils.math_utils import turn_points_with_euler_radians
 from utils.ConfigHelper import ConfigHelper
 from utils.utils import get_np_array_from_foot_positions, get_foot_positions_from_np_array
 
 robotdog_config = ConfigHelper.get_section("robotdog_parameters")
 movement_config = ConfigHelper.get_section("movement_parameters")
-upper_leg_length = robotdog_config.getfloat("upper_leg_length")
-lower_leg_length = robotdog_config.getfloat("lower_leg_length")
-body_length = robotdog_config.getfloat("body_length")
-body_width = robotdog_config.getfloat("body_width")
-max_height = movement_config.getfloat("max_height")
+upper_leg_length = robotdog_config.getfloat("upper_leg_length", fallback=10.0)
+lower_leg_length = robotdog_config.getfloat("lower_leg_length", fallback=10.0)
+body_length = robotdog_config.getfloat("body_length", fallback=21.0)
+body_width = robotdog_config.getfloat("body_width", fallback=15.8)
+max_height = movement_config.getfloat("max_height", fallback=15.0)
 
 shoulder_positions = np.asfortranarray([
     [body_length / 2, body_length / 2, -body_length / 2, -body_length / 2],
@@ -56,7 +56,7 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
 
     # Recover y and z from y_prime
     z = 0  # Simplified to assume L = 0, so z = 0
-    
+
     y = -math.sqrt(y_prime**2 - (z)**2)  # y_prime = -sqrt(z^2 + y^2), assume z = 0
 
     return x, y, z

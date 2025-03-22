@@ -18,41 +18,38 @@ class LegController:
 
         self.kit = ServoKitSingleton.get_instance()
 
-    def get_angle_by_id(self, motor_id: Motor):
-        return self.kit.servo[motor_id].angle
-
-    def set_angle_by_id(self, motor_id: Motor, degrees: float):
-        if (degrees > 180):
-            degrees = 180
-            print(f"Setting {motor_id.name} to over 180 degree -> adjust to 180")
-        elif (degrees < 0):
-            degrees = 0
-            print(f"Setting {motor_id.name} to under 0 degree -> adjust to 0")
-        adjusted_degrees = degrees if self.is_opposited else 180 - degrees
-        self.kit.servo[motor_id].angle = adjusted_degrees
-        print(f"Set motor {motor_id.name} to angle {adjusted_degrees} degrees")
+    def _get_servo_angle_by_id(self, motor_id: Motor):
+        angle = self.kit.servo[motor_id].angle
+        if angle is None:
+            raise ValueError(f"[LegController] Servo {motor_id.name} angle is disabled")
+        adjusted_angle = angle if self.FB_is_opposited else 180 - angle
+        return adjusted_angle
 
     def get_angle(self, part: LegPart):
         motor_id = self.motors[part]
-        adjusted_degrees = self.kit.servo[motor_id].angle if self.is_opposited else 180 - self.kit.servo[motor_id].angle
-        return adjusted_degrees
+        angle = self._get_servo_angle_by_id(motor_id)
+        if part == LegPart.HIP:
+            angle = angle if self.LR_is_opposited else 180 - angle
+        return angle
 
     def set_angle(self, part: LegPart, degrees: float):
         motor_id = self.motors[part]
 
-        if degrees > 180:
-            degrees = 180
+        if degrees > 180.0:
+            degrees = 180.0
             print(f"Setting {motor_id.name} to over 180 degrees -> adjusted to 180")
-        elif degrees < 0:
-            degrees = 0
+        elif degrees < 0.0:
+            degrees = 0.0
             print(f"Setting {motor_id.name} to under 0 degrees -> adjusted to 0")
 
         # Adjust the angle based on whether the leg is opposited
         if part == LegPart.HIP:
-            adjusted_degrees = degrees if self.LR_is_opposited else 180 - degrees
+            adjusted_degrees = degrees if self.LR_is_opposited else 180.0 - degrees
         else:
-            adjusted_degrees = degrees if self.FB_is_opposited else 180 - degrees
-        self.kit.servo[motor_id].angle = adjusted_degrees
+            adjusted_degrees = degrees if self.FB_is_opposited else 180.0 - degrees
+
+        # [TODO]: Currently only take `int` using setter, `float` as input is necessary
+        self.kit.servo[motor_id].angle = int(adjusted_degrees)
 
 
     def set_shoulder_angle(self, degrees: float):

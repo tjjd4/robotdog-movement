@@ -5,9 +5,9 @@ from utils.ConfigHelper import ConfigHelper
 
 class MotionGenerator:
     movement_config = ConfigHelper.get_section("movement_parameters")
-    TRAJECTORY_CYCLE = movement_config.getint("trajectory_cycle")
-    MAX_HEIGHT = movement_config.getfloat("max_height")
-    MIN_HEIGHT = movement_config.getfloat("min_height")
+    TRAJECTORY_CYCLE = movement_config.getint("trajectory_cycle", fallback=40)
+    MAX_HEIGHT = movement_config.getfloat("max_height", fallback=15.0)
+    MIN_HEIGHT = movement_config.getfloat("min_height", fallback=10.0)
     HALF_CYCLE = TRAJECTORY_CYCLE // 2
     # bezier curve reference points
     STEP_POINT_1 = [-1.0, -1.0, -MAX_HEIGHT]
@@ -55,7 +55,7 @@ class MotionGenerator:
         ]).T
 
         return step_nodes
-    
+
     @classmethod
     def generate_motion_from_position(cls, position: Position):
         motion = cls.generate_motion()
