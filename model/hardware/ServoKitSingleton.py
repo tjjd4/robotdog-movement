@@ -1,4 +1,6 @@
 from adafruit_servokit import ServoKit
+import board
+import busio
 
 class ServoKitSingleton:
     """Singleton manager for ServoKit."""
@@ -16,5 +18,5 @@ class ServoKitSingleton:
 
 # Usage example:
 # servo_kit_singleton = ServoKitSingleton()
-# kit = servo_kit_singleton.get_kit()
+# kit = servo_kit_singleton.get_instance()
 # kit.servo[0].angle = 90

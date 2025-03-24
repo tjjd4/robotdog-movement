@@ -1,11 +1,6 @@
 import numpy as np
 import socket
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from utils.config_helper import update_config_ip, update_config_port
-
 s = None
 
 def get_ip():
@@ -24,7 +19,6 @@ def get_ip():
 def create_socket_connection(start_port=5000):
 
     host=get_ip() # this computer's IP
-    update_config_ip(host)
     port = start_port
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     while port < min(start_port+1000,9999):
@@ -33,7 +27,6 @@ def create_socket_connection(start_port=5000):
             break
         except OSError as e:
             port+=1
-    update_config_port(port)
     print(f"Connection Info - ip: {host}, port: {port}")
     return s
 

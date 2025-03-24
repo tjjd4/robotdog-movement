@@ -1,71 +1,26 @@
 import time
 
-import sys
-import os
-
-move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(move_logic_path)
-
-from model.quadruped import Robotdog
-from model.types.leg import LegPosition, LegPart
-
-def pos1(self):
-    self.set_angle(LegPosition.FL, LegPart.SHOULDER, 180)
-    self.set_angle(LegPosition.FL, LegPart.ELBOW, 90)
-    self.set_angle(LegPosition.FL, LegPart.HIP, 90)
-
-    self.set_angle(LegPosition.FR, LegPart.SHOULDER, 180)
-    self.set_angle(LegPosition.FR, LegPart.ELBOW, 90)
-    self.set_angle(LegPosition.FR, LegPart.HIP, 90)
-
-    self.set_angle(LegPosition.BL, LegPart.SHOULDER, 180)
-    self.set_angle(LegPosition.BL, LegPart.ELBOW, 90)
-    self.set_angle(LegPosition.BL, LegPart.HIP, 90)
-
-    self.set_angle(LegPosition.BR, LegPart.SHOULDER, 180)
-    self.set_angle(LegPosition.BR, LegPart.ELBOW, 90)
-    self.set_angle(LegPosition.BR, LegPart.HIP, 90)
-
-def pos2(self):
-    self.set_angle(LegPosition.FL, LegPart.SHOULDER, 90)
-    self.set_angle(LegPosition.FL, LegPart.ELBOW, 0)
-    self.set_angle(LegPosition.FL, LegPart.HIP, 90)
-
-    self.set_angle(LegPosition.FR, LegPart.SHOULDER, 90)
-    self.set_angle(LegPosition.FR, LegPart.ELBOW, 0)
-    self.set_angle(LegPosition.FR, LegPart.HIP, 90)
-
-    self.set_angle(LegPosition.BL, LegPart.SHOULDER, 90)
-    self.set_angle(LegPosition.BL, LegPart.ELBOW, 0)
-    self.set_angle(LegPosition.BL, LegPart.HIP, 90)
-
-    self.set_angle(LegPosition.BR, LegPart.SHOULDER, 90)
-    self.set_angle(LegPosition.BR, LegPart.ELBOW, 0)
-    self.set_angle(LegPosition.BR, LegPart.HIP, 90)
-
-Robotdog.pos1 = pos1
-Robotdog.pos2 = pos2
-
+from model.Robotdog import Robotdog
 
 if __name__ == '__main__':
+    robotdog = Robotdog()
     try:
         print("---開始---")
-        robotdog = Robotdog()
         robotdog.calibrate()
-        
+
         # 設置初始狀態
         is_pos1 = False
-        
+
         while True:
             action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
-            
+
             if is_pos1:
                 print("pos2")
-                robotdog.pos2()
+                robotdog.set_four_legs_angle(shoulder_angle=180, elbow_angle=90, hip_angle=90)
             else:
                 print("pos1")
-                robotdog.pos1()
-                
+                robotdog.set_four_legs_angle(shoulder_angle=90, elbow_angle=0, hip_angle=90)
+
             is_pos1 = not is_pos1
 
     except KeyboardInterrupt:

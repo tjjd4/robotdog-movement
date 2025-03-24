@@ -1,14 +1,8 @@
 import time
 
-import sys
-import os
-
-move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(move_logic_path)
-
 from model.LegController import LegController
 from model.hardware.Motor import Motor
-from model.types.leg import LegPart
+from model.custom_types.index import LegPart
 
 TESTED_LEG_SHOULDER = Motor.FL_SHOULDER
 TESTED_LEG_ELBOW = Motor.FL_ELBOW

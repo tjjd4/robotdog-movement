@@ -1,27 +1,16 @@
 import time
-import numpy as np
-
-import sys
-import os
-
-move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(move_logic_path)
 
 from model.LegController import LegController
 from model.hardware.Motor import Motor
-from model.types.leg import LegPart
+from model.custom_types.index import LegPart
 
 TEST_SHOULDER = Motor.FL_SHOULDER
 TEST_ELBOW = Motor.FL_ELBOW
 TEST_HIP = Motor.FL_HIP
 
-def controller(momentum):
-    momentum[:3] = [0, 0, 1]
-    return momentum
-
 if __name__ == '__main__':
     try:
-        leg = LegController(TEST_SHOULDER, TEST_ELBOW, TEST_HIP, is_opposited=False)
+        leg = LegController(TEST_SHOULDER, TEST_ELBOW, TEST_HIP, FB_is_opposited=False, LR_is_opposited=False)
         is_pos1 = True
             
         while True:

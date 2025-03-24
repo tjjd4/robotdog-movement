@@ -3,15 +3,9 @@ from curses import window
 import time
 import numpy as np
 
-import sys
-import os
-
-move_logic_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(move_logic_path)
-
-from model.quadruped import Robotdog
-from model.MotionCommand import MotionCommand
-from model.types.BehaviorState import BehaviorState
+from model.Robotdog import Robotdog
+from model.custom_types.index import MotionCommand
+from model.custom_types.index import BehaviorState
 
 def control_robot_dog(stdscr: window, robotdog: Robotdog):
     curses.cbreak()
@@ -48,27 +42,31 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
                 command = MotionCommand(horizontal_velocity=np.array([0.0, 0.0]), yaw_rate=0.0, behavior_state=BehaviorState.REST)
 
                 if key == ord('w'):  # Forward
-                    command.horizontal_velocity = np.array([1.0, 0.0])
+                    command.horizontal_velocity = np.array([3.0, 0.0])
+                    command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('s'):  # Backward
-                    command.horizontal_velocity = np.array([-1.0, 0.0])
+                    command.horizontal_velocity = np.array([-3.0, 0.0])
+                    command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('a'):  # Left
-                    command.horizontal_velocity = np.array([0.0, 1.0])
+                    command.horizontal_velocity = np.array([0.0, 3.0])
+                    command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('d'):  # Right
-                    command.horizontal_velocity = np.array([0.0, -1.0])
+                    command.horizontal_velocity = np.array([0.0, -3.0])
+                    command.yaw_rate = 0.0
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('q'):  # Turn Left
                     command.horizontal_velocity = np.array([1.0, 0.0])
-                    command.yaw_rate = 2.0
+                    command.yaw_rate = 0.5
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('e'):  # Turn Right
                     command.horizontal_velocity = np.array([1.0, 0.0])
-                    command.yaw_rate = -2.0
+                    command.yaw_rate = -0.5
                     command.behavior_state = BehaviorState.MOVE
                 elif key == ord('r'):  # Stand/Rest
-                    command.behavior_state = BehaviorState.REST
+                    command.behavior_state = BehaviorState.STAND
                 elif key == ord('c'):  # Calibrate
                     command.behavior_state = BehaviorState.CALIBRATE
                 elif key == 27:  # ESC
@@ -84,7 +82,9 @@ def control_robot_dog(stdscr: window, robotdog: Robotdog):
         # 停止並校準機器狗
         robotdog.run(MotionCommand(behavior_state=BehaviorState.REST))
         time.sleep(1)
-        robotdog.calibrate()
+        print("Calibrating robot dog to default position...")
+        robotdog.run(MotionCommand(behavior_state=BehaviorState.CALIBRATE))
+        time.sleep(1)
 
 if __name__ == '__main__':
     robotdog = Robotdog()
@@ -92,6 +92,6 @@ if __name__ == '__main__':
     print("Calibrating robot dog to default position...")
     robotdog.run(MotionCommand(behavior_state=BehaviorState.CALIBRATE))
     time.sleep(1)
-    robotdog.run(MotionCommand(behavior_state=BehaviorState.REST))
+    robotdog.run(MotionCommand(horizontal_velocity=np.array([0.0, 0.0]), yaw_rate=0.0, behavior_state=BehaviorState.REST))
     time.sleep(1)
     curses.wrapper(control_robot_dog, robotdog)
