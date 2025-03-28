@@ -60,3 +60,4 @@ class MotionCommand:
     yaw: float = 0.0
     height: float = 1
     behavior_state: BehaviorState=BehaviorState.REST
+    is_gyro_activated: bool = False
