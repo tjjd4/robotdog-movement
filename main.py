@@ -2,7 +2,7 @@ import importlib
 import argparse
 
 # from controllers.local_keyboard_controller import controller
-from model.quadruped import Robotdog
+from model.Robotdog import Robotdog
 
 def get_controller(controller_file):
     controller_lib = importlib.import_module(controller_file)
