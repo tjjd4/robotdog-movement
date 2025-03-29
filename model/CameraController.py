@@ -1,29 +1,21 @@
-from fastapi import FastAPI, Response
-from fastapi.responses import StreamingResponse
-from picamera2 import Picamera2
 import cv2
+from picamera2 import Picamera2
 from ultralytics import YOLO
-import threading
-import uvicorn
 
 class CameraController:
     def __init__(self, model_path='yolo11n_ncnn_model', resolution=(640, 480)):
         self.camera = Picamera2()
-        self.camera.configure(self.camera.create_preview_configuration(main={"format": 'XRGB8888', "size": resolution}))
+        self.camera.configure(
+            self.camera.create_preview_configuration(
+                main={"format": 'XRGB8888', "size": resolution}
+            )
+        )
         self.camera.preview_configuration.align()
         self.camera.configure("preview")
         self.model = YOLO(model_path)
+
         self.is_camera_active = False
         self.is_detection_active = False
-        self.app = FastAPI()
-        self._setup_routes()
-
-    def _setup_routes(self):
-        self.app.get("/start_camera")(self.start_camera_route)
-        self.app.get("/stop_camera")(self.stop_camera_route)
-        self.app.get("/start_detection")(self.start_detection_route)
-        self.app.get("/stop_detection")(self.stop_detection_route)
-        self.app.get("/video")(self.video_feed)
 
     def start_camera(self):
         if not self.is_camera_active:
@@ -42,6 +34,7 @@ class CameraController:
         self.is_detection_active = False
 
     def generate_frames(self):
+        """產生處理後的 JPEG 串流畫面 (適用於 MJPEG 串流輸出)"""
         while self.is_camera_active:
             frame = self.camera.capture_array()
             if self.is_detection_active:
@@ -49,6 +42,7 @@ class CameraController:
                 results = self.model(frame_rgb)
                 annotated_frame = results[0].plot()
 
+                # FPS overlay
                 inference_time = results[0].speed.get('inference', 0)
                 fps = 1000.0 / inference_time if inference_time > 0 else 0
                 text = f'FPS: {fps:.1f}'
@@ -65,30 +59,5 @@ class CameraController:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
 
-    def start_server(self, host='0.0.0.0', port=8000):
-        threading.Thread(target=uvicorn.run, args=(self.app,), kwargs={
-            "host": host, "port": port, "log_level": "info"
-        }, daemon=True).start()
-
-    async def start_camera_route(self):
-        self.start_camera()
-        return {"message": "Camera started"}
-
-    async def stop_camera_route(self):
-        self.stop_camera()
-        return {"message": "Camera stopped"}
-
-    async def start_detection_route(self):
-        self.start_detection()
-        return {"message": "Detection started"}
-
-    async def stop_detection_route(self):
-        self.stop_detection()
-        return {"message": "Detection stopped"}
-
-    async def video_feed(self):
-        return StreamingResponse(self.generate_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
-
-if __name__ == '__main__':
-    controller = CameraController()
-    controller.start_server()
+    def is_active(self) -> bool:
+        return self.is_camera_active

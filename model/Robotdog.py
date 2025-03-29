@@ -26,33 +26,23 @@ class Robotdog:
     )
 
     def __init__(self) -> None:
-        self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length", fallback=10.0)
-        self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length", fallback=10.0)
+        # self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length", fallback=10.0)
+        # self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length", fallback=10.0)
         self.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
         self.legs: dict[LegPosition, LegController] = {
-            LegPosition.FL: LegController(
-                Motor.FL_SHOULDER,
-                Motor.FL_ELBOW, Motor.FL_HIP,
+            LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP,
                 FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited", fallback=False),
                 LR_is_opposited=self.legs_config.getboolean("LR_FL_is_opposited", fallback=False),
             ),
-            LegPosition.FR: LegController(
-                Motor.FR_SHOULDER,
-                Motor.FR_ELBOW,
-                Motor.FR_HIP,
+            LegPosition.FR: LegController(Motor.FR_SHOULDER, Motor.FR_ELBOW, Motor.FR_HIP,
                 FB_is_opposited=self.legs_config.getboolean("FB_FR_is_opposited", fallback=True),
                 LR_is_opposited=self.legs_config.getboolean("LR_FR_is_opposited", fallback=False),
             ),
-            LegPosition.BL: LegController(
-                Motor.BL_SHOULDER,
-                Motor.BL_ELBOW, Motor.BL_HIP,
+            LegPosition.BL: LegController(Motor.BL_SHOULDER, Motor.BL_ELBOW, Motor.BL_HIP,
                 FB_is_opposited=self.legs_config.getboolean("FB_BL_is_opposited", fallback=False),
                 LR_is_opposited=self.legs_config.getboolean("LR_BL_is_opposited", fallback=True),
             ),
-            LegPosition.BR: LegController(
-                Motor.BR_SHOULDER,
-                Motor.BR_ELBOW,
-                Motor.BR_HIP,
+            LegPosition.BR: LegController(Motor.BR_SHOULDER, Motor.BR_ELBOW, Motor.BR_HIP,
                 FB_is_opposited=self.legs_config.getboolean("FB_BR_is_opposited", fallback=True),
                 LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited", fallback=True),
             ),
@@ -60,54 +50,10 @@ class Robotdog:
         self.state = RobotDogState()
         self.moving_thread = Thread()
         self.standing_thread = Thread()
-        self.gyroscope = GyroscopeController()
         self.gyro_event = Event()
 
+        self.gyroscope = GyroscopeController()
         self.camera_controller = CameraController()
-
-    def get_angle(self, leg_postion: LegPosition, leg_part: LegPart):
-        self.legs[leg_postion].get_angle(leg_part)
-
-    def set_angle(self, leg_postion: LegPosition, leg_part: LegPart, degrees: float):
-        self.legs[leg_postion].set_angle(leg_part, degrees)
-
-    def set_leg_angle(self, leg_position: LegPosition, shoulder_angle: float, elbow_angle: float, hip_angle: float):
-        self.legs[leg_position].set_shoulder_angle(shoulder_angle)
-        self.legs[leg_position].set_elbow_angle(elbow_angle)
-        self.legs[leg_position].set_hip_angle(hip_angle)
-
-    def set_four_legs_angle(self, shoulder_angle: float, elbow_angle: float, hip_angle: float):
-        for leg_position, leg_controller in self.legs.items():
-            self.set_leg_angle(leg_position, shoulder_angle, elbow_angle, hip_angle)
-
-
-    def adjust_for_turning(self, motion: np.ndarray, turning_factor: float, leg_position: LegPosition) -> np.ndarray:
-        """
-        Adjust the step size for turning using the small-step, big-step method.
-
-        Args:
-            motion (np.ndarray): Original motion trajectory (shape: [3, n_steps]).
-            turning_factor (float): Positive for turning right, negative for turning left.
-
-        Returns:
-            np.ndarray: Adjusted motion trajectory.
-        """
-
-        if turning_factor > 0:  # Turn Right
-            # Left legs take bigger steps, right legs take smaller steps
-            if leg_position == LegPosition.FL or leg_position == LegPosition.BL:
-                motion[0, :] *= (1 + turning_factor)  # Left legs bigger steps
-            elif leg_position == LegPosition.FR or leg_position == LegPosition.BR:
-                motion[0, :] *= (1 - turning_factor)  # Right legs smaller steps
-        elif turning_factor < 0:  # Turn Left
-            turning_factor = abs(turning_factor)
-            # Right legs take bigger steps, left legs take smaller steps
-            if leg_position == LegPosition.FL or leg_position == LegPosition.BL:
-                motion[0, :] *= (1 - turning_factor)  # Left legs smaller steps
-            elif leg_position == LegPosition.FR or leg_position == LegPosition.BR:
-                motion[0, :] *= (1 + turning_factor)  # Right legs bigger steps
-
-        return motion
 
     def set_motors_by_foot_positions(self, foot_positions: FootPositions):
 
