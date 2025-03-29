@@ -61,29 +61,45 @@ def forward_kinematics(theta_shoulder: float, theta_elbow: float, theta_hip: flo
 
     return x, y, z
 
-# def compensate_foot_positions_by_gyro(foot_positions_FP: FootPositions, gyro_data: GyroData) -> FootPositions:
-#     local_foot_positions = get_np_array_from_foot_positions(foot_positions_FP, order='xzy')
-#     foot_positions = local_foot_positions.copy()
-#     foot_positions[0,:] += shoulder_positions[0,:]
-#     foot_positions[1,:] += shoulder_positions[1,:]
-
-#     gyro_foot_positions = turn_points_with_euler_radians(foot_positions, math.radians(gyro_data.roll), math.radians(gyro_data.pitch), 0)
-#     # A * x + B * z + C * y + D = 0
-#     A, B, C, D = get_plane_from_points(gyro_foot_positions[:,0], gyro_foot_positions[:,1], gyro_foot_positions[:,2])
-
-#     compensated_foot_positions = local_foot_positions.copy()
-#     for leg_position in LegPosition:
-#         compensated_foot_positions[2,leg_position] += -(A*shoulder_positions[0,leg_position] + B*shoulder_positions[1,leg_position,]+D)/C - (-max_height)
-
-#     compensated_foot_positions_FP = get_foot_positions_from_np_array(compensated_foot_positions)
-#     return compensated_foot_positions_FP
 
 def compensate_foot_positions_by_gyro(foot_positions: FootPositions, gyro_data: GyroData) -> FootPositions:
     np_foot_positions = get_np_array_from_foot_positions(foot_positions, order='xzy')
-    correction_factor = 0.8
-    max_tilt = 0.4
-    roll_compensation = correction_factor * np.clip(-gyro_data.roll, -max_tilt, max_tilt)
-    pitch_compensation = correction_factor * np.clip(-gyro_data.pitch, -max_tilt, max_tilt)
-    np_rotated_foot_positions = turn_points_with_euler_radians(np_foot_positions, roll_compensation, pitch_compensation, 0)
-    rotated_foot_positions = get_foot_positions_from_np_array(np_rotated_foot_positions)
-    return rotated_foot_positions
+
+    # Calculate body normal vector from gyro data
+    roll_rad = math.radians(gyro_data.roll)
+    pitch_rad = math.radians(gyro_data.pitch)
+    body_normal = np.array([
+        math.sin(roll_rad),
+        -math.sin(pitch_rad) * math.cos(roll_rad),
+        math.cos(pitch_rad) * math.cos(roll_rad)
+    ])
+
+    # Calculate compensation factor based on gyro data
+    base_correction = 0.8
+    severity = max(
+        min(abs(gyro_data.roll) / 45.0, 1.0),
+        min(abs(gyro_data.pitch) / 45.0, 1.0)
+    )
+    correction_factor = base_correction * (1.0 + severity)
+
+    # Calculate maximum compensation and minimum leg height
+    max_compensation = 3.0
+    max_leg_extension_y = -max_height * 1.2
+    min_leg_extension_y = -max_height * 0.5
+
+    compensated_positions = np_foot_positions.copy()
+    for i in range(4):
+        dx = shoulder_positions[0, i]
+        dy = shoulder_positions[1, i]
+        height_adj = (dx * body_normal[0] + dy * body_normal[1]) * correction_factor
+        height_adj = np.clip(height_adj, -max_compensation, max_compensation)
+
+        new_height = compensated_positions[2, i] - height_adj
+        if new_height < max_leg_extension_y:
+            height_adj = compensated_positions[2, i] - max_leg_extension_y
+        elif new_height > min_leg_extension_y:
+            height_adj = compensated_positions[2, i] - min_leg_extension_y
+
+        compensated_positions[2, i] -= height_adj
+
+    return get_foot_positions_from_np_array(compensated_positions)
