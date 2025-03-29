@@ -54,110 +54,8 @@ class Robotdog:
 
         self.gyroscope = GyroscopeController()
         self.camera_controller = CameraController()
-
-    def set_motors_by_foot_positions(self, foot_positions: FootPositions):
-
-        theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
-            x=foot_positions.FL.x, y=foot_positions.FL.y, z=foot_positions.FL.z
-        )
-        theta_shoulder_FR, theta_elbow_FR, theta_hip_FR = get_angle_from_position(
-            x=foot_positions.FR.x, y=foot_positions.FR.y, z=foot_positions.FR.z
-        )
-        theta_shoulder_BL, theta_elbow_BL, theta_hip_BL = get_angle_from_position(
-            x=foot_positions.BL.x, y=foot_positions.BL.y, z=foot_positions.BL.z
-        )
-        theta_shoulder_BR, theta_elbow_BR, theta_hip_BR = get_angle_from_position(
-            x=foot_positions.BR.x, y=foot_positions.BR.y, z=foot_positions.BR.z
-        )
-
-        self.set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
-        self.set_leg_angle(LegPosition.FR, theta_shoulder_FR, theta_elbow_FR, theta_hip_FR)
-        self.set_leg_angle(LegPosition.BL, theta_shoulder_BL, theta_elbow_BL, theta_hip_BL)
-        self.set_leg_angle(LegPosition.BR, theta_shoulder_BR, theta_elbow_BR, theta_hip_BR)
-
-    """
-    Movement Functions
-    """
-
-    def calibrate(self):
-        self.set_four_legs_angle(180, 30, 90)
-
-    def standup(self):
-        if self.state.foot_current_positions == None:
-            self.state.foot_current_positions = self.DEFAULT_STAND_FOOT_POSITIONS
-        last_loop = time.time()
-        while self.state.behavior_state == BehaviorState.STAND:
-            now = time.time()
-            if now - last_loop < self.delay_time:
-                continue
-            last_loop = time.time()
-            foot_current_positions = self.state.foot_current_positions
-
-            if self.gyro_event.is_set():
-                gyro_data = self.gyroscope.read_gyro_data()
-                print(gyro_data)
-                if gyro_data:
-                    foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
-
-            self.set_motors_by_foot_positions(foot_positions=foot_current_positions)
-
-
-    def move(self):
-        if self.state.foot_current_positions == None:
-            self.state.foot_current_positions = self.DEFAULT_STAND_FOOT_POSITIONS
-        tick = 0
-
-        # Generate footstep
-        last_loop = time.time()
-
-        while self.state.behavior_state == BehaviorState.MOVE:
-            now = time.time()
-            if now - last_loop < self.delay_time:
-                continue
-            last_loop = time.time()
-            x_velocity, z_velocity = self.state.horizontal_velocity
-            yaw_rate = self.state.yaw_rate
-            y_height = self.state.height
-
-            # 動態計算步態比例
-            foot_current_positions = self.state.foot_current_positions
-            if self.gyro_event.is_set():
-                gyro_data = self.gyroscope.read_gyro_data()
-                if gyro_data:
-                    foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
-
-            four_leg_motions = np.asfortranarray([
-                MotionGenerator.generate_motion_from_position(foot_current_positions.FL) * np.array([x_velocity, z_velocity, y_height])[:, None],
-                MotionGenerator.generate_motion_from_position(foot_current_positions.FR) * np.array([x_velocity, z_velocity, y_height])[:, None],
-                MotionGenerator.generate_motion_from_position(foot_current_positions.BL) * np.array([x_velocity, z_velocity, y_height])[:, None],
-                MotionGenerator.generate_motion_from_position(foot_current_positions.BR) * np.array([x_velocity, z_velocity, y_height])[:, None]
-            ])
-
-            if yaw_rate != 0.0:
-                for leg_position in LegPosition:
-                    four_leg_motions[leg_position] = self.adjust_for_turning(four_leg_motions[leg_position], self.state.yaw_rate, leg_position)
-
-            # 在 four_leg_motions 中 x, z, y 座標的 index
-            X, Z, Y = 0, 1, 2
-
-            i1 = tick % 40
-            i2 = (tick + 20) % 40
-
-            foot_next_positions = FootPositions(
-                FL = Position(x=four_leg_motions[LegPosition.FL][X][i1]+3, y=four_leg_motions[LegPosition.FL][Y][i1], z=four_leg_motions[LegPosition.FL][Z][i1]),
-                FR = Position(x=four_leg_motions[LegPosition.FR][X][i2]+3, y=four_leg_motions[LegPosition.FR][Y][i2], z=four_leg_motions[LegPosition.FR][Z][i2]),
-                BL = Position(x=four_leg_motions[LegPosition.BL][X][i2], y=four_leg_motions[LegPosition.BL][Y][i2], z=four_leg_motions[LegPosition.BL][Z][i2]),
-                BR = Position(x=four_leg_motions[LegPosition.BR][X][i1], y=four_leg_motions[LegPosition.BR][Y][i1], z=four_leg_motions[LegPosition.BR][Z][i1])
-            )
-            self.set_motors_by_foot_positions(foot_positions=foot_next_positions)
-
-            tick += 1
-
-            if np.allclose(self.state.horizontal_velocity, [0, 0]):
-                print("Stopping robot...")
-                self.state.behavior_state = BehaviorState.REST
-
-
+        self.movement_executor = MovementExecutor(self.state, self.legs, self.gyroscope, self.gyro_event)
+        
     def run(self, command: Optional[MotionCommand]=None):
         """主狀態機控制流程"""
         if command == None:
@@ -171,7 +69,7 @@ class Robotdog:
 
             if not self.standing_thread.is_alive():
                 print("Start standing thread...")
-                self.standing_thread = Thread(target=self.standup, daemon=True)
+                self.standing_thread = Thread(target=self.movement_executor.standup, daemon=True)
                 self.standing_thread.start()
 
         elif self.state.behavior_state == BehaviorState.MOVE:
@@ -180,7 +78,7 @@ class Robotdog:
 
             if not self.moving_thread.is_alive():
                 print("Start moving thread...")
-                self.moving_thread = Thread(target=self.move, daemon=True)
+                self.moving_thread = Thread(target=self.movement_executor.move, daemon=True)
                 self.moving_thread.start()
 
         elif self.state.behavior_state == BehaviorState.CALIBRATE:
@@ -188,7 +86,7 @@ class Robotdog:
                 self.moving_thread.join()
             if self.standing_thread.is_alive():
                 self.standing_thread.join()
-            self.calibrate()
+            self.movement_executor.calibrate()
 
     def update_state_by_motion_command(self, command: MotionCommand):
         """根據指令更新狀態"""
