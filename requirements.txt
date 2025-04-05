@@ -14,4 +14,5 @@ ultralytics
 fastapi
 uvicorn
 websockets
+pyrplidar
 open3d
