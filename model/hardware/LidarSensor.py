@@ -61,7 +61,7 @@ class LidarSensor:
         try:
             # Get the next measurement from the generator
             for measurement in self.scan_generator():
-                if measurement.quality > 0 and 0 <= measurement.angle <= 360 and 0 <= measurement.distance <= 10000:
+                if measurement:
                     return measurement.quality, measurement.angle, measurement.distance
             return None
         except StopIteration:
