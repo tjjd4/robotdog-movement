@@ -9,6 +9,7 @@ from .LegController import LegController
 from .GyroscopeController import GyroscopeController
 from .MotionGenerator import MotionGenerator
 from .CameraController import CameraController
+from .MovementExecutor import MovementExecutor
 from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
 
 from utils.ConfigHelper import ConfigHelper
@@ -28,7 +29,6 @@ class Robotdog:
     def __init__(self) -> None:
         # self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length", fallback=10.0)
         # self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length", fallback=10.0)
-        self.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
         self.legs: dict[LegPosition, LegController] = {
             LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP,
                 FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited", fallback=False),
@@ -48,12 +48,13 @@ class Robotdog:
             ),
         }
         self.state = RobotDogState()
+        self.state.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
         self.moving_thread = Thread()
         self.standing_thread = Thread()
         self.gyro_event = Event()
 
         self.gyroscope = GyroscopeController()
-        self.camera_controller = CameraController()
+        # self.camera_controller = CameraController()
         self.movement_executor = MovementExecutor(self.state, self.legs, self.gyroscope, self.gyro_event)
         
     def run(self, command: Optional[MotionCommand]=None):
@@ -139,3 +140,6 @@ class Robotdog:
         """Start the camera server to view the live feed."""
         self.camera_controller.start_server()
         print("Camera server started. View at http://localhost:5000/video")
+
+    def calibrate(self):
+        self.movement_executor.calibrate()
