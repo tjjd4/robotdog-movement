@@ -3,9 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import asyncio
 from model.custom_types.index import MotionCommand
+from model.Robotdog import Robotdog
 
 class ServerGateway:
-    def __init__(self, robotdog, lidar_controller):
+    def __init__(self, robotdog: Robotdog, lidar_controller):
         self.app = FastAPI()
         self.robotdog = robotdog
         self.lidar_controller = lidar_controller
@@ -52,6 +53,34 @@ class ServerGateway:
                     await asyncio.sleep(0.2)
             except WebSocketDisconnect:
                 print("[LIDAR] WebSocket disconnected")
+
+
+        @self.app.post("/camera/start")
+        def start_camera():
+            self.robotdog.start_camera()
+            return {"status": "Camera started"}
+
+        @self.app.post("/camera/stop")
+        def stop_camera():
+            self.robotdog.stop_camera()
+            return {"status": "Camera stopped"}
+
+        @self.app.post("/detection/start")
+        def start_detection():
+            self.robotdog.start_detection()
+            return {"status": "Detection started"}
+
+        @self.app.post("/detection/stop")
+        def stop_detection():
+            self.robotdog.stop_detection()
+            return {"status": "Detection stopped"}
+
+        @self.app.get("/camera/video")
+        async def video_stream():
+            return StreamingResponse(
+                self.robotdog.get_camera_stream(),
+                media_type="multipart/x-mixed-replace; boundary=frame"
+            )
 
     def get_app(self) -> FastAPI:
         return self.app

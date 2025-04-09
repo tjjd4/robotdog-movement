@@ -54,7 +54,7 @@ class Robotdog:
         self.gyro_event = Event()
 
         self.gyroscope = GyroscopeController()
-        # self.camera_controller = CameraController()
+        self.camera_controller = CameraController()
         self.movement_executor = MovementExecutor(self.state, self.legs, self.gyroscope, self.gyro_event)
         
     def run(self, command: Optional[MotionCommand]=None):
@@ -136,10 +136,8 @@ class Robotdog:
         self.camera_controller.stop_detection()
         print("Object detection stopped.")
 
-    def start_camera_server(self):
-        """Start the camera server to view the live feed."""
-        self.camera_controller.start_server()
-        print("Camera server started. View at http://localhost:5000/video")
+    def get_camera_stream(self):
+        return self.camera_controller.generate_frames()
 
     def calibrate(self):
         self.movement_executor.calibrate()
