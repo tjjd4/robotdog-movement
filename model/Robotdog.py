@@ -1,17 +1,13 @@
-import time
 from threading import Thread, Event
 from typing import Optional
-import numpy as np
 
-from .custom_types.index import LegPosition, LegPart, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position
+from .custom_types.index import LegPosition, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position
 from .hardware.Motor import Motor
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
-from .MotionGenerator import MotionGenerator
 from .CameraController import CameraController
 from .MovementExecutor import MovementExecutor
-from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
-
+from .StateManager import StateManager
 from utils.ConfigHelper import ConfigHelper
 
 class Robotdog:
@@ -27,8 +23,6 @@ class Robotdog:
     )
 
     def __init__(self) -> None:
-        # self.upper_leg_length = self.robotdog_config.getfloat("upper_leg_length", fallback=10.0)
-        # self.lower_leg_length = self.robotdog_config.getfloat("lower_leg_length", fallback=10.0)
         self.legs: dict[LegPosition, LegController] = {
             LegPosition.FL: LegController(Motor.FL_SHOULDER, Motor.FL_ELBOW, Motor.FL_HIP,
                 FB_is_opposited=self.legs_config.getboolean("FB_FL_is_opposited", fallback=False),
@@ -47,60 +41,24 @@ class Robotdog:
                 LR_is_opposited=self.legs_config.getboolean("LR_BR_is_opposited", fallback=True),
             ),
         }
-        self.state = RobotDogState()
-        self.state.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
+        init_state = RobotDogState()
+        init_state.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
+    
+        self.state_manager = StateManager(init_state)
         self.moving_thread = Thread()
         self.standing_thread = Thread()
         self.gyro_event = Event()
 
         self.gyroscope = GyroscopeController()
         self.camera_controller = CameraController()
-        self.movement_executor = MovementExecutor(self.state, self.legs, self.gyroscope, self.gyro_event)
+        self.movement_executor = MovementExecutor(self.state_manager, self.legs, self.gyroscope, self.gyro_event)
         
-    def run(self, command: Optional[MotionCommand]=None):
-        """主狀態機控制流程"""
-        if command == None:
+    def run(self, command: Optional[MotionCommand] = None):
+        if command is None:
             return
-        self.update_state_by_motion_command(command)
+        self.state_manager.update_state_by_motion_command(command)
+        self.movement_executor.run()
 
-        # 根據行為狀態執行對應行為
-        if self.state.behavior_state == BehaviorState.STAND:
-            if self.moving_thread.is_alive():
-                self.moving_thread.join()
-
-            if not self.standing_thread.is_alive():
-                print("Start standing thread...")
-                self.standing_thread = Thread(target=self.movement_executor.standup, daemon=True)
-                self.standing_thread.start()
-
-        elif self.state.behavior_state == BehaviorState.MOVE:
-            if self.standing_thread.is_alive():
-                self.standing_thread.join()
-
-            if not self.moving_thread.is_alive():
-                print("Start moving thread...")
-                self.moving_thread = Thread(target=self.movement_executor.move, daemon=True)
-                self.moving_thread.start()
-
-        elif self.state.behavior_state == BehaviorState.CALIBRATE:
-            if self.moving_thread.is_alive():
-                self.moving_thread.join()
-            if self.standing_thread.is_alive():
-                self.standing_thread.join()
-            self.movement_executor.calibrate()
-
-    def update_state_by_motion_command(self, command: MotionCommand):
-        """根據指令更新狀態"""
-        self.state.horizontal_velocity = command.horizontal_velocity
-        self.state.yaw_rate = command.yaw_rate
-        self.state.roll = command.roll
-        self.state.pitch = command.pitch
-        self.state.yaw = command.yaw
-        self.state.height = command.height
-        self.state.behavior_state = command.behavior_state
-
-    def update_foot_positions(self, foot_current_positions: FootPositions):
-        self.state.foot_current_positions = foot_current_positions
 
     def activate_gyroscope(self):
         if not self.gyro_event.is_set():

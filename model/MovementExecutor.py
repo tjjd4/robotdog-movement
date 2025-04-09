@@ -1,33 +1,59 @@
 import time
 import numpy as np
-from threading import Event
+from threading import Thread, Event
 
 from .custom_types.index import LegPosition, BehaviorState, FootPositions, Position
 from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
 from .MotionGenerator import MotionGenerator
+from .StateManager import StateManager
+from .LegController import LegController
+from .GyroscopeController import GyroscopeController
 
 
 class MovementExecutor:
-    def __init__(self, robot_state, leg_controllers, gyroscope, gyro_event: Event):
-        self.state = robot_state
+    def __init__(self, state_manager: StateManager, leg_controllers: dict[LegPosition, LegController], gyroscope: GyroscopeController, gyro_event: Event):
+        self.state_manager = state_manager
         self.legs = leg_controllers
         self.gyroscope = gyroscope
         self.gyro_event = gyro_event
 
-    def standup(self):
-        if self.state.foot_current_positions is None:
-            self.state.foot_current_positions = self._default_stand_foot_positions()
+        self.moving_thread = Thread()
 
-        delay_time = self.state.delay_time
+    def run(self):
+        behavior = self.state_manager.get_behavior_state()
+
+        if self.moving_thread.is_alive():
+            self.moving_thread.join()
+
+        if behavior == BehaviorState.STAND:
+            print("[MovementExecutor] Start standing...")
+            self.moving_thread = Thread(target=self.standup, daemon=True)
+            self.moving_thread.start()
+
+        elif behavior == BehaviorState.MOVE:
+            print("[MovementExecutor] Start moving...")
+            self.moving_thread = Thread(target=self.move, daemon=True)
+            self.moving_thread.start()
+
+        elif behavior == BehaviorState.CALIBRATE:
+            print("[MovementExecutor] Calibrating...")
+            self.calibrate()
+
+
+    def standup(self):
+        if self.state_manager.get_foot_positions() is None:
+            self.state_manager.set_foot_positions(self._default_stand_foot_positions())
+
+        delay_time = self.state_manager.get_delay_time()
         last_loop = time.time()
 
-        while self.state.behavior_state == BehaviorState.STAND:
+        while self.state_manager.get_behavior_state() == BehaviorState.STAND:
             now = time.time()
             if now - last_loop < delay_time:
                 continue
             last_loop = time.time()
 
-            foot_current_positions = self.state.foot_current_positions
+            foot_current_positions = self.state_manager.get_foot_positions()
 
             if self.gyro_event.is_set():
                 gyro_data = self.gyroscope.read_gyro_data()
@@ -37,23 +63,23 @@ class MovementExecutor:
             self._set_motors_by_foot_positions(foot_current_positions)
 
     def move(self):
-        if self.state.foot_current_positions is None:
-            self.state.foot_current_positions = self._default_stand_foot_positions()
+        if self.state_manager.get_foot_positions() is None:
+            self.state_manager.set_foot_positions(self._default_stand_foot_positions())
 
         tick = 0
-        delay_time = self.state.delay_time
+        delay_time = self.state_manager.get_delay_time()
         last_loop = time.time()
 
-        while self.state.behavior_state == BehaviorState.MOVE:
+        while self.state_manager.get_behavior_state() == BehaviorState.MOVE:
             now = time.time()
             if now - last_loop < delay_time:
                 continue
             last_loop = time.time()
 
-            x_velocity, z_velocity = self.state.horizontal_velocity
-            yaw_rate = self.state.yaw_rate
-            y_height = self.state.height
-            foot_current_positions = self.state.foot_current_positions
+            x_velocity, z_velocity = self.state_manager.get_horizontal_velocity()
+            yaw_rate = self.state_manager.get_yaw_rate()
+            y_height = self.state_manager.get_height()
+            foot_current_positions = self.state_manager.get_foot_positions()
 
             if self.gyro_event.is_set():
                 gyro_data = self.gyroscope.read_gyro_data()
@@ -86,12 +112,9 @@ class MovementExecutor:
             self._set_motors_by_foot_positions(foot_next_positions)
             tick += 1
 
-            if np.allclose(self.state.horizontal_velocity, [0, 0]):
-                print("Stopping robot...")
-                self.state.behavior_state = BehaviorState.REST
 
     def calibrate(self):
-        self._set_all_leg_angles(shoulder=180, elbow=30, hip=90)
+        self._set_all_leg_angles(shoulder=180, elbow=40, hip=90)
 
     def _set_motors_by_foot_positions(self, foot_positions: FootPositions):
         theta_shoulder_FL, theta_elbow_FL, theta_hip_FL = get_angle_from_position(
@@ -140,7 +163,7 @@ class MovementExecutor:
         return motion
 
     def _default_stand_foot_positions(self) -> FootPositions:
-        max_height = self.state.height or 15.0
+        max_height = self.state_manager.get_height()
         return FootPositions(
             FL=Position(x=0, y=-max_height, z=0),
             FR=Position(x=0, y=-max_height, z=0),
