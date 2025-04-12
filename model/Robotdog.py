@@ -3,6 +3,7 @@ from typing import Optional
 
 from .custom_types.index import LegPosition, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position
 from .hardware.Motor import Motor
+from .LidarController import LidarController
 from .LegController import LegController
 from .GyroscopeController import GyroscopeController
 from .CameraController import CameraController
@@ -51,6 +52,7 @@ class Robotdog:
 
         self.gyroscope = GyroscopeController()
         self.camera_controller = CameraController()
+        self.lidar_controller = LidarController()
         self.movement_executor = MovementExecutor(self.state_manager, self.legs, self.gyroscope, self.gyro_event)
         
     def run(self, command: Optional[MotionCommand] = None):
@@ -99,3 +101,12 @@ class Robotdog:
 
     def calibrate(self):
         self.movement_executor.calibrate()
+
+    def start_lidar(self):
+        self.lidar_controller.start()
+
+    def stop_lidar(self):
+        self.lidar_controller.stop()
+
+    def get_latest_scan(self):
+        return self.lidar_controller.get_latest_scan()

@@ -2,8 +2,8 @@ from model.hardware.LidarSensor import LidarSensor
 import threading
 
 class LidarController:
-    def __init__(self, sensor: LidarSensor):
-        self.sensor = sensor
+    def __init__(self, sensor: LidarSensor=None):
+        self.sensor = LidarSensor() if sensor is None else sensor
         self.running = False
         self.thread = None
         self.latest_scan = [None] * 360  # index 0~359 -> 最新距離資料
