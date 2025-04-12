@@ -1,15 +1,17 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
 import json
 import asyncio
+import numpy as np
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+
 from model.custom_types.index import MotionCommand
 from model.Robotdog import Robotdog
 
 class ServerGateway:
-    def __init__(self, robotdog: Robotdog, lidar_controller):
+    def __init__(self, robotdog: Robotdog):
         self.app = FastAPI()
         self.robotdog = robotdog
-        self.lidar_controller = lidar_controller
         self._setup_routes()
 
     def _setup_routes(self):
@@ -42,14 +44,33 @@ class ServerGateway:
             except WebSocketDisconnect:
                 print("[CONTROL] WebSocket disconnected")
 
+        @self.app.post("/lidar/start")
+        def start_lidar():
+            self.robotdog.start_lidar()
+            return {"status": "Lidar started"}
+
+        @self.app.post("/lidar/stop")
+        def stop_lidar():
+            self.robotdog.stop_lidar()
+            return {"status": "Lidar stopped"}
+        
 
         @self.app.websocket("/ws/pointcloud")
         async def lidar_stream(websocket: WebSocket):
             await websocket.accept()
             try:
                 while True:
-                    points = self.lidar_controller.get_latest_point_cloud()
-                    await websocket.send_text(json.dumps(points.tolist()))
+                    distances = self.robotdog.get_latest_scan()
+                    # Convert distances to 2D Cartesian points (x, y)
+                    points = [
+                        {
+                            "x": float(d * np.cos(np.radians(angle))),
+                            "y": float(d * np.sin(np.radians(angle)))
+                        }
+                        for angle, d in enumerate(distances)
+                        if d is not None
+                    ]
+                    await websocket.send_text(json.dumps(points))
                     await asyncio.sleep(0.2)
             except WebSocketDisconnect:
                 print("[LIDAR] WebSocket disconnected")
