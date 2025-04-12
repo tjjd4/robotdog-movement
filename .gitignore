@@ -13,3 +13,6 @@ venv/
 *.torchscript
 
 **/*_ncnn_model/
+
+# macOS
+.DS_Store
