@@ -10,7 +10,6 @@ dependencies = [
     "board>=1.0",
     "fastapi>=0.115.12",
     "numpy>=2.2.4",
-    "open3d>=0.19.0",
     "opencv-python>=4.11.0.86",
     "pillow>=11.1.0",
     "pyrplidar>=0.1.2",
@@ -27,3 +26,6 @@ dev = [
     "ipykernel>=6.29.5",
     "matplotlib>=3.10.1",
 ]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
