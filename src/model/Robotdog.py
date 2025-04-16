@@ -110,3 +110,6 @@ class Robotdog:
 
     def get_latest_scan(self):
         return self.lidar_controller.get_latest_scan()
+    
+    def get_lidar_stream(self):
+        return self.lidar_controller.generate_frames()

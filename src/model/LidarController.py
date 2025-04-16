@@ -1,5 +1,9 @@
-from model.hardware.LidarSensor import LidarSensor
 import threading
+import numpy as np
+import matplotlib.pyplot as plt
+from io import BytesIO
+
+from model.hardware.LidarSensor import LidarSensor
 
 class LidarController:
     def __init__(self, sensor: LidarSensor=None):
@@ -38,3 +42,38 @@ class LidarController:
     def get_latest_scan(self):
         with self.lock:
             return list(self.latest_scan)  # copy to avoid race condition
+        
+    def generate_frames(self):
+        """產生繪製後的 LIDAR 點雲圖 JPEG 串流"""
+        while self.running:
+            scan = self.get_latest_scan()
+            points = [
+                (
+                    dist * np.cos(np.radians(angle)),
+                    dist * np.sin(np.radians(angle))
+                )
+                for angle, dist in enumerate(scan)
+                if dist is not None
+            ]
+
+            fig, ax = plt.subplots(figsize=(6, 6))
+            ax.set_xlim(-1000, 1000)
+            ax.set_ylim(-1000, 1000)
+            ax.set_aspect('equal')
+            ax.set_facecolor('black')
+            ax.axis('off')  # 移除坐標軸
+
+            if points:
+                xs, ys = zip(*points)
+                ax.scatter(xs, ys, s=2, c='lime')
+
+            buf = BytesIO()
+            plt.savefig(buf, format='jpeg', dpi=100, bbox_inches='tight', pad_inches=0)
+            plt.close(fig)
+            buf.seek(0)
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + buf.read() + b'\r\n')
+
+    def is_running(self):
+        return self.running

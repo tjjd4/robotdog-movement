@@ -75,6 +75,13 @@ class ServerGateway:
             except WebSocketDisconnect:
                 print("[LIDAR] WebSocket disconnected")
 
+        @self.app.get("/lidar/stream")
+        async def lidar_stream():
+            return StreamingResponse(
+                self.robotdog.get_lidar_stream(),
+                media_type="multipart/x-mixed-replace; boundary=frame"
+            )
+
 
         @self.app.post("/camera/start")
         def start_camera():
