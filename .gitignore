@@ -1,6 +1,12 @@
 # pycache
 **/*.pyc
 
+# Python packaging metadata
+*.egg-info/
+*.egg
+dist/
+build/
+
 # venv
 venv/
 .venv/
