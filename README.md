@@ -71,10 +71,10 @@ re-activate virtual environment!
 
 ### 3. Install Dependencies
 
-Install the required Python packages using the `requirements.txt` file:
+Install the required Python packages using the `pyproject.toml` file:
 ```bash
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r pyproject.toml
 ```
 ---
 

@@ -27,5 +27,3 @@ dev = [
     "ipykernel>=6.29.5",
 ]
 
-[tool.setuptools]
-package-dir = { "" = "src" }
