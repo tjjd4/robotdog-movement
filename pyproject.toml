@@ -9,6 +9,7 @@ dependencies = [
     "bezier>=2024.6.20",
     "board>=1.0",
     "fastapi>=0.115.12",
+    "lgpio>=0.2.2.0",
     "matplotlib>=3.10.1",
     "numpy>=2.2.4",
     "opencv-python>=4.11.0.86",
