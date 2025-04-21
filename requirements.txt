@@ -1,0 +1,17 @@
+adafruit-circuitpython-servokit
+board
+bezier
+keyboard
+ipykernel
+matplotlib
+transforms3d
+numpy
+simplejpeg==1.7.6
+mpu6050
+pyrplidar
+scipy
+opencv-python
+ultralytics
+fastapi
+uvicorn
+websockets

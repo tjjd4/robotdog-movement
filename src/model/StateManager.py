@@ -1,5 +1,5 @@
 from threading import Lock
-from custom_types.index import MotionCommand, FootPositions, RobotDogState
+from model.custom_types.index import MotionCommand, FootPositions, RobotDogState
 
 
 class StateManager:

@@ -71,10 +71,10 @@ re-activate virtual environment!
 
 ### 3. Install Dependencies
 
-Install the required Python packages using the `pyproject.toml` file:
+Install the required Python packages using the `requirements.txt` file:
 ```bash
 source .venv/bin/activate
-pip install -r pyproject.toml
+pip install -r requirements.txt
 ```
 ---
 
@@ -100,4 +100,4 @@ If everything is configured correctly, the script should execute without issues.
 
 - Ensure you activate the virtual environment in every new terminal session before running the scripts.
 - If additional dependencies are added to `requirements.txt`, re-run `pip install -r requirements.txt` to install them.
-- If `PYTHONPATH` cannot be set or you prefer not to set it, you can replace any failing absolute imports with relative imports in the code to resolve the errors.
+- If `PYTHONPATH` not set which lead to `ModuleNotFoundError`, enter `export PYTHONPATH=$(pwd)/src/` to set the `PYTHONPATH` to `src/` (Need to `cd` to repo).
