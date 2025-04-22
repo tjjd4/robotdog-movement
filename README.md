@@ -100,4 +100,4 @@ If everything is configured correctly, the script should execute without issues.
 
 - Ensure you activate the virtual environment in every new terminal session before running the scripts.
 - If additional dependencies are added to `requirements.txt`, re-run `pip install -r requirements.txt` to install them.
-- If `PYTHONPATH` not set which lead to `ModuleNotFoundError`, enter `export PYTHONPATH=$(pwd)/src/` to set the `PYTHONPATH` to `src/` (Need to `cd` to repo).
+- If `PYTHONPATH` not set which lead to `ModuleNotFoundError`, enter `export PYTHONPATH=$(pwd)` to set the `PYTHONPATH` to `project_root` (Need to `cd` to repo).
