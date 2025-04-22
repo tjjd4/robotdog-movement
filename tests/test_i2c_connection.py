@@ -1,7 +1,7 @@
 import smbus
 
 address = 0x68  # MPU6050 的 I2C 地址
-bus = smbus.SMBus(0)
+bus = smbus.SMBus(1)
 
 try:
     who_am_i = bus.read_byte_data(address, 0x75)  # 讀取 WHO_AM_I 註冊表

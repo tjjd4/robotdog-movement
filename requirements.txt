@@ -1,13 +1,13 @@
-adafruit-circuitpython-servokit==1.3.17
+adafruit-circuitpython-servokit
 board
 bezier
-keyboard
 ipykernel
 matplotlib
 transforms3d
 numpy
 simplejpeg==1.7.6
 mpu6050
+pyrplidar
 scipy
 opencv-python
 ultralytics

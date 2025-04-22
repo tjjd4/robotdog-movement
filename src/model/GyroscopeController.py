@@ -1,8 +1,7 @@
 import time
 
-from .hardware.GyroKitSingleton import GyroKitSingleton
-from .custom_types.index import GyroData
-from utils.GyroQueue import GyroQueue
+from src.model.hardware.GyroKitSingleton import GyroKitSingleton
+from src.model.custom_types.index import GyroData
 
 class GyroscopeController:
     def __init__(self):

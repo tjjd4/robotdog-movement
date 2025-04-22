@@ -1,6 +1,12 @@
 # pycache
 **/*.pyc
 
+# Python packaging metadata
+*.egg-info/
+*.egg
+dist/
+build/
+
 # venv
 venv/
 .venv/
@@ -13,3 +19,6 @@ venv/
 *.torchscript
 
 **/*_ncnn_model/
+
+# macOS
+.DS_Store

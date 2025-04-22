@@ -38,6 +38,9 @@ class FootPositions:
     FR: Position
     BL: Position
     BR: Position
+    
+    def __getitem__(self, key):
+        return getattr(self, key)
 
 @dataclass
 class RobotDogState():
@@ -50,6 +53,7 @@ class RobotDogState():
     yaw: float = 0.0
     height: float = 1
     behavior_state: BehaviorState = BehaviorState.REST
+    delay_time: float = 0.01
 
 @dataclass
 class MotionCommand:
