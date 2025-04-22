@@ -1,7 +1,6 @@
 adafruit-circuitpython-servokit
 board
 bezier
-keyboard
 ipykernel
 matplotlib
 transforms3d
