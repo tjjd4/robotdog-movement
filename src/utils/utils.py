@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Literal
 
-from model.custom_types.index import FootPositions, Position
+from src.model.custom_types.index import FootPositions, Position
 
 
 def get_np_array_from_foot_positions(foot_positions: FootPositions, order: Literal['xyz', 'xzy']='xzy') -> np.ndarray:
