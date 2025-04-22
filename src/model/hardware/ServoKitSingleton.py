@@ -1,6 +1,4 @@
 from adafruit_servokit import ServoKit
-import board
-import busio
 
 class ServoKitSingleton:
     """Singleton manager for ServoKit."""

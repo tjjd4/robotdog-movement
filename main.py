@@ -6,7 +6,6 @@ from src.model.Robotdog import Robotdog
 robotdog = Robotdog()
 
 gateway = ServerGateway(robotdog)
-gateway = ServerGateway(robotdog)
 app = gateway.get_app()
 
 if __name__ == "__main__":

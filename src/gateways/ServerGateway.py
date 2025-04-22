@@ -5,7 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from src.custom_types.index import MotionCommand
+from src.model.custom_types.index import MotionCommand
 from src.model.Robotdog import Robotdog
 
 class ServerGateway:

@@ -1,5 +1,5 @@
 from enum import IntEnum
-from utils.ConfigHelper import ConfigHelper
+from src.utils.ConfigHelper import ConfigHelper
 
 legs_motors_config = ConfigHelper.get_section("motors_legs")
 
