@@ -1,8 +1,11 @@
-from gateways.ServerGateway import ServerGateway
-from model.Robotdog import Robotdog
+import uvicorn
+
+from src.gateways.ServerGateway import ServerGateway
+from src.model.Robotdog import Robotdog
 
 robotdog = Robotdog()
 
+gateway = ServerGateway(robotdog)
 gateway = ServerGateway(robotdog)
 app = gateway.get_app()
 

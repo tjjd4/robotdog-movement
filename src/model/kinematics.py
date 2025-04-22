@@ -1,9 +1,9 @@
 import math
 import numpy as np
-from model.custom_types.index import GyroData, FootPositions
-from utils.math_utils import turn_points_with_euler_radians
-from utils.ConfigHelper import ConfigHelper
-from utils.utils import get_np_array_from_foot_positions, get_foot_positions_from_np_array
+from src.custom_types.index import GyroData, FootPositions
+from src.utils.math_utils import turn_points_with_euler_radians
+from src.utils.ConfigHelper import ConfigHelper
+from src.utils.utils import get_np_array_from_foot_positions, get_foot_positions_from_np_array
 
 robotdog_config = ConfigHelper.get_section("robotdog_parameters")
 movement_config = ConfigHelper.get_section("movement_parameters")

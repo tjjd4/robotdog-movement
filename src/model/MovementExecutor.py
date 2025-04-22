@@ -2,12 +2,12 @@ import time
 import numpy as np
 from threading import Thread, Event
 
-from .custom_types.index import LegPosition, BehaviorState, FootPositions, Position
-from .kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
-from .MotionGenerator import MotionGenerator
-from .StateManager import StateManager
-from .LegController import LegController
-from .GyroscopeController import GyroscopeController
+from src.model.custom_types.index import LegPosition, BehaviorState, FootPositions, Position
+from src.model.kinematics import get_angle_from_position, compensate_foot_positions_by_gyro
+from src.model.MotionGenerator import MotionGenerator
+from src.model.StateManager import StateManager
+from src.model.LegController import LegController
+from src.model.GyroscopeController import GyroscopeController
 
 
 class MovementExecutor:

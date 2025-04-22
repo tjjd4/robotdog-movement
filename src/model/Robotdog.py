@@ -9,7 +9,7 @@ from .GyroscopeController import GyroscopeController
 from .CameraController import CameraController
 from .MovementExecutor import MovementExecutor
 from .StateManager import StateManager
-from utils.ConfigHelper import ConfigHelper
+from .utils.ConfigHelper import ConfigHelper
 
 class Robotdog:
     robotdog_config = ConfigHelper.get_section("robotdog_parameters")

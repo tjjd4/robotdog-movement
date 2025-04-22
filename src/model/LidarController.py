@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
-from model.hardware.LidarSensor import LidarSensor
+from src.model.hardware.LidarSensor import LidarSensor
 
 class LidarController:
     def __init__(self, sensor: LidarSensor=None):

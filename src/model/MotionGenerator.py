@@ -1,7 +1,7 @@
 import bezier
 import numpy as np
-from model.custom_types.index import Position
-from utils.ConfigHelper import ConfigHelper
+from src.model.custom_types.index import Position
+from src.utils.ConfigHelper import ConfigHelper
 
 class MotionGenerator:
     movement_config = ConfigHelper.get_section("movement_parameters")
