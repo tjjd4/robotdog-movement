@@ -1,9 +1,10 @@
-from flask import Flask, Response
+from fastapi import FastAPI, Response
+from fastapi.responses import StreamingResponse
 from picamera2 import Picamera2
 import cv2
 from ultralytics import YOLO
 
-app = Flask(__name__)
+app = FastAPI()
 
 # Initialize the Raspberry Pi camera
 camera = Picamera2()
@@ -45,9 +46,13 @@ def generate_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
 
-@app.route('/video')
-def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.get('/video')
+async def video_feed():
+    return StreamingResponse(
+        generate_frames(),
+        media_type='multipart/x-mixed-replace; boundary=frame'
+    )
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, threaded=True, debug=False)
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=5000)

@@ -170,3 +170,9 @@ class MovementExecutor:
             BL=Position(x=0, y=-max_height, z=0),
             BR=Position(x=0, y=-max_height, z=0),
         )
+    
+    def calibrate_for_installation_1(self):
+        self._set_all_leg_angles(90, 0, 90)
+
+    def calibrate_for_installation_2(self):
+        self._set_all_leg_angles(180, 90, 90)

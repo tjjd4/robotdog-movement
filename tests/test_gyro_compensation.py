@@ -1,8 +1,8 @@
 import time
 import numpy as np
 
-from model.Robotdog import Robotdog
-from model.custom_types.index import MotionCommand, BehaviorState
+from src.model.Robotdog import Robotdog
+from src.model.custom_types.index import MotionCommand, BehaviorState
 
 
 if __name__ == '__main__':

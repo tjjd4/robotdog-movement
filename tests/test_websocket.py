@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 import json
-from model.custom_types.index import BehaviorState
+from src.model.custom_types.index import BehaviorState
 
 async def test_websocket():
     uri = "ws://localhost:8000/ws"

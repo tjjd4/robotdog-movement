@@ -1,7 +1,7 @@
 import time
 import logging
 
-from model.hardware.LidarSensor import LidarSensor
+from src.model.hardware.LidarSensor import LidarSensor
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

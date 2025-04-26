@@ -3,9 +3,8 @@ from curses import window
 import time
 import numpy as np
 
-from model.Robotdog import Robotdog
-from model.custom_types.index import MotionCommand
-from model.custom_types.index import BehaviorState
+from src.model.Robotdog import Robotdog
+from src.model.custom_types.index import MotionCommand, BehaviorState
 
 def control_robot_dog(stdscr: window, robotdog: Robotdog):
     curses.cbreak()

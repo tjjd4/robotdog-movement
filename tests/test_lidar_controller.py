@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse, JSONResponse
-from model.LidarController import LidarController
+from src.model.LidarController import LidarController
 
 app = FastAPI()
 lidar_controller = LidarController()

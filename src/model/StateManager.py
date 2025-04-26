@@ -41,3 +41,7 @@ class StateManager:
     def get_height(self):
         with self._lock:
             return self._state.height
+        
+    def get_delay_time(self):
+        with self._lock:
+            return self._state.delay_time

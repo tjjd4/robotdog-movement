@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from typing import Optional
 
-from .custom_types.index import LegPosition, RobotDogState, BehaviorState, MotionCommand, FootPositions, Position
+from .custom_types.index import LegPosition, RobotDogState, MotionCommand, FootPositions, Position
 from .hardware.Motor import Motor
 from .LidarController import LidarController
 from .LegController import LegController
@@ -9,7 +9,8 @@ from .GyroscopeController import GyroscopeController
 from .CameraController import CameraController
 from .MovementExecutor import MovementExecutor
 from .StateManager import StateManager
-from .utils.ConfigHelper import ConfigHelper
+
+from src.utils.ConfigHelper import ConfigHelper
 
 class Robotdog:
     robotdog_config = ConfigHelper.get_section("robotdog_parameters")
@@ -113,3 +114,9 @@ class Robotdog:
     
     def get_lidar_stream(self):
         return self.lidar_controller.generate_frames()
+    
+    def calibrate_for_installation_1(self):
+        self.movement_executor.calibrate_for_installation_1()
+
+    def calibrate_for_installation_2(self):
+        self.movement_executor.calibrate_for_installation_2()

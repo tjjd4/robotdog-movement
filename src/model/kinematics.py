@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from src.custom_types.index import GyroData, FootPositions
+from src.model.custom_types.index import GyroData, FootPositions
 from src.utils.math_utils import turn_points_with_euler_radians
 from src.utils.ConfigHelper import ConfigHelper
 from src.utils.utils import get_np_array_from_foot_positions, get_foot_positions_from_np_array

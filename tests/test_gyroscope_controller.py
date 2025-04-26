@@ -1,7 +1,7 @@
 import time
 from queue import LifoQueue
-from model.GyroscopeController import GyroscopeController
-from model.custom_types.index import GyroData
+from src.model.GyroscopeController import GyroscopeController
+from src.model.custom_types.index import GyroData
 
 if __name__ == "__main__":
     gyro_controller = GyroscopeController()

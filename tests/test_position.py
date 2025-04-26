@@ -1,6 +1,6 @@
 import time
 
-from model.Robotdog import Robotdog
+from src.model.Robotdog import Robotdog
 
 if __name__ == '__main__':
     robotdog = Robotdog()
@@ -14,12 +14,12 @@ if __name__ == '__main__':
         while True:
             action = input("按下 Enter 鍵來切換姿勢，或按 Ctrl+C 終止程式：")
 
-            if is_pos1:
-                print("pos2")
-                robotdog.set_four_legs_angle(shoulder_angle=180, elbow_angle=90, hip_angle=90)
-            else:
+            if not is_pos1:
                 print("pos1")
-                robotdog.set_four_legs_angle(shoulder_angle=90, elbow_angle=0, hip_angle=90)
+                robotdog.calibrate_for_installation_1()
+            else:
+                print("pos2")
+                robotdog.calibrate_for_installation_2()
 
             is_pos1 = not is_pos1
 

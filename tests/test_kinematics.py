@@ -1,6 +1,6 @@
-from model.kinematics import inverse_kinematics, forward_kinematics, compensate_foot_positions_by_gyro
-from model.custom_types.index import FootPositions, Position, GyroData
-from utils.utils import get_np_array_from_foot_positions
+from src.model.kinematics import inverse_kinematics, forward_kinematics, compensate_foot_positions_by_gyro
+from src.model.custom_types.index import FootPositions, Position, GyroData
+from src.utils.utils import get_np_array_from_foot_positions
 
 if __name__ == '__main__':
     upper_leg = 10
