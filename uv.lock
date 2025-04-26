@@ -761,6 +761,19 @@ wheels = [
 ]
 
 [[package]]
+name = "mpu6050"
+version = "0.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "quat" },
+    { name = "smbus" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/62/9c/96c392ac9c5d8fa55bff269add9bc45587745ef3b494c6ef9f9f2b005311/mpu6050-0.0.3.tar.gz", hash = "sha256:6b8a163cbfdc648918ffabf64658c15c830bc5da8aa3a0ce435f5f5a568a97b0", size = 18397 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/c2/23e8ee354f1b2a23fc9e6665d7bf54cef5e791e1c6fbb238092054603b30/mpu6050-0.0.3-py3-none-any.whl", hash = "sha256:244c9344677cac3de458e30e7bfe1257e834eefc250a4a724c424c5c3d025797", size = 18176 },
+]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1341,6 +1354,15 @@ wheels = [
 ]
 
 [[package]]
+name = "quat"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/3a/1be655cf1961678f1b66f77cbd64a9d8263f343effc4d0aeed8fa95ddefa/quat-1.0.0.tar.gz", hash = "sha256:7de1a9c25b40648b837ada6ba2efea67e031722971fe1e5266bc0716721c8abb", size = 4002 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0a/aa/32d00b90603c2146a6385076e249320cddf3ca17a50773a72b5654f42600/quat-1.0.0-py3-none-any.whl", hash = "sha256:c0c80943f89f2da22d1888cb732e9e7d6c19b1eeefdbeb6d26d1e2d51a63098c", size = 3874 },
+]
+
+[[package]]
 name = "requests"
 version = "2.32.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1365,11 +1387,12 @@ dependencies = [
     { name = "board" },
     { name = "fastapi" },
     { name = "matplotlib" },
+    { name = "mpu6050" },
     { name = "numpy" },
     { name = "opencv-python" },
-    { name = "pillow" },
     { name = "pyrplidar" },
     { name = "scipy" },
+    { name = "simplejpeg" },
     { name = "transforms3d" },
     { name = "ultralytics" },
     { name = "uvicorn" },
@@ -1388,11 +1411,12 @@ requires-dist = [
     { name = "board", specifier = ">=1.0" },
     { name = "fastapi", specifier = ">=0.115.12" },
     { name = "matplotlib", specifier = ">=3.10.1" },
+    { name = "mpu6050", specifier = ">=0.0.3" },
     { name = "numpy", specifier = ">=2.2.4" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
-    { name = "pillow", specifier = ">=11.1.0" },
     { name = "pyrplidar", specifier = ">=0.1.2" },
     { name = "scipy", specifier = ">=1.15.2" },
+    { name = "simplejpeg", specifier = "==1.7.6" },
     { name = "transforms3d", specifier = ">=0.4.2" },
     { name = "ultralytics", specifier = ">=8.3.23" },
     { name = "uvicorn", specifier = ">=0.34.0" },
@@ -1464,6 +1488,27 @@ wheels = [
 ]
 
 [[package]]
+name = "simplejpeg"
+version = "1.7.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a8/7f/48ed799e98f96a853cf903899880632f8a96a94de895db4f98a45309c13a/simplejpeg-1.7.6.tar.gz", hash = "sha256:89ea4784eaa09edd11b0caded9c40326c4872ba9232ff1705d5b732492e7aca8", size = 5793293 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e4/e0/9bf79ec9bd993dff64d6ea4fbc3046172fa61e16209571d85c478cc67013/simplejpeg-1.7.6-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:3f34fd17bb5347fc9251c936425ef5342e16b2a46f40ec2df3cda063519566ad", size = 494223 },
+    { url = "https://files.pythonhosted.org/packages/3e/6a/0e2be7a56b440c085a3159a31833248f0db1620951286c98434eeacd2ae6/simplejpeg-1.7.6-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:0a078ab7c242608137aae62a57d08677a6b4d2f974f51679aa0fa7db6127872b", size = 430405 },
+    { url = "https://files.pythonhosted.org/packages/51/8b/0c9059be3e4246f80b8688822d1ef3fab27d117a08bac72c4cef37bbc6ae/simplejpeg-1.7.6-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:12319e9045f7f5ae5d3af985aeed86bd438e240a1feb348f5535f7f3fb14c9d0", size = 430696 },
+    { url = "https://files.pythonhosted.org/packages/e5/17/46741913917b68f1f31041077e84c23cfddad1d79312be6fe3d6ef20fd61/simplejpeg-1.7.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9b0387029b26f2c7f85443320f7af6ad75cd9ee958ff3925214cba0210208251", size = 407309 },
+    { url = "https://files.pythonhosted.org/packages/08/a4/466d874c9cd6d6d561a4c193568779f1e50ba97c65d33c49ed4bb4259dca/simplejpeg-1.7.6-cp312-cp312-win_amd64.whl", hash = "sha256:bc9434378e30a485aded0fc9deff401981224737237db901e801da7719fc6026", size = 296026 },
+    { url = "https://files.pythonhosted.org/packages/b1/43/4baf44c50e503d01087f628fd365d28eface2c8084479369dc7730f1f598/simplejpeg-1.7.6-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:dfe768fb8b79253a3c9f49b86760f4c1c48c98870113856c98c37865c7ae8ae5", size = 492345 },
+    { url = "https://files.pythonhosted.org/packages/c0/68/ccc77aff0b6a8d6547712417aac3631ee74474f6547a17d7dea95be0606e/simplejpeg-1.7.6-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:8505a335fd4bc92e46d9b97f51780a1ba782780fdd9036cc68e1a248a08f9e7c", size = 428999 },
+    { url = "https://files.pythonhosted.org/packages/39/d0/5a204419a6eec6e988979f9750af7d59feae5618ec72a4a996c9339d6e7f/simplejpeg-1.7.6-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4b19f967d0b3aa7d8294a1ddc103d269f53044f9827068b5a2b98c7197003c92", size = 429078 },
+    { url = "https://files.pythonhosted.org/packages/f1/85/a6bb8773d431cd96e28b923c3d6795d1e18a93aa3a5b147e158cf6a6fc98/simplejpeg-1.7.6-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b03f6dc376a139473704955503b64582d289335b09f267c2097451aad3224c8a", size = 405822 },
+    { url = "https://files.pythonhosted.org/packages/a8/5e/0a6238d987af2953ae7c1fb5d51b6f945f85846fb39642343ac1656f93ae/simplejpeg-1.7.6-cp313-cp313-win_amd64.whl", hash = "sha256:635a3bb01ccc330ea8672bf451805641525c37a60769124705280ad5ccb726cc", size = 295691 },
+]
+
+[[package]]
 name = "six"
 version = "1.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1471,6 +1516,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050 },
 ]
+
+[[package]]
+name = "smbus"
+version = "1.1.post2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4d/5c/70e14aa4f0c586efc017e1d1aa6e2f7921eefc7602fc2d03368ff912aa91/smbus-1.1.post2.tar.gz", hash = "sha256:f96d345e0aa10053a8a4917634f1dc37ba1f656fa5cace7629b71777e90855c6", size = 104988 }
 
 [[package]]
 name = "sniffio"
