@@ -1,6 +1,8 @@
 import json
 import asyncio
 import numpy as np
+import socket
+import threading
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -13,6 +15,7 @@ class ServerGateway:
         self.app = FastAPI()
         self.robotdog = robotdog
         self._setup_routes()
+        self._start_udp_server(robot_name="Robotdog003")
 
     def _setup_routes(self):
         self.app.add_middleware(
@@ -112,3 +115,25 @@ class ServerGateway:
 
     def get_app(self) -> FastAPI:
         return self.app
+
+    def _start_udp_server(self, robot_name: str, port: int = 8000):
+        def udp_listen_loop():
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.bind(('', port))
+            print(f"[UDP] Listening for broadcast on UDP port {port}")
+            while True:
+                try:
+                    data, addr = sock.recvfrom(1024)
+                    message = data.decode('utf-8', errors='ignore')
+                    print(f"[UDP] Received from {addr}: {message}")
+                    if "DISCOVER" in message:
+                        response = robot_name.encode('utf-8')
+                        sock.sendto(response, addr)
+                        print(f"[UDP] Sent response to {addr}")
+                except Exception as e:
+                    print(f"[UDP] Error: {e}")
+
+        self.udp_thread = threading.Thread(target=udp_listen_loop, daemon=True)
+        self.udp_thread.start()
