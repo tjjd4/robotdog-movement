@@ -16,13 +16,6 @@ class Robotdog:
     robotdog_config = ConfigHelper.get_section("robotdog_parameters")
     movement_config = ConfigHelper.get_section("movement_parameters")
     legs_config = ConfigHelper.get_section("motors_legs")
-    MAX_HEIGHT = movement_config.getfloat("max_height", fallback=15.0)
-    DEFAULT_STAND_FOOT_POSITIONS = FootPositions(
-        FL = Position(x=0, y=-MAX_HEIGHT, z=0),
-        FR = Position(x=0, y=-MAX_HEIGHT, z=0),
-        BL = Position(x=0, y=-MAX_HEIGHT, z=0),
-        BR = Position(x=0, y=-MAX_HEIGHT, z=0)
-    )
 
     def __init__(self) -> None:
         self.legs: dict[LegPosition, LegController] = {
@@ -45,6 +38,7 @@ class Robotdog:
         }
         init_state = RobotDogState()
         init_state.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
+        init_state.max_height = self.movement_config.getfloat("max_height", fallback=15.0)
     
         self.state_manager = StateManager(init_state)
         self.moving_thread = Thread()

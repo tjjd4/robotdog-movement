@@ -40,6 +40,8 @@ class FootPositions:
     BR: Position
     
     def __getitem__(self, key):
+        if isinstance(key, LegPosition):
+            key = key.name
         return getattr(self, key)
 
 @dataclass
@@ -51,17 +53,17 @@ class RobotDogState():
     roll: float = 0.0
     pitch: float = 0.0
     yaw: float = 0.0
-    height: float = 1
+    height: float = 15
     behavior_state: BehaviorState = BehaviorState.REST
     delay_time: float = 0.01
 
 @dataclass
 class MotionCommand:
-    horizontal_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0]))
-    yaw_rate: float = 0.0
-    roll: float = 0.0
-    pitch: float = 0.0
-    yaw: float = 0.0
-    height: float = 1
-    behavior_state: BehaviorState=BehaviorState.REST
-    is_gyro_activated: bool = False
+    horizontal_velocity: Optional[np.ndarray] = None
+    yaw_rate: Optional[float] = None
+    roll: Optional[float] = None
+    pitch: Optional[float] = None
+    yaw: Optional[float] = None
+    height: Optional[float] = None
+    behavior_state: Optional[BehaviorState] = None
+    is_gyro_activated: Optional[bool] = None

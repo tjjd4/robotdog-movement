@@ -4,19 +4,23 @@ from src.model.custom_types.index import MotionCommand, FootPositions, RobotDogS
 
 
 class StateManager:
+    # should be attribute name of RobotDogState and MotionCommand
+    UPDATE_ALLOWED_FIELDS = {
+        'horizontal_velocity', 'yaw_rate', 'roll', 'pitch',
+        'yaw', 'height', 'behavior_state', 'is_gyro_activated'
+    }
+
     def __init__(self, state: RobotDogState):
         self._state: RobotDogState = state
         self._lock = Lock()
 
     def update_state_by_motion_command(self, command: MotionCommand):
-        with self._lock:
-            self._state.horizontal_velocity = command.horizontal_velocity
-            self._state.yaw_rate = command.yaw_rate
-            self._state.roll = command.roll
-            self._state.pitch = command.pitch
-            self._state.yaw = command.yaw
-            self._state.height = command.height
-            self._state.behavior_state = command.behavior_state
+        if command is not None:
+            with self._lock:
+                for field_name in self.UPDATE_ALLOWED_FIELDS:
+                    value = getattr(command, field_name)
+                    if value is not None:
+                        setattr(self._state, field_name, value)
 
     def get_state(self):
         with self._lock:
@@ -45,3 +49,8 @@ class StateManager:
     def get_delay_time(self):
         with self._lock:
             return self._state.delay_time
+
+    def get_yaw_rate(self):
+        with self._lock:
+            return self._state.yaw_rate
+        

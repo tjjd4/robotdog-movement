@@ -12,7 +12,7 @@ class CameraController:
         )
         self.camera.preview_configuration.align()
         self.camera.configure("preview")
-        self.model = YOLO(model_path)
+        self.model = YOLO(model_path, task="detect")
 
         self.is_camera_active = False
         self.is_detection_active = False

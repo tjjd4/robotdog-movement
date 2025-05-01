@@ -11,12 +11,13 @@ from src.model.GyroscopeController import GyroscopeController
 
 
 class MovementExecutor:
+
     def __init__(self, state_manager: StateManager, leg_controllers: dict[LegPosition, LegController], gyroscope: GyroscopeController, gyro_event: Event):
         self.state_manager = state_manager
         self.legs = leg_controllers
         self.gyroscope = gyroscope
         self.gyro_event = gyro_event
-        self.current_behavior = BehaviorState.REST
+        self.current_behavior = self.state_manager.get_behavior_state()
 
         self.moving_thread = Thread()
 
