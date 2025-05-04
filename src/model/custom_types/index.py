@@ -1,7 +1,7 @@
 from typing_extensions import Optional
 import numpy as np
 from enum import IntEnum
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 from dataclasses import dataclass, field
 
 class LegPosition(IntEnum):
@@ -20,6 +20,7 @@ class BehaviorState(IntEnum):
     MOVE = 1
     CALIBRATE = 2
     STAND = 3
+    POSE = 4
 
 class Position(NamedTuple):
     x: float
@@ -56,6 +57,7 @@ class RobotDogState():
     height: float = 15
     behavior_state: BehaviorState = BehaviorState.REST
     delay_time: float = 0.01
+    pose: Optional[Literal["STAND", "SIT", "PEE"]] = None
 
 @dataclass
 class MotionCommand:
@@ -66,4 +68,5 @@ class MotionCommand:
     yaw: Optional[float] = None
     height: Optional[float] = None
     behavior_state: Optional[BehaviorState] = None
+    pose: Optional[Literal["STAND", "SIT", "PEE"]] = None
     is_gyro_activated: Optional[bool] = None

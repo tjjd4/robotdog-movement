@@ -7,7 +7,7 @@ class StateManager:
     # should be attribute name of RobotDogState and MotionCommand
     UPDATE_ALLOWED_FIELDS = {
         'horizontal_velocity', 'yaw_rate', 'roll', 'pitch',
-        'yaw', 'height', 'behavior_state', 'is_gyro_activated'
+        'yaw', 'height', 'behavior_state', 'pose', 'is_gyro_activated'
     }
 
     def __init__(self, state: RobotDogState):
@@ -53,4 +53,9 @@ class StateManager:
     def get_yaw_rate(self):
         with self._lock:
             return self._state.yaw_rate
+    
+    def get_pose(self):
+        with self._lock:
+            return self._state.pose
+
         

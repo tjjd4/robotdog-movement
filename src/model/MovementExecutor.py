@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import logging
 from threading import Thread, Event
 
 from src.model.custom_types.index import LegPosition, BehaviorState, FootPositions, Position
@@ -8,7 +9,10 @@ from src.model.MotionGenerator import MotionGenerator
 from src.model.StateManager import StateManager
 from src.model.LegController import LegController
 from src.model.GyroscopeController import GyroscopeController
+from src.model.Pose import Pose
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class MovementExecutor:
 
@@ -30,18 +34,23 @@ class MovementExecutor:
             self.current_behavior = behavior
 
         if behavior == BehaviorState.STAND:
-            print("[MovementExecutor] Start standing...")
+            logger.info("[MovementExecutor] Start standing...")
             self.moving_thread = Thread(target=self.standup, daemon=True)
             self.moving_thread.start()
 
         elif behavior == BehaviorState.MOVE:
-            print("[MovementExecutor] Start moving...")
+            logger.info("[MovementExecutor] Start moving...")
             self.moving_thread = Thread(target=self.move, daemon=True)
             self.moving_thread.start()
 
         elif behavior == BehaviorState.CALIBRATE:
-            print("[MovementExecutor] Calibrating...")
+            logger.info("[MovementExecutor] Calibrating...")
             self.calibrate()
+
+        elif behavior == BehaviorState.POSE:
+            logger.info("[MovementExecutor] Applying pose...")
+            self.moving_thread = Thread(target=self.apply_pose, daemon=True)
+            self.moving_thread.start()
 
 
     def standup(self):
@@ -180,3 +189,14 @@ class MovementExecutor:
 
     def calibrate_for_installation_2(self):
         self._set_all_leg_angles(180, 90, 90)
+
+    def apply_pose(self):
+        pose_name = self.state_manager.get_pose()
+        if not pose_name:
+            logger.info("[MovementExecutor] No pose name specified")
+            return
+        pose_positions = Pose.get_pose_positions(pose_name)
+        if pose_positions:
+            self._set_motors_by_foot_positions(pose_positions)
+        else:
+            logger.info(f"[MovementExecutor] Unknown pose: {pose_name}")

@@ -1,7 +1,7 @@
-from threading import Thread, Event
+from threading import Event
 from typing import Optional
 
-from .custom_types.index import LegPosition, RobotDogState, MotionCommand, FootPositions, Position
+from .custom_types.index import LegPosition, RobotDogState, MotionCommand
 from .hardware.Motor import Motor
 from .LidarController import LidarController
 from .LegController import LegController
@@ -41,8 +41,6 @@ class Robotdog:
         init_state.max_height = self.movement_config.getfloat("max_height", fallback=15.0)
     
         self.state_manager = StateManager(init_state)
-        self.moving_thread = Thread()
-        self.standing_thread = Thread()
         self.gyro_event = Event()
 
         self.gyroscope = GyroscopeController()
