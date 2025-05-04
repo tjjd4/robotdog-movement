@@ -1,3 +1,4 @@
+import logging
 from threading import Event
 from typing import Optional
 
@@ -11,6 +12,9 @@ from .MovementExecutor import MovementExecutor
 from .StateManager import StateManager
 
 from src.utils.ConfigHelper import ConfigHelper
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Robotdog:
     robotdog_config = ConfigHelper.get_section("robotdog_parameters")
@@ -58,36 +62,36 @@ class Robotdog:
     def activate_gyroscope(self):
         if not self.gyro_event.is_set():
             self.gyro_event.set()
-            print("LOG: Gyroscope activated.")
+            logger.info("[Robotdog] Gyroscope activated.")
         else:
-            print("LOG: Gyroscope already activated!")
+            logger.info("[Robotdog] Gyroscope already activated!")
 
     def deactivate_gyroscope(self):
         if self.gyro_event.is_set():
             self.gyro_event.clear()
-            print("LOG: Gyroscope deactivated.")
+            logger.info("[Robotdog] Gyroscope deactivated.")
         else:
-            print("LOG: Gyroscope not activated!")
+            logger.info("[Robotdog] Gyroscope not activated!")
 
     def start_camera(self):
         """Start the camera."""
         self.camera_controller.start_camera()
-        print("Camera started.")
+        logger.info("[Robotdog] Camera started.")
 
     def stop_camera(self):
         """Stop the camera."""
         self.camera_controller.stop_camera()
-        print("Camera stopped.")
+        logger.info("[Robotdog] Camera stopped.")
 
     def start_detection(self):
         """Start the object detection feature."""
         self.camera_controller.start_detection()
-        print("Object detection started.")
+        logger.info("[Robotdog] Object detection started.")
 
     def stop_detection(self):
         """Stop the object detection feature."""
         self.camera_controller.stop_detection()
-        print("Object detection stopped.")
+        logger.info("[Robotdog] Object detection stopped.")
 
     def get_camera_stream(self):
         return self.camera_controller.generate_frames()
@@ -97,9 +101,11 @@ class Robotdog:
 
     def start_lidar(self):
         self.lidar_controller.start()
+        logger.info("[Robotdog] Lidar started.")
 
     def stop_lidar(self):
         self.lidar_controller.stop()
+        logger.info("[Robotdog] Lidar stopped.")
 
     def get_latest_scan(self):
         return self.lidar_controller.get_latest_scan()
@@ -109,6 +115,8 @@ class Robotdog:
     
     def calibrate_for_installation_1(self):
         self.movement_executor.calibrate_for_installation_1()
+        logger.info("[Robotdog] Calibrated for installation 1.")
 
     def calibrate_for_installation_2(self):
         self.movement_executor.calibrate_for_installation_2()
+        logger.info("[Robotdog] Calibrated for installation 2.")
