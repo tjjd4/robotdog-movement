@@ -6,7 +6,7 @@ from .custom_types.index import LegPosition, RobotDogState, MotionCommand
 from .hardware.Motor import Motor
 from .LidarController import LidarController
 from .LegController import LegController
-from .GyroscopeController import GyroscopeController
+from .GyroController import GyroController
 from .CameraController import CameraController
 from .MovementExecutor import MovementExecutor
 from .StateManager import StateManager
@@ -47,10 +47,10 @@ class Robotdog:
         self.state_manager = StateManager(init_state)
         self.gyro_event = Event()
 
-        self.gyroscope = GyroscopeController()
+        self.gyro_controller = GyroController()
         self.camera_controller = CameraController()
         self.lidar_controller = LidarController()
-        self.movement_executor = MovementExecutor(self.state_manager, self.legs, self.gyroscope, self.gyro_event)
+        self.movement_executor = MovementExecutor(self.state_manager, self.legs, self.gyro_controller, self.gyro_event)
         
     def run(self, command: Optional[MotionCommand] = None):
         if command is None:

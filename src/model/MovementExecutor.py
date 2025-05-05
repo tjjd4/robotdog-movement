@@ -8,7 +8,7 @@ from src.model.kinematics import get_angle_from_position, compensate_foot_positi
 from src.model.MotionGenerator import MotionGenerator
 from src.model.StateManager import StateManager
 from src.model.LegController import LegController
-from src.model.GyroscopeController import GyroscopeController
+from src.model.GyroController import GyroController
 from src.model.Pose import Pose
 
 logging.basicConfig(level=logging.INFO)
@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 class MovementExecutor:
 
-    def __init__(self, state_manager: StateManager, leg_controllers: dict[LegPosition, LegController], gyroscope: GyroscopeController, gyro_event: Event):
+    def __init__(self, state_manager: StateManager, leg_controllers: dict[LegPosition, LegController], gyro_controller: GyroController, gyro_event: Event):
         self.state_manager = state_manager
         self.legs = leg_controllers
-        self.gyroscope = gyroscope
+        self.gyro_controller = gyro_controller
         self.gyro_event = gyro_event
         self.current_behavior = self.state_manager.get_behavior_state()
 
@@ -69,7 +69,7 @@ class MovementExecutor:
             foot_current_positions = self.state_manager.get_foot_positions()
 
             if self.gyro_event.is_set():
-                gyro_data = self.gyroscope.read_gyro_data()
+                gyro_data = self.gyro_controller.read_gyro_data()
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 
@@ -95,7 +95,7 @@ class MovementExecutor:
             foot_current_positions = self.state_manager.get_foot_positions()
 
             if self.gyro_event.is_set():
-                gyro_data = self.gyroscope.read_gyro_data()
+                gyro_data = self.gyro_controller.read_gyro_data()
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
 

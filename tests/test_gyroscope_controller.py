@@ -1,10 +1,10 @@
 import time
 from queue import LifoQueue
-from src.model.GyroscopeController import GyroscopeController
+from src.model.GyroController import GyroController
 from src.model.custom_types.index import GyroData
 
 if __name__ == "__main__":
-    gyro_controller = GyroscopeController()
+    gyro_controller = GyroController()
 
     try:
         while True:
