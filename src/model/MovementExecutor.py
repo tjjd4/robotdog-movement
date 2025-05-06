@@ -107,7 +107,7 @@ class MovementExecutor:
             }
 
             # 若有旋轉指令，套用轉彎修正
-            if yaw_rate != 0.0:
+            if yaw_rate is not None and yaw_rate != 0.0:
                 for leg in LegPosition:
                     motions[leg] = self._adjust_for_turning(motions[leg], yaw_rate, leg)
 
