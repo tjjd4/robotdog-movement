@@ -11,7 +11,6 @@ from src.model.LegController import LegController
 from src.model.GyroController import GyroController
 from src.model.Pose import Pose
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class MovementExecutor:
@@ -94,10 +93,16 @@ class MovementExecutor:
             y_height = self.state_manager.get_height()
             foot_current_positions = self.state_manager.get_foot_positions()
 
+            logger.debug(f"[MovementExecutor.move] Current behavior: {self.state_manager.get_behavior_state()}")
+            logger.debug(f"[MovementExecutor.move] Current foot positions: {foot_current_positions}")
+            logger.debug(f"[MovementExecutor.move] Velocities: x={x_velocity}, z={z_velocity}, yaw={yaw_rate}")
+            logger.debug(f"[MovementExecutor.move] Height: {y_height}")
+
             if self.gyro_event.is_set():
                 gyro_data = self.gyro_controller.read_gyro_data()
                 if gyro_data:
                     foot_current_positions = compensate_foot_positions_by_gyro(foot_current_positions, gyro_data)
+                    logger.debug(f"[MovementExecutor.move] Gyro compensated positions: {foot_current_positions}")
 
             # 每隻腳產生動作軌跡
             motions = {
@@ -106,10 +111,13 @@ class MovementExecutor:
                 for leg in LegPosition
             }
 
+            logger.debug(f"[MovementExecutor.move] Generated motions: {motions}")
+
             # 若有旋轉指令，套用轉彎修正
             if yaw_rate is not None and yaw_rate != 0.0:
                 for leg in LegPosition:
                     motions[leg] = self._adjust_for_turning(motions[leg], yaw_rate, leg)
+                logger.debug(f"[MovementExecutor.move] Adjusted motions for turning: {motions}")
 
             i1 = tick % 40
             i2 = (tick + 20) % 40
@@ -121,6 +129,9 @@ class MovementExecutor:
                 BL=Position(motions[LegPosition.BL][X][i2], motions[LegPosition.BL][Y][i2], motions[LegPosition.BL][Z][i2]),
                 BR=Position(motions[LegPosition.BR][X][i1], motions[LegPosition.BR][Y][i1], motions[LegPosition.BR][Z][i1]),
             )
+
+            logger.debug(f"[MovementExecutor.move] Next foot positions: {foot_next_positions}")
+            logger.debug(f"[MovementExecutor.move] Tick: {tick}")
 
             self._set_motors_by_foot_positions(foot_next_positions)
             tick += 1

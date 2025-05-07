@@ -6,8 +6,6 @@ import threading
 from src.model.hardware.GyroKitSingleton import GyroKitSingleton
 from src.model.custom_types.index import GyroData
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class GyroSensor:

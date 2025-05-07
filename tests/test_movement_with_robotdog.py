@@ -1,8 +1,12 @@
 import time
 import numpy as np
+import logging
 
 from src.model.Robotdog import Robotdog
 from src.model.custom_types.index import MotionCommand, BehaviorState
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def test_fixed_movements(robotdog: Robotdog):
     actions = [
@@ -16,7 +20,7 @@ def test_fixed_movements(robotdog: Robotdog):
     ]
 
     for label, cmd in actions:
-        print(f"\n▶ 執行動作：{label}")
+        logger.info(f"\n▶ 執行動作：{label}")
         robotdog.run(cmd)
         time.sleep(2)
 

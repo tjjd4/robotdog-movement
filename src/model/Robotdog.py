@@ -13,7 +13,6 @@ from .StateManager import StateManager
 
 from src.utils.ConfigHelper import ConfigHelper
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class Robotdog:
