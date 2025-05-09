@@ -58,4 +58,10 @@ class StateManager:
         with self._lock:
             return self._state.pose
 
-        
+
+if __name__ == "__main__":
+    state = RobotDogState()
+    state_manager = StateManager(state)
+    state_manager.update_state_by_motion_command(MotionCommand(height=2.0))
+    print(state_manager.get_height())
+    

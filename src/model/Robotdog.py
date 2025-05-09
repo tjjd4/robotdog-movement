@@ -41,7 +41,6 @@ class Robotdog:
         }
         init_state = RobotDogState()
         init_state.delay_time = self.movement_config.getfloat("delay_time", fallback=0.01)
-        init_state.max_height = self.movement_config.getfloat("max_height", fallback=15.0)
     
         self.state_manager = StateManager(init_state)
         self.gyro_event = Event()

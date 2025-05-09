@@ -54,7 +54,7 @@ class RobotDogState():
     roll: float = 0.0
     pitch: float = 0.0
     yaw: float = 0.0
-    height: float = 15
+    height: float = 1  # Motion scaling factors (1 = default)
     behavior_state: BehaviorState = BehaviorState.REST
     delay_time: float = 0.01
     pose: Optional[Literal["STAND", "SIT", "PEE"]] = None
