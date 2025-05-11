@@ -59,9 +59,8 @@ class MotionGenerator:
     @classmethod
     def generate_motion_from_position(cls, position: Position):
         motion = cls.generate_motion()
-        np_position = np.asfortranarray([[position.x], [position.z], [position.y]])
-        y_offset = np.asfortranarray([[0.0], [0.0], [-cls.MAX_HEIGHT]])
-        adjust_motion = motion + np_position - y_offset
+        np_position_offset = np.asfortranarray([[position.x], [position.z], [position.y + cls.MAX_HEIGHT]])
+        adjust_motion = motion + np_position_offset
         return adjust_motion
 
 
@@ -81,6 +80,6 @@ if __name__ == "__main__":
     position = Position(x=x, y=y, z=z)
 
     motion_from_position = MotionGenerator.generate_motion_from_position(position)
-    print("\nMotion from Positions:\n")
+    print(f"\nMotion from Positions: {position}\n")
     print("Shape:\n", motion_from_position.shape)
     print(motion_from_position)

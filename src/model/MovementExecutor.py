@@ -154,23 +154,21 @@ class MovementExecutor:
             x=foot_positions.BR.x, y=foot_positions.BR.y, z=foot_positions.BR.z
         )
 
-        self._set_leg_angle(LegPosition.FL, theta_shoulder_FL, theta_elbow_FL, theta_hip_FL)
-        self._set_leg_angle(LegPosition.FR, theta_shoulder_FR, theta_elbow_FR, theta_hip_FR)
-        self._set_leg_angle(LegPosition.BL, theta_shoulder_BL, theta_elbow_BL, theta_hip_BL)
-        self._set_leg_angle(LegPosition.BR, theta_shoulder_BR, theta_elbow_BR, theta_hip_BR)
-
+        self._set_leg_angle(leg_position=LegPosition.FL, shoulder=theta_shoulder_FL, elbow=theta_elbow_FL, hip=theta_hip_FL)
+        self._set_leg_angle(leg_position=LegPosition.FR, shoulder=theta_shoulder_FR, elbow=theta_elbow_FR, hip=theta_hip_FR)
+        self._set_leg_angle(leg_position=LegPosition.BL, shoulder=theta_shoulder_BL, elbow=theta_elbow_BL, hip=theta_hip_BL)
+        self._set_leg_angle(leg_position=LegPosition.BR, shoulder=theta_shoulder_BR, elbow=theta_elbow_BR, hip=theta_hip_BR)
+            
+    def _set_leg_angle(self, leg_position: LegPosition, shoulder: float, elbow: float, hip: float):
+        self.legs[leg_position].set_shoulder_angle(shoulder)
+        self.legs[leg_position].set_elbow_angle(elbow)
+        self.legs[leg_position].set_hip_angle(hip)
 
     def _set_all_leg_angles(self, shoulder: float, elbow: float, hip: float):
         for leg in LegPosition:
             self.legs[leg].set_shoulder_angle(shoulder)
             self.legs[leg].set_elbow_angle(elbow)
             self.legs[leg].set_hip_angle(hip)
-            
-    def _set_leg_angle(self, leg_position: LegPosition, shoulder: float, elbow: float, hip: float):
-        self.legs[leg_position].set_shoulder_angle(shoulder)
-        self.legs[leg_position].set_elbow_angle(elbow)
-        self.legs[leg_position].set_hip_angle(hip)
-            
 
     def _adjust_for_turning(self, motion: np.ndarray, turning_factor: float, leg: LegPosition) -> np.ndarray:
         if turning_factor > 0:  # Turn Right
