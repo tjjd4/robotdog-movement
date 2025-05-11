@@ -49,7 +49,7 @@ class LegController:
             adjusted_degrees = degrees if self.FB_is_opposited else 180.0 - degrees
 
         # [TODO]: Currently only take `int` using setter, `float` as input is necessary
-        self.kit.servo[motor_id].angle = int(adjusted_degrees)
+        self.kit.servo[motor_id].angle = adjusted_degrees
 
 
     def set_shoulder_angle(self, degrees: float):
