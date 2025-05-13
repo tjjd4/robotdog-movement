@@ -10,10 +10,20 @@ from src.model.StateManager import StateManager
 from src.model.LegController import LegController
 from src.model.GyroController import GyroController
 from src.model.Pose import Pose
+from src.utils.ConfigHelper import ConfigHelper
 
 logger = logging.getLogger(__name__)
 
 class MovementExecutor:
+    movement_config = ConfigHelper.get_section("movement_parameters")
+    MAX_HEIGHT = movement_config.getfloat("max_height", fallback=15.0)
+    MIN_HEIGHT = movement_config.getfloat("min_height", fallback=10.0)
+    DEFAULT_STAND_FOOT_POSITIONS = FootPositions(
+        FL=Position(x=0, y=-MAX_HEIGHT, z=0),
+        FR=Position(x=0, y=-MAX_HEIGHT, z=0),
+        BL=Position(x=0, y=-MAX_HEIGHT, z=0),
+        BR=Position(x=0, y=-MAX_HEIGHT, z=0),
+    )
 
     def __init__(self, state_manager: StateManager, leg_controllers: dict[LegPosition, LegController], gyro_controller: GyroController, gyro_event: Event):
         self.state_manager = state_manager
@@ -54,7 +64,7 @@ class MovementExecutor:
 
     def standup(self):
         if self.state_manager.get_foot_positions() is None:
-            self.state_manager.set_foot_positions(self._default_stand_foot_positions())
+            self.state_manager.set_foot_positions(self.DEFAULT_STAND_FOOT_POSITIONS)
 
         delay_time = self.state_manager.get_delay_time()
         last_loop = time.time()
@@ -76,7 +86,7 @@ class MovementExecutor:
 
     def move(self):
         if self.state_manager.get_foot_positions() is None:
-            self.state_manager.set_foot_positions(self._default_stand_foot_positions())
+            self.state_manager.set_foot_positions(self.DEFAULT_STAND_FOOT_POSITIONS)
 
         tick = 0
         delay_time = self.state_manager.get_delay_time()
@@ -183,15 +193,6 @@ class MovementExecutor:
             else:
                 motion[0, :] *= (1 + turning_factor)
         return motion
-
-    def _default_stand_foot_positions(self) -> FootPositions:
-        max_height = self.state_manager.get_height()
-        return FootPositions(
-            FL=Position(x=0, y=-max_height, z=0),
-            FR=Position(x=0, y=-max_height, z=0),
-            BL=Position(x=0, y=-max_height, z=0),
-            BR=Position(x=0, y=-max_height, z=0),
-        )
     
     def calibrate_for_installation_1(self):
         self._set_all_leg_angles(90, 0, 90)
