@@ -103,7 +103,6 @@ class MovementExecutor:
             y_height = self.state_manager.get_height()
             foot_current_positions = self.state_manager.get_foot_positions()
 
-            logger.debug(f"[MovementExecutor.move] Current behavior: {self.state_manager.get_behavior_state()}")
             logger.debug(f"[MovementExecutor.move] Current foot positions: {foot_current_positions}")
             logger.debug(f"[MovementExecutor.move] Velocities: x={x_velocity}, z={z_velocity}, yaw={yaw_rate}")
             logger.debug(f"[MovementExecutor.move] Height: {y_height}")
@@ -121,13 +120,12 @@ class MovementExecutor:
                 for leg in LegPosition
             }
 
-            logger.debug(f"[MovementExecutor.move] Generated motions: {motions}")
-
             # 若有旋轉指令，套用轉彎修正
             if yaw_rate is not None and yaw_rate != 0.0:
                 for leg in LegPosition:
                     motions[leg] = self._adjust_for_turning(motions[leg], yaw_rate, leg)
-                logger.debug(f"[MovementExecutor.move] Adjusted motions for turning: {motions}")
+                logger.debug(f"[MovementExecutor.move] Adjusted motion by yaw_rate: {yaw_rate}")
+            logger.debug(f"[MovementExecutor.move] Generated motions: {motions}")
 
             i1 = tick % 40
             i2 = (tick + 20) % 40
