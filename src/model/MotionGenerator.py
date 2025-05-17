@@ -12,7 +12,7 @@ class MotionGenerator:
     # bezier curve reference points
     STEP_POINT_1 = [-1.0, -1.0, -MAX_HEIGHT]
     STEP_POINT_2 = [-1.0, -1.0, -MIN_HEIGHT]
-    STEP_POINT_3 = [1.0, 1.0, -MAX_HEIGHT]
+    STEP_POINT_3 = [1.0, 1.0, -MIN_HEIGHT]
     STEP_POINT_4 = [1.0, 1.0, -MAX_HEIGHT]
 
     SLIDE_POINT_1 = [1.0, 1.0, -MAX_HEIGHT]
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     print("\nOriginal Points:\n")
     print(original_points)
 
-    x, y, z = (1, -15, 0)
+    x, y, z = (0, -15, 0)
     position = Position(x=x, y=y, z=z)
 
     motion_from_position = MotionGenerator.generate_motion_from_position(position)
