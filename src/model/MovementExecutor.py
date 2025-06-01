@@ -30,17 +30,14 @@ class MovementExecutor:
         self.legs = leg_controllers
         self.gyro_controller = gyro_controller
         self.gyro_event = gyro_event
-        self.current_behavior = self.state_manager.get_behavior_state()
 
         self.moving_thread = Thread()
 
     def run(self):
         behavior = self.state_manager.get_behavior_state()
 
-        if self.current_behavior != behavior:
-            if self.moving_thread.is_alive():
-                self.moving_thread.join()
-            self.current_behavior = behavior
+        if self.moving_thread.is_alive():
+            self.moving_thread.join()
 
         if behavior == BehaviorState.STAND:
             logger.info("[MovementExecutor] Start standing...")
