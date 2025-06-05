@@ -26,6 +26,7 @@ class ServerGateway:
             allow_headers=["*"],
         )
 
+        # ----------- Movement APIs -------------
         @self.app.post("/command")
         async def receive_command(command: dict):
             self.robotdog.run_command_from_dict(command)
@@ -46,7 +47,9 @@ class ServerGateway:
                         await websocket.send_text(f"Error executing command: {str(e)}")
             except WebSocketDisconnect:
                 print("[CONTROL] WebSocket disconnected")
+        # ----------- END Movement APIs -------------
 
+        # ----------- Lidar APIs -------------
         @self.app.post("/lidar/start")
         def start_lidar():
             self.robotdog.start_lidar()
@@ -84,8 +87,9 @@ class ServerGateway:
                 self.robotdog.get_lidar_stream(),
                 media_type="multipart/x-mixed-replace; boundary=frame"
             )
+        # ----------- END Lidar APIs -------------
 
-
+        # ----------- Camera APIs -------------
         @self.app.post("/camera/start")
         def start_camera():
             self.robotdog.start_camera()
@@ -112,6 +116,31 @@ class ServerGateway:
                 self.robotdog.get_camera_stream(),
                 media_type="multipart/x-mixed-replace; boundary=frame"
             )
+        # ----------- END Camera APIs -------------
+
+        # ----------- WiFi APIs -------------
+        @self.app.post("/wifi/configure")
+        async def configure_wifi(request: dict):
+            ssid = request.get("ssid")
+            password = request.get("password")
+            if not ssid or not password:
+                return {"status": "error", "message": "SSID and password are required"}
+
+            try:
+                WifiManager.configure_wifi(ssid, password)
+                WifiManager.reload_wifi()
+                return {"status": "success", "message": "WiFi configuration updated"}
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @self.app.get("/wifi/status")
+        async def wifi_status():
+            ssid = WifiManager.get_current_ssid()
+            if ssid:
+                return {"status": "connected", "ssid": ssid}
+            else:
+                return {"status": "disconnected", "ssid": None}
+        # ----------- END WiFi APIs -------------
 
     def get_app(self) -> FastAPI:
         return self.app
