@@ -9,6 +9,7 @@ from fastapi.responses import StreamingResponse
 
 from src.model.custom_types.index import MotionCommand
 from src.model.Robotdog import Robotdog
+from src.utils.WifiManager import WifiManager
 
 class ServerGateway:
     def __init__(self, robotdog: Robotdog):
@@ -119,17 +120,28 @@ class ServerGateway:
         # ----------- END Camera APIs -------------
 
         # ----------- WiFi APIs -------------
-        @self.app.post("/wifi/configure")
-        async def configure_wifi(request: dict):
+        @self.app.post("/wifi/add")
+        async def add_wifi_config(request: dict):
             ssid = request.get("ssid")
             password = request.get("password")
             if not ssid or not password:
                 return {"status": "error", "message": "SSID and password are required"}
 
             try:
-                WifiManager.configure_wifi(ssid, password)
-                WifiManager.reload_wifi()
-                return {"status": "success", "message": "WiFi configuration updated"}
+                WifiManager.add_wifi_config(ssid, password)
+                return {"status": "success", "message": "WiFi configuration added"}
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @self.app.post("/wifi/add")
+        async def rm_wifi_config(request: dict):
+            ssid = request.get("ssid")
+            if not ssid:
+                return {"status": "error", "message": "SSID are required"}
+
+            try:
+                WifiManager.rm_wifi_config(ssid)
+                return {"status": "success", "message": "WiFi configuration removed"}
             except Exception as e:
                 return {"status": "error", "message": str(e)}
 
@@ -140,6 +152,11 @@ class ServerGateway:
                 return {"status": "connected", "ssid": ssid}
             else:
                 return {"status": "disconnected", "ssid": None}
+
+        @self.app.get("/wifi/lists")
+        async def wifi_configs():
+            configs = WifiManager.list_configs()
+            return configs
         # ----------- END WiFi APIs -------------
 
     def get_app(self) -> FastAPI:
