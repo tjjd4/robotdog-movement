@@ -133,7 +133,7 @@ class ServerGateway:
             except Exception as e:
                 return {"status": "error", "message": str(e)}
 
-        @self.app.post("/wifi/add")
+        @self.app.post("/wifi/remove")
         async def rm_wifi_config(request: dict):
             ssid = request.get("ssid")
             if not ssid:
