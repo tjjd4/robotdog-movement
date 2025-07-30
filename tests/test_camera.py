@@ -1,57 +1,74 @@
-from fastapi import FastAPI, Response
+import sys
+import os
+
+# Add src to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from picamera2 import Picamera2
-import cv2
-from ultralytics import YOLO
+from model.CameraController import CameraController
+from model.YoloV11Detector import YoloV11Detector
+from model.YoloWorldDetector import YoloWorldDetector
 
 app = FastAPI()
 
-# Initialize the Raspberry Pi camera
-camera = Picamera2()
-camera.configure(camera.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
-camera.preview_configuration.align()
-camera.configure("preview")
-camera.start()
+# Initialize detectors
+yolo_v11 = YoloV11Detector('yolo11n.pt')
+yolo_world = YoloWorldDetector('yolov8s-world.pt')
 
-# Load YOLO model (Ensure yolo___.pt exists at this path if using self fine-tune model)
-model = YOLO("yolo11n_ncnn_model")
+# Initialize camera controller
+camera_controller = CameraController()
 
-def generate_frames():
-    while True:
-        frame = camera.capture_array()
+@app.on_event("startup")
+async def startup_event():
+    camera_controller.start_camera()
 
-        # Convert to RGB (YOLO requires RGB format)
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        results = model(frame_rgb)
-
-        # Annotate frame with detections
-        annotated_frame = results[0].plot()
-
-        # Get inference time and calculate FPS
-        inference_time = results[0].speed.get('inference', 0)
-        fps = 1000.0 / inference_time if inference_time > 0 else 0
-        text = f'FPS: {fps:.1f}'
-
-        # Draw FPS on the frame
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        text_size = cv2.getTextSize(text, font, 1, 2)[0]
-        text_x = annotated_frame.shape[1] - text_size[0] - 10  # Right-aligned
-        text_y = text_size[1] + 10  # Top-aligned
-        cv2.putText(annotated_frame, text, (text_x, text_y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
-
-        ret, buffer = cv2.imencode('.jpg', annotated_frame)
-        frame_jpeg = buffer.tobytes()
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_jpeg + b'\r\n')
+@app.on_event("shutdown")
+async def shutdown_event():
+    camera_controller.stop_camera()
 
 @app.get('/video')
 async def video_feed():
     return StreamingResponse(
-        generate_frames(),
+        camera_controller.generate_frames(),
         media_type='multipart/x-mixed-replace; boundary=frame'
     )
+
+@app.post('/start_detection')
+async def start_detection():
+    camera_controller.start_detection()
+    return {"status": "detection started"}
+
+@app.post('/stop_detection')
+async def stop_detection():
+    camera_controller.stop_detection()
+    return {"status": "detection stopped"}
+
+@app.post('/set_detector/{detector_type}')
+async def set_detector(detector_type: str):
+    if detector_type.lower() == 'yolov11':
+        camera_controller.set_detector(yolo_v11)
+        return {"status": f"detector set to YoloV11"}
+    elif detector_type.lower() == 'yoloworld':
+        camera_controller.set_detector(yolo_world)
+        return {"status": f"detector set to YoloWorld"}
+    else:
+        return {"error": "Invalid detector type. Use 'yolov11' or 'yoloworld'"}
+
+@app.get('/status')
+async def get_status():
+    detector_status = None
+    detector_type = None
+    
+    if camera_controller.detector:
+        detector_status = camera_controller.detector.is_active()
+        detector_type = type(camera_controller.detector).__name__
+    
+    return {
+        "camera_active": camera_controller.is_active(),
+        "detector_type": detector_type,
+        "detector_active": detector_status
+    }
 
 if __name__ == '__main__':
     import uvicorn

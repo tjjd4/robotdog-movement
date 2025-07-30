@@ -1,9 +1,13 @@
 import cv2
+import logging
 from picamera2 import Picamera2
-from ultralytics import YOLO
+from .BaseYoloDetector import BaseYoloDetector
+from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 class CameraController:
-    def __init__(self, model_path='yolo11n_ncnn_model', resolution=(640, 480)):
+    def __init__(self, detector: Optional[BaseYoloDetector] = None, resolution=(640, 480)):
         self.camera = Picamera2()
         self.camera.configure(
             self.camera.create_preview_configuration(
@@ -12,10 +16,9 @@ class CameraController:
         )
         self.camera.preview_configuration.align()
         self.camera.configure("preview")
-        self.model = YOLO(model_path, task="detect")
+        self.detector = detector
 
         self.is_camera_active = False
-        self.is_detection_active = False
 
     def start_camera(self):
         if not self.is_camera_active:
@@ -28,29 +31,25 @@ class CameraController:
             self.is_camera_active = False
 
     def start_detection(self):
-        self.is_detection_active = True
+        if self.detector:
+            self.detector.start_detection()
 
     def stop_detection(self):
-        self.is_detection_active = False
+        if self.detector:
+            self.detector.stop_detection()
+    
+    def set_detector(self, detector: BaseYoloDetector):
+        self.detector = detector
 
     def generate_frames(self):
         """產生處理後的 JPEG 串流畫面 (適用於 MJPEG 串流輸出)"""
         while self.is_camera_active:
             frame = self.camera.capture_array()
-            if self.is_detection_active:
+            
+            if self.detector and self.detector.is_active():
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                results = self.model(frame_rgb)
-                annotated_frame = results[0].plot()
-
-                # FPS overlay
-                inference_time = results[0].speed.get('inference', 0)
-                fps = 1000.0 / inference_time if inference_time > 0 else 0
-                text = f'FPS: {fps:.1f}'
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                text_size = cv2.getTextSize(text, font, 1, 2)[0]
-                text_x = annotated_frame.shape[1] - text_size[0] - 10
-                text_y = text_size[1] + 10
-                cv2.putText(annotated_frame, text, (text_x, text_y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                annotated_frame = self.detector.detect(frame_rgb)
+                annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_RGB2BGR)
             else:
                 annotated_frame = frame
 
